@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>رحلة عبر الزمن: أسرار بيت الحكمة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --midnight:#0B1F3A;
+    --midnight-2:#122A4D;
+    --midnight-3:#0E2340;
+    --gold:#C9A24B;
+    --gold-light:#E9D08C;
+    --teal:#2A8F87;
+    --teal-dark:#1B5E58;
+    --parchment:#F3EAD3;
+    --parchment-2:#EAE0C4;
+    --maroon:#8A3324;
+    --ink:#2B1B0E;
+    --success:#3E8E5A;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--midnight);
+    color:var(--parchment);
+    font-family:'Tajawal',sans-serif;
+    min-height:100vh;
+    overflow-x:hidden;
+    position:relative;
+  }
+
+  /* Geometric star pattern backdrop */
+  body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background-image:
+      radial-gradient(circle at 20% 20%, rgba(201,162,75,0.06) 0%, transparent 45%),
+      radial-gradient(circle at 80% 75%, rgba(42,143,135,0.08) 0%, transparent 45%),
+      repeating-linear-gradient(45deg, rgba(201,162,75,0.025) 0px, rgba(201,162,75,0.025) 1px, transparent 1px, transparent 42px),
+      repeating-linear-gradient(-45deg, rgba(201,162,75,0.025) 0px, rgba(201,162,75,0.025) 1px, transparent 1px, transparent 42px);
+    pointer-events:none;
+    z-index:0;
+  }
+
+  #app{
+    position:relative;
+    z-index:1;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:32px 18px 60px;
+  }
+
+  h1,h2,h3{
+    font-family:'Amiri',serif;
+    margin:0;
+    font-weight:700;
+  }
+
+  .eyebrow{
+    color:var(--gold-light);
+    font-size:14px;
+    letter-spacing:0.5px;
+    margin-bottom:6px;
+  }
+
+  /* ---------- Frame / ornament ---------- */
+  .ornate-frame{
+    position:relative;
+    background:linear-gradient(180deg, var(--midnight-2), var(--midnight-3));
+    border:1px solid rgba(201,162,75,0.35);
+    border-radius:6px;
+    padding:36px 30px;
+    max-width:640px;
+    width:100%;
+    box-shadow:0 20px 60px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(201,162,75,0.08);
+  }
+  .ornate-frame::before, .ornate-frame::after{
+    content:"";
+    position:absolute;
+    width:22px;height:22px;
+    border:2px solid var(--gold);
+    opacity:0.8;
+  }
+  .ornate-frame::before{top:-1px;right:-1px;border-left:none;border-bottom:none;}
+  .ornate-frame::after{bottom:-1px;left:-1px;border-right:none;border-top:none;}
+
+  .corner-tl, .corner-br{
+    position:absolute; width:22px; height:22px; border:2px solid var(--gold); opacity:0.8;
+  }
+  .corner-tl{top:-1px;left:-1px;border-right:none;border-bottom:none;}
+  .corner-br{bottom:-1px;right:-1px;border-left:none;border-top:none;}
+
+  /* ---------- Buttons ---------- */
+  .btn{
+    font-family:'Tajawal',sans-serif;
+    font-weight:700;
+    font-size:16px;
+    padding:13px 30px;
+    border-radius:4px;
+    border:1px solid var(--gold);
+    background:transparent;
+    color:var(--gold-light);
+    cursor:pointer;
+    transition:background 0.2s ease, color 0.2s ease, transform 0.15s ease;
+  }
+  .btn:hover{background:rgba(201,162,75,0.12); transform:translateY(-1px);}
+  .btn:active{transform:translateY(0);}
+  .btn-solid{
+    background:var(--gold);
+    color:var(--midnight);
+  }
+  .btn-solid:hover{background:var(--gold-light);}
+  .btn:disabled{opacity:0.35; cursor:not-allowed; transform:none;}
+
+  /* ---------- Intro screen ---------- */
+  .intro-wrap{
+    text-align:center;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:22px;
+    margin-top:6vh;
+  }
+  .astrolabe{
+    width:150px;height:150px;
+    animation:spin 40s linear infinite;
+  }
+  @keyframes spin{ to{ transform:rotate(360deg);} }
+  @media (prefers-reduced-motion: reduce){ .astrolabe{animation:none;} }
+
+  .intro-title{font-size:clamp(28px,5vw,42px); color:var(--gold-light); line-height:1.3;}
+  .intro-sub{font-size:17px; color:var(--parchment-2); max-width:520px; line-height:1.9;}
+
+  /* ---------- Map / progress screen ---------- */
+  .map-wrap{width:100%; max-width:760px;}
+  .map-header{text-align:center; margin-bottom:8px;}
+  .gem-tally{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    margin:14px 0 30px;
+    font-size:15px; color:var(--gold-light);
+  }
+  .gem-dot{width:11px;height:11px;border-radius:2px; transform:rotate(45deg); background:rgba(201,162,75,0.2); border:1px solid var(--gold);}
+  .gem-dot.filled{background:var(--gold);}
+
+  .stations-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:16px;
+  }
+  @media (max-width:560px){ .stations-grid{grid-template-columns:repeat(2,1fr);} }
+
+  .station-card{
+    background:var(--midnight-2);
+    border:1px solid rgba(201,162,75,0.25);
+    border-radius:6px;
+    padding:18px 12px;
+    text-align:center;
+    cursor:pointer;
+    transition:border-color 0.2s ease, transform 0.15s ease, background 0.2s ease;
+    position:relative;
+  }
+  .station-card:hover{border-color:var(--gold); transform:translateY(-3px);}
+  .station-card.locked{opacity:0.45; cursor:not-allowed;}
+  .station-card.locked:hover{transform:none; border-color:rgba(201,162,75,0.25);}
+  .station-card.done{border-color:var(--teal); background:linear-gradient(180deg, var(--midnight-2), rgba(42,143,135,0.12));}
+  .station-icon{font-size:30px; margin-bottom:8px; display:block;}
+  .station-name{font-family:'Amiri',serif; font-size:15px; color:var(--gold-light); font-weight:700;}
+  .station-field{font-size:12px; color:var(--parchment-2); margin-top:3px;}
+  .done-badge{position:absolute; top:8px; left:8px; color:var(--teal); font-size:16px;}
+
+  /* ---------- Station screen ---------- */
+  .station-screen{max-width:620px; width:100%;}
+  .station-top{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px;}
+  .back-link{color:var(--parchment-2); font-size:13px; cursor:pointer; text-decoration:underline; text-underline-offset:3px;}
+  .station-title{font-size:26px; color:var(--gold-light); margin:4px 0 2px;}
+  .station-field-tag{
+    display:inline-block; font-size:12px; color:var(--teal); border:1px solid var(--teal-dark);
+    padding:3px 10px; border-radius:20px; margin-bottom:16px;
+  }
+  .story-text{font-size:16px; line-height:2; color:var(--parchment-2); margin-bottom:22px;}
+  .story-text b{color:var(--gold-light); font-weight:700;}
+
+  .challenge-box{
+    background:rgba(0,0,0,0.18);
+    border:1px dashed rgba(201,162,75,0.4);
+    border-radius:6px;
+    padding:20px;
+    margin-bottom:18px;
+  }
+  .challenge-q{font-size:16px; color:var(--parchment); margin-bottom:16px; line-height:1.8;}
+
+  .choices{display:flex; flex-direction:column; gap:10px;}
+  .choice-btn{
+    text-align:right;
+    font-family:'Tajawal',sans-serif;
+    font-size:15px;
+    padding:13px 16px;
+    background:var(--midnight-2);
+    border:1px solid rgba(201,162,75,0.3);
+    color:var(--parchment);
+    border-radius:5px;
+    cursor:pointer;
+    transition:border-color 0.15s ease, background 0.15s ease;
+  }
+  .choice-btn:hover{border-color:var(--gold);}
+  .choice-btn.correct{background:rgba(62,142,90,0.25); border-color:var(--success); color:var(--parchment);}
+  .choice-btn.wrong{background:rgba(138,51,36,0.3); border-color:var(--maroon);}
+  .choice-btn:disabled{cursor:default;}
+
+  .seq-row{display:flex; flex-wrap:wrap; gap:10px; margin-bottom:14px;}
+  .seq-item{
+    padding:11px 16px;
+    background:var(--midnight-2);
+    border:1px solid rgba(201,162,75,0.3);
+    border-radius:5px;
+    cursor:pointer;
+    font-size:14px;
+    transition:border-color 0.15s ease, opacity 0.15s ease, background 0.15s ease;
+  }
+  .seq-item:hover{border-color:var(--gold);}
+  .seq-item.picked{opacity:0.3; cursor:default; border-color:var(--teal);}
+  .seq-item.error{background:rgba(138,51,36,0.3); border-color:var(--maroon);}
+  .seq-progress{font-size:13px; color:var(--parchment-2); margin-bottom:10px;}
+
+  .feedback{font-size:14px; margin-top:6px; min-height:20px;}
+  .feedback.ok{color:#8FCB9F;}
+  .feedback.bad{color:#E39C8C;}
+
+  .fact-reveal{
+    background:linear-gradient(180deg, rgba(201,162,75,0.1), rgba(201,162,75,0.03));
+    border:1px solid var(--gold);
+    border-radius:6px;
+    padding:18px 20px;
+    margin-top:18px;
+    display:none;
+  }
+  .fact-reveal.show{display:block; animation:fadeUp 0.5s ease;}
+  @keyframes fadeUp{ from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);} }
+  .fact-reveal .gem-line{color:var(--gold-light); font-size:14px; margin-bottom:8px; font-weight:700;}
+  .fact-reveal .fact-text{font-size:15px; line-height:1.85; color:var(--parchment);}
+
+  .station-actions{display:flex; justify-content:space-between; margin-top:24px; gap:10px;}
+
+  /* ---------- Final screen ---------- */
+  .final-wrap{text-align:center; margin-top:6vh; max-width:600px;}
+  .final-title{font-size:clamp(26px,5vw,38px); color:var(--gold-light); margin-bottom:14px;}
+  .final-text{font-size:16px; line-height:2; color:var(--parchment-2); margin-bottom:26px;}
+  .final-gems{font-size:34px; letter-spacing:6px; margin-bottom:22px;}
+
+  footer.credit{
+    margin-top:40px;
+    font-size:12px;
+    color:rgba(243,234,211,0.35);
+    text-align:center;
+  }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+(function(){
+
+  const stations = [
+    {
+      id: 'khwarizmi',
+      icon: '𓆼٭',
+      name: 'الخوارزمي',
+      field: 'الرياضيات والجبر',
+      story: `في بيت الحكمة ببغداد، يجلس <b>محمد بن موسى الخوارزمي</b> منكبًا على مخطوطاته. هو من وضع أسس علم <b>الجبر</b> ("الجبر والمقابلة")، الذي استُخدم لتنظيم التجارة، وقسمة المواريث، وحساب المساحات. كلمة "الجبر" نفسها انتقلت إلى اللغات الأوروبية لتصبح "Algebra"، واسمه أصبح أصل كلمة "Algorithm".`,
+      type: 'choice',
+      question: 'أراد تاجر أن يقسّم 24 دينارًا ذهبيًا بين ثلاثة شركاء بالتساوي، ثم أضاف لكل واحد منهم دينارين إضافيين مكافأة. كم دينارًا حصل عليه كل شريك؟',
+      options: ['8 دنانير', '10 دنانير', '12 دينارًا', '6 دنانير'],
+      correctIndex: 1,
+      fact: 'كتاب الخوارزمي "المختصر في حساب الجبر والمقابلة" ظل يُدرَّس في أوروبا حتى القرن السادس عشر، وهو أول من قدّم حلولًا منهجية للمعادلات الخطية والتربيعية.'
+    },
+    {
+      id: 'jabir',
+      icon: '⚗',
+      name: 'جابر بن حيان',
+      field: 'الكيمياء',
+      story: `يُلقَّب <b>جابر بن حيان</b> بـ"أبي الكيمياء". في مختبره، طوّر عمليات <b>التقطير والتبلور والتصعيد</b>، وابتكر أدوات معملية ما زلنا نستخدم مبادئها اليوم، مثل الإنبيق. يطلب منك مساعدته في إعادة ترتيب خطوات تقطير ماء الورد كما كان يفعل.`,
+      type: 'sequence',
+      question: 'رتّب خطوات تقطير ماء الورد بالترتيب الصحيح بالنقر عليها:',
+      items: [
+        'وضع بتلات الورد والماء في الوعاء',
+        'تسخين الوعاء برفق على النار',
+        'تكثيف البخار داخل الأنبوب البارد',
+        'جمع القطرات النقية في إناء الجمع'
+      ],
+      correctOrder: [0,1,2,3],
+      fact: 'يُنسب إلى جابر بن حيان أكثر من مئتي مؤلَّف، ومنهجه التجريبي القائم على الملاحظة والقياس مهّد الطريق لاحقًا لظهور الكيمياء الحديثة.'
+    },
+    {
+      id: 'zahrawi',
+      icon: '✚',
+      name: 'الزهراوي',
+      field: 'الطب والجراحة',
+      story: `في قرطبة الأندلسية، يعمل <b>أبو القاسم الزهراوي</b>، الجرّاح الذي ألّف موسوعة "التصريف لمن عجز عن التأليف"، ووصف فيها أكثر من مئتي أداة جراحية ابتكرها بنفسه، إضافة إلى عمليات مثل خياطة الجروح بالخيط القابل للامتصاص.`,
+      type: 'choice',
+      question: 'يُعرف عن الزهراوي أنه أول من استخدم خيوطًا من أمعاء الحيوانات في العمليات الجراحية لأن جسم الإنسان يمتصّها تلقائيًا. ما الفائدة الأساسية من ذلك للمريض؟',
+      options: [
+        'تجنّب الحاجة لعملية ثانية لإزالة الغرز',
+        'جعل الجرح أكثر جمالًا',
+        'تقليل تكلفة العملية',
+        'تسريع نمو الشعر حول الجرح'
+      ],
+      correctIndex: 0,
+      fact: 'كتاب الزهراوي "التصريف" تُرجم إلى اللاتينية وظل مرجعًا أساسيًا في كليات الطب الأوروبية لأكثر من خمسة قرون، وتظهر فيه رسومات دقيقة لأدواته الجراحية.'
+    },
+    {
+      id: 'biruni',
+      icon: '🜛',
+      name: 'البيروني',
+      field: 'الفلك والجغرافيا',
+      story: `يقف <b>أبو الريحان البيروني</b> فوق جبل قرب مدينة "نندنة"، يحمل أداة قياس الزوايا. ابتكر طريقة عبقرية لحساب <b>محيط الأرض</b> باستخدام ارتفاع جبل واحد فقط وقياس زاوية الأفق منه، فتوصّل إلى نتيجة قريبة جدًا من القيمة الحقيقية المعروفة اليوم.`,
+      type: 'choice',
+      question: 'ما الفكرة الأساسية التي اعتمد عليها البيروني لحساب محيط الأرض من قمة جبل واحد؟',
+      options: [
+        'قياس زاوية ميل خط الأفق من قمة الجبل مع معرفة ارتفاعه',
+        'عدّ عدد الأيام بين شروقين متتاليين',
+        'قياس المسافة بين مدينتين بعدد خطوات الجمل',
+        'مراقبة حركة القمر لمدة شهر كامل'
+      ],
+      correctIndex: 0,
+      fact: 'توصّل البيروني إلى أن نصف قطر الأرض يقارب 6339.9 كيلومترًا، وهي قيمة قريبة جدًا من القياسات الحديثة (نحو 6371 كم)، رغم أنه اعتمد على أدوات بسيطة نسبيًا.'
+    },
+    {
+      id: 'jazari',
+      icon: '⚙',
+      name: 'الجزري',
+      field: 'الهندسة الميكانيكية',
+      story: `في ديار بكر، يبني <b>بديع الزمان الجزري</b> آلاته العجيبة: ساعات مائية، وآليات أوتوماتيكية، ومضخات. كتابه "الجامع بين العلم والعمل النافع في صناعة الحيل" يوثّق خمسين آلة مختلفة، ويُعدّ من أوائل من صمّم أنظمة تحكم آلية في التاريخ.`,
+      type: 'sequence',
+      question: 'رتّب مسار عمل الساعة المائية للجزري بالنقر بالترتيب الصحيح:',
+      items: [
+        'يمتلئ خزان الماء العلوي بالماء',
+        'الماء يتدفق بمعدل ثابت عبر فتحة دقيقة',
+        'عوّامة ترتفع تدريجيًا مع امتلاء الحوض',
+        'حركة العوّامة تُدير آلية التروس والمؤشرات'
+      ],
+      correctOrder: [0,1,2,3],
+      fact: 'صمّم الجزري أيضًا "الفيل المائي" و"الطاووس الآلي"، وتُعتبر تصاميمه من أقدم الأمثلة الموثقة على أنظمة التغذية الراجعة (Feedback Systems) في تاريخ الهندسة.'
+    },
+    {
+      id: 'battuta',
+      icon: '✺',
+      name: 'ابن بطوطة',
+      field: 'الرحلات والجغرافيا',
+      story: `ينطلق الشاب <b>محمد بن بطوطة</b> من طنجة في رحلة حج، لكنها تتحول إلى مغامرة استمرت نحو ثلاثين عامًا وقطع فيها أكثر من 120 ألف كيلومتر، موثّقًا مشاهداته في كتابه "تحفة النظار في غرائب الأمصار وعجائب الأسفار"، المعروف بـ"رحلة ابن بطوطة".`,
+      type: 'sequence',
+      question: 'رتّب محطات رحلة ابن بطوطة الكبرى بالترتيب الزمني الصحيح:',
+      items: [
+        'طنجة (نقطة الانطلاق)',
+        'مكة المكرمة (أداء فريضة الحج)',
+        'دلهي في الهند (العمل قاضيًا)',
+        'الصين (أقصى نقطة وصل إليها شرقًا)'
+      ],
+      correctOrder: [0,1,2,3],
+      fact: 'زار ابن بطوطة أكثر من أربعين دولة بمقاييس اليوم، وتُعتبر رحلته من أهم المصادر التاريخية لفهم العالم الإسلامي وخارجه في القرن الرابع عشر الميلادي.'
+    }
+  ];
+
+  const state = {
+    screen: 'intro',
+    currentStation: null,
+    completed: new Set(),
+    seqPicked: [],
+    seqError: false,
+    answered: false
+  };
+
+  const app = document.getElementById('app');
+
+  function render(){
+    if(state.screen === 'intro') return renderIntro();
+    if(state.screen === 'map') return renderMap();
+    if(state.screen === 'station') return renderStation();
+    if(state.screen === 'final') return renderFinal();
+  }
+
+  function renderIntro(){
+    app.innerHTML = `
+      <div class="intro-wrap">
+        <svg class="astrolabe" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="50" cy="50" r="46" fill="none" stroke="#C9A24B" stroke-width="1.5" opacity="0.8"/>
+          <circle cx="50" cy="50" r="34" fill="none" stroke="#C9A24B" stroke-width="1" opacity="0.6"/>
+          <circle cx="50" cy="50" r="4" fill="#C9A24B"/>
+          <g stroke="#E9D08C" stroke-width="1" opacity="0.8">
+            <line x1="50" y1="4" x2="50" y2="96"/>
+            <line x1="4" y1="50" x2="96" y2="50"/>
+            <line x1="15" y1="15" x2="85" y2="85"/>
+            <line x1="85" y1="15" x2="15" y2="85"/>
+          </g>
+          <polygon points="50,20 58,42 80,42 62,56 68,78 50,64 32,78 38,56 20,42 42,42"
+            fill="none" stroke="#2A8F87" stroke-width="1" opacity="0.7"/>
+        </svg>
+        <div class="eyebrow">بيت الحكمة، بغداد</div>
+        <h1 class="intro-title">رحلة عبر الزمن:<br>أسرار بيت الحكمة</h1>
+        <p class="intro-sub">
+          بين رفوف المخطوطات القديمة، تعثر على <b style="color:var(--gold-light)">إسطرلابًا</b> غريبًا معطلًا، منقوشًا عليه ست جواهر فارغة.
+          حين تلمسه، يضيء فجأة… ويهمس لك: "أعِد لي جواهري الست، وستفتح لك بوابات الزمن إلى عصر العلماء العظام".
+        </p>
+        <button class="btn btn-solid" id="startBtn">ابدأ الرحلة ✦</button>
+      </div>
+    `;
+    document.getElementById('startBtn').onclick = () => { state.screen = 'map'; render(); };
+  }
+
+  function renderMap(){
+    const gemsCount = state.completed.size;
+    const dots = Array.from({length:6}, (_,i) => `<div class="gem-dot ${i < gemsCount ? 'filled' : ''}"></div>`).join('');
+
+    const cards = stations.map((s, idx) => {
+      const done = state.completed.has(s.id);
+      const locked = false; // all stations open freely, no forced order
+      return `
+        <div class="station-card ${done ? 'done' : ''}" data-id="${s.id}">
+          ${done ? '<span class="done-badge">✓</span>' : ''}
+          <span class="station-icon">${s.icon}</span>
+          <div class="station-name">${s.name}</div>
+          <div class="station-field">${s.field}</div>
+        </div>
+      `;
+    }).join('');
+
+    app.innerHTML = `
+      <div class="map-wrap">
+        <div class="map-header">
+          <div class="eyebrow">الإسطرلاب ينتظر جواهره</div>
+          <h2 style="color:var(--gold-light); font-size:24px;">اختر بوابة زمنية</h2>
+        </div>
+        <div class="gem-tally">${dots} &nbsp; ${gemsCount} / 6 جواهر</div>
+        <div class="stations-grid">${cards}</div>
+      </div>
+    `;
+
+    document.querySelectorAll('.station-card').forEach(card => {
+      card.onclick = () => {
+        const id = card.getAttribute('data-id');
+        state.currentStation = stations.find(s => s.id === id);
+        state.seqPicked = [];
+        state.seqError = false;
+        state.answered = false;
+        state.screen = 'station';
+        render();
+      };
+    });
+
+    if(gemsCount === 6){
+      setTimeout(() => { state.screen = 'final'; render(); }, 50);
+    }
+  }
+
+  function renderStation(){
+    const s = state.currentStation;
+    const done = state.completed.has(s.id);
+
+    let challengeHtml = '';
+    if(s.type === 'choice'){
+      challengeHtml = `
+        <div class="challenge-q">${s.question}</div>
+        <div class="choices" id="choicesWrap">
+          ${s.options.map((opt,i) => `<button class="choice-btn" data-i="${i}">${opt}</button>`).join('')}
+        </div>
+        <div class="feedback" id="feedback"></div>
+      `;
+    } else if(s.type === 'sequence'){
+      challengeHtml = `
+        <div class="challenge-q">${s.question}</div>
+        <div class="seq-progress" id="seqProgress">اخترت 0 من ${s.items.length}</div>
+        <div class="seq-row" id="seqWrap">
+          ${s.items.map((item,i) => `<div class="seq-item" data-i="${i}">${item}</div>`).join('')}
+        </div>
+        <div class="feedback" id="feedback"></div>
+      `;
+    }
+
+    app.innerHTML = `
+      <div class="station-screen">
+        <div class="station-top">
+          <span class="back-link" id="backLink">← العودة إلى الخريطة</span>
+        </div>
+        <h2 class="station-title">${s.icon} ${s.name}</h2>
+        <span class="station-field-tag">${s.field}</span>
+        <p class="story-text">${s.story}</p>
+        <div class="ornate-frame">
+          <span class="corner-tl"></span><span class="corner-br"></span>
+          <div class="challenge-box">${challengeHtml}</div>
+          <div class="fact-reveal" id="factReveal">
+            <div class="gem-line">✦ حصلت على جوهرة المعرفة!</div>
+            <div class="fact-text">${s.fact}</div>
+          </div>
+        </div>
+        <div class="station-actions">
+          <button class="btn" id="mapBtn">خريطة الرحلة</button>
+          <button class="btn btn-solid" id="continueBtn" style="display:none;">متابعة الرحلة ✦</button>
+        </div>
+      </div>
+    `;
+
+    document.getElementById('backLink').onclick = () => { state.screen = 'map'; render(); };
+    document.getElementById('mapBtn').onclick = () => { state.screen = 'map'; render(); };
+
+    if(done){
+      document.getElementById('factReveal').classList.add('show');
+      const fb = document.getElementById('feedback');
+      if(fb) fb.innerHTML = `<span class="ok">لقد أتممت هذا التحدي بالفعل ✓</span>`;
+      document.getElementById('continueBtn').style.display = 'inline-block';
+      document.getElementById('continueBtn').onclick = () => { state.screen = 'map'; render(); };
+      if(s.type === 'choice'){
+        document.querySelectorAll('.choice-btn').forEach((btn,i) => {
+          if(i === s.correctIndex) btn.classList.add('correct');
+          btn.disabled = true;
+        });
+      } else {
+        document.querySelectorAll('.seq-item').forEach(item => item.classList.add('picked'));
+      }
+      return;
+    }
+
+    if(s.type === 'choice'){
+      document.querySelectorAll('.choice-btn').forEach(btn => {
+        btn.onclick = () => {
+          const i = parseInt(btn.getAttribute('data-i'));
+          const fb = document.getElementById('feedback');
+          if(i === s.correctIndex){
+            document.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
+            btn.classList.add('correct');
+            fb.innerHTML = `<span class="ok">إجابة صحيحة!</span>`;
+            completeStation();
+          } else {
+            btn.classList.add('wrong');
+            btn.disabled = true;
+            fb.innerHTML = `<span class="bad">ليست هذه الإجابة، حاول مرة أخرى.</span>`;
+          }
+        };
+      });
+    } else if(s.type === 'sequence'){
+      document.querySelectorAll('.seq-item').forEach(item => {
+        item.onclick = () => {
+          const i = parseInt(item.getAttribute('data-i'));
+          if(item.classList.contains('picked')) return;
+          const expected = s.correctOrder[state.seqPicked.length];
+          const fb = document.getElementById('feedback');
+          if(i === expected){
+            item.classList.add('picked');
+            state.seqPicked.push(i);
+            document.getElementById('seqProgress').textContent = `اخترت ${state.seqPicked.length} من ${s.items.length}`;
+            fb.innerHTML = '';
+            if(state.seqPicked.length === s.items.length){
+              fb.innerHTML = `<span class="ok">رتّبتها بشكل صحيح تمامًا!</span>`;
+              completeStation();
+            }
+          } else {
+            item.classList.add('error');
+            fb.innerHTML = `<span class="bad">هذا ليس الترتيب الصحيح، حاول مجددًا.</span>`;
+            setTimeout(() => item.classList.remove('error'), 500);
+          }
+        };
+      });
+    }
+
+    function completeStation(){
+      state.completed.add(s.id);
+      setTimeout(() => {
+        document.getElementById('factReveal').classList.add('show');
+        document.getElementById('continueBtn').style.display = 'inline-block';
+        document.getElementById('continueBtn').onclick = () => {
+          state.screen = state.completed.size === 6 ? 'final' : 'map';
+          render();
+        };
+      }, 400);
+    }
+  }
+
+  function renderFinal(){
+    app.innerHTML = `
+      <div class="final-wrap">
+        <div class="final-gems">✦ ✦ ✦ ✦ ✦ ✦</div>
+        <h2 class="final-title">أعدتَ ضوء الإسطرلاب</h2>
+        <p class="final-text">
+          جمعتَ الجواهر الست، وأعدتَ إحياء الإسطرلاب القديم. عبر بغداد وقرطبة وديار بكر وطريق الحرير،
+          التقيتَ بستة من عمالقة العصر الذهبي الإسلامي: <b style="color:var(--gold-light)">الخوارزمي، وجابر بن حيان،
+          والزهراوي، والبيروني، والجزري، وابن بطوطة</b>. إرثهم العلمي ما زال حاضرًا في الجبر والكيمياء والطب
+          والفلك والهندسة والجغرافيا حتى يومنا هذا.
+        </p>
+        <button class="btn btn-solid" id="replayBtn">أعد الرحلة من جديد ✦</button>
+      </div>
+    `;
+    document.getElementById('replayBtn').onclick = () => {
+      state.completed.clear();
+      state.screen = 'intro';
+      render();
+    };
+  }
+
+  render();
+})();
+</script>
+
+<footer class="credit">رحلة عبر الزمن: أسرار بيت الحكمة — لعبة تعليمية عن علماء الحضارة الإسلامية</footer>
+</body>
+</html>
