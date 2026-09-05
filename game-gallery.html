@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>رفّ الألعاب</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#141018">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#141018;
+    --panel:#1d1723;
+    --panel-2:#251d2e;
+    --paper:#f2ead9;
+    --gold:#e8a33d;
+    --coral:#e8613f;
+    --mint:#5ec9a6;
+    --violet:#8b7bd8;
+    --line: rgba(242,234,217,0.14);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 15% 0%, #2a2033 0%, transparent 45%),
+      radial-gradient(circle at 90% 20%, #1f2a2a 0%, transparent 40%),
+      var(--ink);
+    color:var(--paper);
+    font-family:'Tajawal', sans-serif;
+    min-height:100vh;
+  }
+
+  .wrap{max-width:1100px;margin:0 auto;padding:48px 24px 80px;}
+
+  header{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:20px;
+    padding-bottom:28px;
+    border-bottom:1px solid var(--line);
+    margin-bottom:36px;
+  }
+  header h1{
+    font-size:clamp(34px,5vw,52px);
+    font-weight:900;
+    margin:0;
+    line-height:1.05;
+  }
+  header h1 span{color:var(--gold);}
+  header p{
+    margin:10px 0 0;
+    color:rgba(242,234,217,0.65);
+    font-size:15px;
+    max-width:40ch;
+  }
+  .count{
+    font-family:'JetBrains Mono',monospace;
+    font-size:13px;
+    color:rgba(242,234,217,0.55);
+    white-space:nowrap;
+  }
+
+  .shelf{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(220px,1fr));
+    gap:18px;
+  }
+
+  .cart{
+    position:relative;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:20px 18px 18px;
+    cursor:pointer;
+    text-align:right;
+    overflow:hidden;
+    transition:transform .18s ease, border-color .18s ease, background .18s ease;
+  }
+  .cart::before{
+    content:"";
+    position:absolute;
+    inset-inline-start:0;
+    top:0; bottom:0;
+    width:6px;
+    background:var(--accent, var(--gold));
+  }
+  .cart:hover{
+    transform:translateY(-4px);
+    border-color:rgba(242,234,217,0.3);
+    background:var(--panel-2);
+  }
+  .cart:focus-visible{
+    outline:2px solid var(--paper);
+    outline-offset:3px;
+  }
+  .cart .tag{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    letter-spacing:.04em;
+    color:var(--accent, var(--gold));
+    margin-bottom:10px;
+    display:block;
+  }
+  .cart h3{
+    margin:0 0 8px;
+    font-size:19px;
+    font-weight:700;
+  }
+  .cart p{
+    margin:0;
+    font-size:13.5px;
+    line-height:1.6;
+    color:rgba(242,234,217,0.6);
+  }
+  .cart .play{
+    margin-top:16px;
+    font-size:13px;
+    font-weight:700;
+    color:var(--paper);
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .cart .play::after{content:"◀";font-size:11px;transition:transform .18s ease;}
+  .cart:hover .play::after{transform:translateX(-4px);}
+
+  .empty{
+    grid-column:1/-1;
+    border:1px dashed var(--line);
+    border-radius:14px;
+    padding:40px 24px;
+    text-align:center;
+    color:rgba(242,234,217,0.55);
+    font-size:14px;
+    line-height:1.9;
+  }
+  .empty code{
+    background:rgba(242,234,217,0.08);
+    padding:2px 7px;
+    border-radius:5px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:12.5px;
+    color:var(--mint);
+  }
+
+  /* overlay player */
+  .stage{
+    position:fixed;
+    inset:0;
+    background:var(--ink);
+    display:flex;
+    flex-direction:column;
+    transform:translateY(100%);
+    transition:transform .28s ease;
+    z-index:50;
+  }
+  .stage.open{transform:translateY(0);}
+  .stage-bar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:14px 18px;
+    border-bottom:1px solid var(--line);
+    background:var(--panel);
+  }
+  .stage-bar .title{
+    font-weight:700;
+    font-size:15px;
+  }
+  .back-btn{
+    background:transparent;
+    border:1px solid var(--line);
+    color:var(--paper);
+    font-family:'Tajawal',sans-serif;
+    font-size:13px;
+    font-weight:700;
+    padding:8px 16px;
+    border-radius:20px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .back-btn:hover{border-color:rgba(242,234,217,0.5);}
+  .stage iframe{
+    flex:1;
+    border:0;
+    width:100%;
+    background:#000;
+  }
+
+  footer{
+    margin-top:44px;
+    padding-top:20px;
+    border-top:1px solid var(--line);
+    font-size:12.5px;
+    color:rgba(242,234,217,0.4);
+    font-family:'JetBrains Mono',monospace;
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>رفّ <span>الألعاب</span></h1>
+      <p>كل الألعاب اللي صنعتها بصفحة وحدة. اضغط على أي لعبة تشتغل هون فوراً.</p>
+    </div>
+    <div class="count" id="count"></div>
+  </header>
+
+  <div class="shelf" id="shelf"></div>
+
+  <footer>GAME-GALLERY · v1</footer>
+</div>
+
+<div class="stage" id="stage">
+  <div class="stage-bar">
+    <div class="title" id="stageTitle"></div>
+    <button class="back-btn" id="backBtn">
+      <span>▶</span> رجوع للرف
+    </button>
+  </div>
+  <iframe id="stageFrame" title="game"></iframe>
+</div>
+
+<script>
+  /*
+    ==========================================================
+    ✏️ عدّل هالمصفوفة لإضافة ألعابك:
+    - name: اسم اللعبة
+    - desc: وصف قصير (سطر أو سطرين)
+    - file: اسم ملف الـ HTML تبع اللعبة (لازم يكون بنفس المجلد
+            اللي فيه ملف game-gallery.html هذا، أو مسار نسبي له)
+    - accent: لون مميز اختياري (اتركه فاضي لو ما بدك)
+    ==========================================================
+  */
+  const games = [
+    { name: "رحلة عبر الزمن: أسرار بيت الحكمة", desc: "اجمع الجواهر الست والتقِ بعمالقة العصر الذهبي الإسلامي", file: "games/رحلة-بيت-الحكمة.html", accent: "#c9a24b", tag: "تعليمية" },
+  ];
+
+  const shelf = document.getElementById('shelf');
+  const countEl = document.getElementById('count');
+  const stage = document.getElementById('stage');
+  const stageFrame = document.getElementById('stageFrame');
+  const stageTitle = document.getElementById('stageTitle');
+  const backBtn = document.getElementById('backBtn');
+
+  const tags = ['ARCADE','PUZZLE','ACTION','LAB','LEVEL-01','WIP'];
+
+  function render(){
+    shelf.innerHTML = '';
+    countEl.textContent = games.length ? `${games.length} لعبة` : '';
+
+    if(!games.length){
+      shelf.innerHTML = `
+        <div class="empty">
+          الرف فاضي لهلق 🎮<br>
+          افتح ملف <code>game-gallery.html</code> بمحرر نصوص، ولاقي مصفوفة
+          <code>games</code> بالأعلى، وضيف كل لعبة كسطر جديد فيها بهالشكل:<br><br>
+          <code>{ name: "اسم اللعبة", desc: "وصف قصير", file: "game.html" }</code><br><br>
+          وحطّ ملف اللعبة (game.html) بنفس المجلد.
+        </div>`;
+      return;
+    }
+
+    games.forEach((g, i) => {
+      const card = document.createElement('button');
+      card.className = 'cart';
+      card.style.setProperty('--accent', g.accent || ['#e8a33d','#e8613f','#5ec9a6','#8b7bd8'][i % 4]);
+      card.innerHTML = `
+        <span class="tag">${g.tag || tags[i % tags.length]}</span>
+        <h3>${g.name}</h3>
+        <p>${g.desc || ''}</p>
+        <div class="play">تشغيل</div>
+      `;
+      card.addEventListener('click', () => openGame(g));
+      shelf.appendChild(card);
+    });
+  }
+
+  function openGame(g){
+    stageTitle.textContent = g.name;
+    stageFrame.src = g.file;
+    stage.classList.add('open');
+  }
+
+  function closeGame(){
+    stage.classList.remove('open');
+    setTimeout(() => { stageFrame.src = 'about:blank'; }, 300);
+  }
+
+  backBtn.addEventListener('click', closeGame);
+  document.addEventListener('keydown', (e) => {
+    if(e.key === 'Escape' && stage.classList.contains('open')) closeGame();
+  });
+
+  render();
+</script>
+
+</body>
+</html>
