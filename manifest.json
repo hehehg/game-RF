@@ -2,7 +2,7 @@
   "name": "رفّ الألعاب",
   "short_name": "رفّ الألعاب",
   "description": "معرض ألعاب HTML الخاصة بي",
-  "start_url": "./game-gallery.html",
+  "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
