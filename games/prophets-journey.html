@@ -44,6 +44,7 @@ button{font-family:inherit}
   <div class="nour"><div class="orb"></div><p id="nt"></p></div>
   <div class="top">
     <div class="prog"><small id="pt"></small><div class="pb"><b id="pf"></b></div></div>
+    <span class="btn" style="display:inline-flex;gap:8px;align-items:center;padding:4px 12px"><button id="mute" aria-label="كتم" style="background:none;border:0;color:#fff;font-size:20px;cursor:pointer">🔊</button><input id="vol" type="range" min="0" max="100" value="40" aria-label="مستوى الصوت" style="width:90px"></span>
     <button class="btn" id="ba">🏆 الإنجازات</button>
     <button class="btn" id="br">إعادة ضبط التقدم</button>
   </div>
@@ -53,6 +54,7 @@ button{font-family:inherit}
 <div class="ov" id="ov"><div class="card"><h2>الإنجازات</h2><div id="al"></div><button class="btn" id="ac">إغلاق</button></div></div>
 <div id="toast"></div>
 <script src="prophets-journey/shared/save.js"></script>
+<script src="prophets-journey/shared/audio.js"></script>
 <script src="prophets-journey/adventures.js"></script>
 <script>
 (function(){
@@ -97,6 +99,8 @@ $('ba').onclick=function(){
 };
 $('ac').onclick=function(){$('ov').className='ov'};
 $('br').onclick=function(){if(confirm('هل تريد مسح كل تقدمك في رحلة الأنبياء؟')){if(PJ.reset()){S=PJ.load();render();toast('تمت إعادة ضبط التقدم')}else toast('تعذّر مسح التقدم')}};
+PJ.audio.bindUI($('mute'),$('vol'));
+document.addEventListener('pointerdown',function(){PJ.audio.init('hub')},{once:true});
 render();
 })();
 </script>

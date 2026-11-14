@@ -72,6 +72,7 @@ kbd{display:inline-block;min-width:22px;padding:0 6px;margin:0 2px;border:1px so
   <div class="ov hidden" id="nogl"><div class="card"><h2>تعذّر تشغيل العرض ثلاثي الأبعاد</h2><p>هذا المتصفح أو الجهاز لا يدعم WebGL. جرّب متصفحًا آخر.</p></div></div>
 </div>
 <script src="shared/save.js"></script>
+<script src="shared/audio.js"></script>
 <script src="vendor/three.min.js"></script>
 <script>
 (function(){
@@ -187,15 +188,10 @@ function setStep(n,spawn){step=n;ringHit=[false,false,false];rings.forEach((r,i)
 function card(o){$('ct').textContent=o.t;$('cb').textContent=o.b||'';$('cd').textContent=o.d||'';$('cr').textContent=o.r||'';$('cok').textContent=o.btn||'متابعة';
   $('card').classList.remove('hidden');paused=true;$('cok').onclick=()=>{$('card').classList.add('hidden');paused=false;o.done&&o.done()}}
 
-/* ---- الصوت ---- */
-let ac,mg,muted=false;
-function setVol(){if(mg)mg.gain.setTargetAtTime(muted?0:$('vol').value/100,ac.currentTime,.1);$('mute').textContent=muted?'🔇':'🔊'}
-function audio(){if(ac)return;try{const C=window.AudioContext||window.webkitAudioContext;if(!C)return;ac=new C();mg=ac.createGain();mg.connect(ac.destination);
-  const a=ac.createGain();a.gain.value=.09;a.connect(mg);const o=ac.createOscillator();o.frequency.value=55;const f=ac.createBiquadFilter();f.type='lowpass';f.frequency.value=500;o.connect(f);f.connect(a);o.start();
-  const n=ac.sampleRate*2,b=ac.createBuffer(1,n,ac.sampleRate),d=b.getChannelData(0);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*.2;
-  const s=ac.createBufferSource();s.buffer=b;s.loop=true;const nf=ac.createBiquadFilter();nf.type='bandpass';nf.frequency.value=400;const ng=ac.createGain();ng.gain.value=.05;s.connect(nf);nf.connect(ng);ng.connect(a);s.start();setVol()}catch(e){ac=null}}
-function tone(f,d,t,v){if(!ac||muted)return;const o=ac.createOscillator(),g=ac.createGain(),n=ac.currentTime;o.type=t||'sine';o.frequency.value=f;o.connect(g);g.connect(mg);g.gain.setValueAtTime(v||.06,n);g.gain.exponentialRampToValueAtTime(.0001,n+(d||.25));o.start();o.stop(n+(d||.25)+.05)}
-$('mute').onclick=()=>{muted=!muted;setVol()};$('vol').oninput=setVol;
+/* ---- الصوت (وحدة مشتركة) ---- */
+const tone=(f,d,t,v)=>PJ.audio.tone(f,d,t,v);
+function audio(){PJ.audio.init('sea')}
+PJ.audio.bindUI($('mute'),$('vol'));
 
 /* ---- الإدخال ---- */
 let keys={},joy={x:0,y:0},tUp=false,tDn=false,tAct=false,yaw=0,pitch=-.12;const vel=new THREE.Vector3();
