@@ -142,6 +142,40 @@
       backdrop-filter: blur(7px);
     }
 
+    .audioBar {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: rgba(5, 18, 26, 0.58);
+      box-shadow: 0 18px 30px rgba(0,0,0,0.18);
+      backdrop-filter: blur(8px);
+      z-index: 25;
+      pointer-events: auto;
+    }
+
+    .audioToggle {
+      appearance: none;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+      color: var(--gold-soft);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .audioSlider {
+      width: 120px;
+      accent-color: var(--gold);
+    }
+
     .controls .row {
       display: flex;
       align-items: center;
@@ -345,6 +379,11 @@
         </div>
       </div>
 
+      <div class="audioBar">
+        <button class="audioToggle" id="audioToggle" type="button" aria-label="صوت">🔊</button>
+        <input id="volumeSlider" class="audioSlider" type="range" min="0" max="100" value="35" aria-label="مستوى الصوت" />
+      </div>
+
       <div class="controls">
         <div class="eyebrow" style="margin-bottom:0;">التحكم</div>
         <div class="row">
@@ -410,6 +449,8 @@
     const missionText = document.getElementById('missionText');
     const statusWhale = document.getElementById('statusWhale');
     const statusRelic = document.getElementById('statusRelic');
+    const audioToggle = document.getElementById('audioToggle');
+    const volumeSlider = document.getElementById('volumeSlider');
 
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -445,19 +486,76 @@
 
     let audioCtx = null;
     let masterGain = null;
+    let ambientGain = null;
+    let ambientOscillators = [];
+    let ambientNoise = null;
+    let isMuted = false;
+
+    function setAudioState() {
+      const value = Number(volumeSlider.value) / 100;
+      if (!masterGain) return;
+      const effective = isMuted ? 0 : value;
+      masterGain.gain.setTargetAtTime(effective, audioCtx.currentTime, 0.12);
+      audioToggle.textContent = isMuted ? '🔇' : '🔊';
+    }
 
     function initAudio() {
-      if (state.audioReady || !window.AudioContext && !window.webkitAudioContext) return;
+      if (state.audioReady || !(window.AudioContext || window.webkitAudioContext)) return;
       const AudioCtor = window.AudioContext || window.webkitAudioContext;
       audioCtx = new AudioCtor();
       masterGain = audioCtx.createGain();
-      masterGain.gain.value = 0.05;
+      masterGain.gain.value = 0;
       masterGain.connect(audioCtx.destination);
+
+      ambientGain = audioCtx.createGain();
+      ambientGain.gain.value = 0.08;
+      ambientGain.connect(masterGain);
+
+      const tonic = audioCtx.createOscillator();
+      const drift = audioCtx.createOscillator();
+      const filter = audioCtx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.value = 650;
+      filter.Q.value = 0.6;
+      tonic.type = 'sine';
+      tonic.frequency.value = 54;
+      drift.type = 'triangle';
+      drift.frequency.value = 0.19;
+      tonic.connect(filter);
+      drift.connect(filter);
+      filter.connect(ambientGain);
+      tonic.start();
+      drift.start();
+      ambientOscillators.push({ osc: tonic, gain: ambientGain, kind: 'tonic' });
+      ambientOscillators.push({ osc: drift, gain: ambientGain, kind: 'drift' });
+
+      const bufferSize = 2 * audioCtx.sampleRate;
+      const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+      const output = noiseBuffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        output[i] = (Math.random() * 2 - 1) * 0.2;
+      }
+      const source = audioCtx.createBufferSource();
+      source.buffer = noiseBuffer;
+      source.loop = true;
+      const noiseFilter = audioCtx.createBiquadFilter();
+      noiseFilter.type = 'bandpass';
+      noiseFilter.frequency.value = 420;
+      noiseFilter.Q.value = 0.2;
+      const noiseGain = audioCtx.createGain();
+      noiseGain.gain.value = 0.03;
+      source.connect(noiseFilter);
+      noiseFilter.connect(noiseGain);
+      noiseGain.connect(ambientGain);
+      source.start();
+      ambientNoise = { source, noiseGain };
+
       state.audioReady = true;
+      setAudioState();
     }
 
     function playTone(freq, duration, type = 'sine', volume = 0.03) {
-      if (!audioCtx || !masterGain) return;
+      if (!audioCtx || !masterGain || isMuted) return;
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
       osc.frequency.value = freq;
@@ -486,13 +584,15 @@
     }
 
     function createWater() {
-      const geometry = new THREE.PlaneGeometry(240, 240, 80, 80);
+      const geometry = new THREE.PlaneGeometry(240, 240, 90, 90);
       const material = new THREE.MeshStandardMaterial({
         color: 0x114f78,
-        roughness: 0.48,
-        metalness: 0.15,
+        roughness: 0.38,
+        metalness: 0.2,
         transparent: true,
-        opacity: 0.96
+        opacity: 0.96,
+        emissive: 0x092a39,
+        emissiveIntensity: 0.12
       });
 
       const water = new THREE.Mesh(geometry, material);
@@ -502,6 +602,42 @@
 
       water.userData = { geometry, base: geometry.attributes.position.array.slice() };
       return water;
+    }
+
+    function createLightRays() {
+      const group = new THREE.Group();
+      for (let i = 0; i < 12; i++) {
+        const ray = new THREE.Mesh(
+          new THREE.ConeGeometry(2.3 + Math.random() * 1.9, 20 + Math.random() * 10, 12, 1, true),
+          new THREE.MeshBasicMaterial({
+            color: new THREE.Color().setHSL(0.56 + Math.random() * 0.08, 0.9, 0.7),
+            transparent: true,
+            opacity: 0.08,
+            side: THREE.DoubleSide
+          })
+        );
+        ray.position.set((Math.random() - 0.5) * 130, 18 + Math.random() * 15, (Math.random() - 0.5) * 110);
+        ray.rotation.z = Math.random() * Math.PI;
+        ray.rotation.x = Math.PI / 2;
+        group.add(ray);
+      }
+      scene.add(group);
+      return group;
+    }
+
+    function createSeafloor() {
+      const seafloor = new THREE.Mesh(
+        new THREE.CircleGeometry(110, 48),
+        new THREE.MeshStandardMaterial({
+          color: 0x1a3b3a,
+          roughness: 1,
+          metalness: 0.06
+        })
+      );
+      seafloor.rotation.x = -Math.PI / 2;
+      seafloor.position.y = -10.8;
+      scene.add(seafloor);
+      return seafloor;
     }
 
     function updateWater(water, t) {
@@ -547,13 +683,13 @@
 
     function createBubbles() {
       const bubbleGroup = new THREE.Group();
-      for (let i = 0; i < 60; i++) {
+      for (let i = 0; i < 80; i++) {
         const bubble = new THREE.Mesh(
-          new THREE.SphereGeometry(0.18 + Math.random() * 0.18, 10, 10),
-          new THREE.MeshStandardMaterial({ color: 0xd5f8ff, transparent: true, opacity: 0.7, emissive: 0x7dd8f0, emissiveIntensity: 0.2 })
+          new THREE.SphereGeometry(0.18 + Math.random() * 0.18, 12, 12),
+          new THREE.MeshStandardMaterial({ color: 0xd5f8ff, transparent: true, opacity: 0.7, emissive: 0x7dd8f0, emissiveIntensity: 0.18 })
         );
-        bubble.position.set((Math.random() - 0.5) * 140, -4 + Math.random() * 18, (Math.random() - 0.5) * 120);
-        bubble.userData = { drift: Math.random() * 4 + 0.8 };
+        bubble.position.set((Math.random() - 0.5) * 150, -6 + Math.random() * 22, (Math.random() - 0.5) * 130);
+        bubble.userData = { drift: Math.random() * 4 + 0.8, bob: Math.random() * Math.PI * 2 };
         bubbleGroup.add(bubble);
       }
       scene.add(bubbleGroup);
@@ -704,6 +840,8 @@
 
     function buildWorld() {
       createLights();
+      const seafloor = createSeafloor();
+      const lights = createLightRays();
       const water = createWater();
       const beacon = createBeacon();
       const whale = createWhale();
@@ -711,18 +849,18 @@
       const bubbles = createBubbles();
       const fish = createFishSchool();
 
-      for (let i = 0; i < 28; i++) {
+      for (let i = 0; i < 32; i++) {
         const x = (Math.random() - 0.5) * 150;
         const z = (Math.random() - 0.5) * 130;
         const y = -6.6 + (Math.random() * 2.2);
         createRock(x, y, z, 0.7 + Math.random() * 1.5);
       }
 
-      for (let i = 0; i < 18; i++) {
+      for (let i = 0; i < 22; i++) {
         createCoralCluster((Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100);
       }
 
-      return { water, beacon, whale, relic, bubbles, fish };
+      return { water, beacon, whale, relic, bubbles, fish, seafloor, lights };
     }
 
     const world = buildWorld();
@@ -854,16 +992,17 @@
       submarine.position.z = THREE.MathUtils.clamp(submarine.position.z, -60, 60);
       submarine.rotation.y = yaw;
       submarine.rotation.x = pitch * 0.35;
+      submarine.rotation.z = THREE.MathUtils.clamp((move.x * 0.18) + Math.sin(clock.elapsedTime * 2.5) * 0.06, -0.45, 0.45);
     }
 
     function updateCamera(delta) {
-      const offset = new THREE.Vector3(0, 3.5, 9);
+      const offset = new THREE.Vector3(0, 3.8, 10.5);
       const dir = new THREE.Vector3(0, 0, 1).applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw);
       const camOffset = offset.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw);
-      camOffset.y += pitch;
+      camOffset.y += pitch * 1.7;
       const idealPosition = submarine.position.clone().add(camOffset);
-      camera.position.lerp(idealPosition, 0.15 + delta * 0.6);
-      const lookTarget = submarine.position.clone().add(dir.clone().multiplyScalar(12)).add(new THREE.Vector3(0, 1.5, 0));
+      camera.position.lerp(idealPosition, 0.12 + delta * 0.8);
+      const lookTarget = submarine.position.clone().add(dir.clone().multiplyScalar(12)).add(new THREE.Vector3(0, 1.8, 0));
       camera.lookAt(lookTarget);
     }
 
@@ -879,8 +1018,8 @@
     function animateBubbles(time) {
       world.bubbles.children.forEach((bubble, index) => {
         bubble.position.y += 0.04 + (index % 3) * 0.01;
-        bubble.position.x += Math.sin(time * 0.7 + index) * 0.03;
-        bubble.position.z += Math.cos(time * 0.8 + index) * 0.03;
+        bubble.position.x += Math.sin(time * 0.7 + index) * 0.03 + bubble.userData.drift * 0.015;
+        bubble.position.z += Math.cos(time * 0.8 + bubble.userData.bob) * 0.025;
         if (bubble.position.y > 12) {
           bubble.position.y = -5;
           bubble.position.x = (Math.random() - 0.5) * 120;
@@ -895,6 +1034,9 @@
       updateWater(world.water, elapsed);
       animateFishSchool(elapsed);
       animateBubbles(elapsed);
+      world.lights.children.forEach((ray, index) => {
+        ray.rotation.z += 0.0008 + index * 0.00008;
+      });
 
       if (state.started && !state.finished) {
         updateSubmarine(delta);
@@ -947,11 +1089,21 @@
 
     startBtn.addEventListener('click', () => {
       initAudio();
+      setAudioState();
       introOverlay.classList.add('hidden');
       state.started = true;
       setMissionText();
       updateStatusBadges();
       playTone(220, 0.18, 'sine', 0.04);
+    });
+
+    audioToggle.addEventListener('click', () => {
+      isMuted = !isMuted;
+      setAudioState();
+    });
+
+    volumeSlider.addEventListener('input', () => {
+      setAudioState();
     });
 
     document.addEventListener('keydown', (event) => {
@@ -996,8 +1148,29 @@
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     });
 
+    const params = new URLSearchParams(window.location.search);
+    const autoPlay = params.get('autoPlay') === '1' || params.get('autoPlay') === 'true';
+    const autoComplete = params.get('autoComplete') === '1' || params.get('autoComplete') === 'true';
+
     bindTouchControls();
     updateStatusBadges();
+
+    if (autoPlay) {
+      window.setTimeout(() => {
+        introOverlay.classList.add('hidden');
+        state.started = true;
+        setMissionText();
+        updateStatusBadges();
+        if (autoComplete) {
+          state.whaleSeen = true;
+          state.relicFound = true;
+          state.finished = false;
+          submarine.position.set(0, 0, 0);
+          finishMission();
+        }
+      }, 350);
+    }
+
     animate();
   </script>
 </body>
