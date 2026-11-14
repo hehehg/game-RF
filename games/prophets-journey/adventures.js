@@ -1,0 +1,28 @@
+/* سجل المغامرات الخمس والعشرين بترتيب القائمة المعتمدة. أضف file عند اكتمال المغامرة. */
+window.ADVENTURES = [
+  { id: 'adam', name: 'آدم عليه السلام' },
+  { id: 'idris', name: 'إدريس عليه السلام' },
+  { id: 'nuh', name: 'نوح عليه السلام' },
+  { id: 'hud', name: 'هود عليه السلام' },
+  { id: 'salih', name: 'صالح عليه السلام' },
+  { id: 'ibrahim', name: 'إبراهيم عليه السلام' },
+  { id: 'lut', name: 'لوط عليه السلام' },
+  { id: 'ismail', name: 'إسماعيل عليه السلام' },
+  { id: 'ishaq', name: 'إسحاق عليه السلام' },
+  { id: 'yaqub', name: 'يعقوب عليه السلام' },
+  { id: 'yusuf', name: 'يوسف عليه السلام' },
+  { id: 'ayyub', name: 'أيوب عليه السلام' },
+  { id: 'shuayb', name: 'شعيب عليه السلام' },
+  { id: 'musa', name: 'موسى عليه السلام' },
+  { id: 'harun', name: 'هارون عليه السلام' },
+  { id: 'dhulkifl', name: 'ذو الكفل عليه السلام' },
+  { id: 'dawud', name: 'داود عليه السلام' },
+  { id: 'sulayman', name: 'سليمان عليه السلام' },
+  { id: 'ilyas', name: 'إلياس عليه السلام' },
+  { id: 'alyasa', name: 'اليسع عليه السلام' },
+  { id: 'yunus', name: 'يونس عليه السلام', file: 'prophets-journey/yunus.html', steps: 5 },
+  { id: 'zakariya', name: 'زكريا عليه السلام' },
+  { id: 'yahya', name: 'يحيى عليه السلام' },
+  { id: 'isa', name: 'عيسى عليه السلام' },
+  { id: 'muhammad', name: 'محمد ﷺ' }
+];

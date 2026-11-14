@@ -2,284 +2,102 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>رحلة الأنبياء — مغامرة يونس عليه السلام</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>رحلة الأنبياء — مركز أسرار الزمان</title>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--gold:#f4e6b4;--txt:#edf8ff;--line:rgba(200,229,238,.28);--pn:rgba(4,15,22,.78)}
+:root{--gold:#f4e6b4;--line:rgba(200,229,238,.25);--pn:rgba(6,22,31,.86)}
 *{box-sizing:border-box}
-html,body{margin:0;height:100%;overflow:hidden;background:#041b2c;color:var(--txt);font-family:Tajawal,Tahoma,sans-serif}
-#root{position:fixed;inset:0;touch-action:none;user-select:none;-webkit-user-select:none}
-canvas{display:block;width:100%;height:100%}
-.hud{position:absolute;top:10px;right:10px;width:min(340px,calc(100vw - 20px));padding:10px 14px;border:1px solid var(--line);border-radius:16px;background:var(--pn);pointer-events:none}
-.hud h1{margin:0 0 4px;font:700 22px Amiri,serif;color:var(--gold)}
-.hud p{margin:0;font-size:13px;line-height:1.7}
-.pips{display:flex;gap:6px;margin-top:8px}.pips i{flex:1;height:5px;border-radius:3px;background:rgba(255,255,255,.18)}.pips i.on{background:#f4c95d}.pips i.cur{background:#7fd7ef}
-#cnt{margin-top:6px;font-size:12px;color:#bfe7f2}
-.bar{position:absolute;bottom:22%;left:50%;width:min(260px,60vw);height:10px;transform:translateX(-50%);border-radius:6px;background:rgba(0,0,0,.5);border:1px solid var(--line);display:none}
-.bar b{display:block;height:100%;width:0;border-radius:6px;background:#f4c95d}
-#toast{position:absolute;top:14%;left:50%;transform:translateX(-50%);max-width:min(520px,92vw);padding:10px 16px;border-radius:14px;background:var(--pn);border:1px solid var(--line);font-size:14px;line-height:1.8;text-align:center;opacity:0;transition:opacity .35s;pointer-events:none}
-#toast.on{opacity:1}
-.cine{position:absolute;left:0;right:0;height:0;background:#000;transition:height .8s;pointer-events:none}
-#cT{top:0}#cB{bottom:0}.cinema .cine{height:13%}
-#sub{position:absolute;bottom:15%;left:50%;transform:translateX(-50%);width:min(640px,92vw);text-align:center;font-size:15px;line-height:1.9;opacity:0;transition:opacity .4s;text-shadow:0 2px 6px #000;pointer-events:none}
-#sub.on{opacity:1}
-.audio{position:absolute;top:10px;left:10px;display:flex;gap:8px;align-items:center;padding:6px 10px;border-radius:14px;background:var(--pn);border:1px solid var(--line)}
-.audio button{background:none;border:0;color:#fff;font-size:20px;cursor:pointer}.audio input{width:80px}
-.help{position:absolute;bottom:12px;right:12px;padding:10px 12px;border-radius:14px;background:var(--pn);border:1px solid var(--line);font-size:12px;line-height:1.9;pointer-events:none}
-kbd{display:inline-block;min-width:22px;padding:0 6px;margin:0 2px;border:1px solid var(--line);border-radius:6px;text-align:center;background:rgba(255,255,255,.08)}
-.touch{display:none}.istouch .touch{display:block}.istouch .help{display:none}
-#joy{position:absolute;left:18px;bottom:22px;width:130px;height:130px;border-radius:50%;background:rgba(255,255,255,.1);border:2px solid var(--line);touch-action:none}
-#knob{position:absolute;left:35px;top:35px;width:60px;height:60px;border-radius:50%;background:rgba(244,201,93,.55);pointer-events:none}
-.tb{position:absolute;width:62px;height:62px;border-radius:50%;border:2px solid var(--line);background:rgba(4,15,22,.6);color:#fff;font-size:24px;touch-action:none}
-.tb.act{background:rgba(244,201,93,.55)}
-#bUp{right:18px;bottom:150px}#bDn{right:18px;bottom:82px}#bLamp{right:90px;bottom:116px}#bAct{right:90px;bottom:34px;width:72px;height:72px}
-.ov{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(2,10,16,.72);z-index:30}
-.ov.hidden{display:none}
-.card{width:min(620px,100%);max-height:92vh;overflow:auto;padding:24px 22px;border:1px solid var(--line);border-radius:22px;background:rgba(6,22,31,.95);text-align:center}
-.card h2{margin:0 0 10px;font:700 clamp(24px,5vw,34px) Amiri,serif;color:var(--gold)}
-.card p{margin:0 0 12px;line-height:1.9;font-size:15px}
-.dua{font:700 clamp(26px,6vw,38px) Amiri,serif;line-height:2;color:#fff;margin:14px 0 4px}
-.ref{font-size:13px;color:#bfe7f2;margin-bottom:12px}
-.card button{margin:6px;padding:11px 22px;border-radius:999px;border:0;font:700 16px Tajawal,sans-serif;cursor:pointer;background:linear-gradient(#f4c95d,#d9a93f);color:#2a1d00}
-.card button.alt{background:rgba(255,255,255,.14);color:#fff}
-.note{font-size:11px;color:#9fc4d0}
+html,body{margin:0;min-height:100%;color:#edf8ff;font-family:Tajawal,Tahoma,sans-serif;background:#041b2c}
+body{background:radial-gradient(circle at 20% 10%,rgba(127,215,239,.18),transparent 35%),radial-gradient(circle at 85% 25%,rgba(217,184,106,.14),transparent 30%),linear-gradient(#041b2c,#0a2a3a 60%,#10354d);min-height:100vh}
+.wrap{max-width:1000px;margin:0 auto;padding:22px 16px 60px}
+h1{margin:0;font:700 clamp(30px,6vw,46px) Amiri,serif;color:var(--gold)}
+.sub{color:#bfe7f2;margin:4px 0 18px;font-size:14px}
+.nour{display:flex;gap:12px;align-items:center;padding:14px 16px;border:1px solid var(--line);border-radius:18px;background:var(--pn);margin-bottom:18px}
+.orb{flex:none;width:46px;height:46px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,#7fd7ef 45%,#1b83a6);box-shadow:0 0 18px #7fd7ef;animation:p 3s ease-in-out infinite}
+@keyframes p{50%{box-shadow:0 0 30px #7fd7ef;transform:scale(1.06)}}
+.nour p{margin:0;line-height:1.9;font-size:15px}
+.top{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:14px}
+.prog{flex:1;min-width:200px}.prog small{color:#bfe7f2}.pb{height:8px;border-radius:5px;background:rgba(255,255,255,.15);margin-top:6px;overflow:hidden}.pb b{display:block;height:100%;background:linear-gradient(90deg,#f4c95d,#7fd7ef);width:0}
+button{font-family:inherit}
+.btn{padding:9px 16px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.08);color:#fff;font-weight:700;cursor:pointer}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
+.w{position:relative;text-align:right;padding:14px 14px 12px;border-radius:16px;border:1px solid var(--line);background:var(--pn);color:#fff;cursor:pointer;min-height:104px;transition:transform .15s}
+.w:hover{transform:translateY(-3px)}
+.w .n{font:700 12px Tajawal;color:#8fb7c4}.w h3{margin:4px 0 8px;font-size:17px}
+.w .s{display:inline-block;font-size:12px;padding:3px 10px;border-radius:999px;background:rgba(255,255,255,.1)}
+.w.open,.w.prog,.w.done{border-color:#f4c95d;background:linear-gradient(160deg,rgba(244,201,93,.2),var(--pn))}
+.w.done .s{background:#3a8a5f}.w.prog .s,.w.open .s{background:#b78a22;color:#fff}
+.w.soon{opacity:.62}
+.ov{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(2,10,16,.75);z-index:10}.ov.on{display:flex}
+.card{width:min(520px,100%);max-height:90vh;overflow:auto;padding:22px;border-radius:20px;border:1px solid var(--line);background:rgba(6,22,31,.97)}
+.card h2{margin:0 0 12px;font:700 28px Amiri,serif;color:var(--gold)}
+.ach{display:flex;gap:10px;align-items:center;padding:10px 12px;margin-bottom:8px;border-radius:12px;background:rgba(255,255,255,.06)}.ach.off{opacity:.45}.ach span{font-size:22px}
+#toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);padding:10px 18px;border-radius:14px;background:var(--pn);border:1px solid var(--line);opacity:0;transition:opacity .3s;pointer-events:none;font-size:14px}#toast.on{opacity:1}
+.foot{margin-top:26px;font-size:12px;color:#8fb7c4;line-height:1.9}
 </style>
 </head>
 <body>
-<div id="root">
-  <canvas id="c"></canvas>
-  <div class="cine" id="cT"></div><div class="cine" id="cB"></div>
-  <div class="hud"><h1 id="mt"></h1><p id="mx"></p><div class="pips" id="pips"></div><div id="cnt"></div></div>
-  <div class="audio"><button id="mute" aria-label="كتم">🔊</button><input id="vol" type="range" min="0" max="100" value="40" aria-label="مستوى الصوت"></div>
-  <div class="help"><div><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> حركة</div><div><kbd>Space</kbd> صعود <kbd>C</kbd> هبوط</div><div><kbd>L</kbd> المصباح <kbd>F</kbd> تفاعل (اضغط مطولًا)</div><div><kbd>←</kbd><kbd>→</kbd> أو اسحب بالفأرة: الكاميرا</div></div>
-  <div class="bar" id="bar"><b id="barf"></b></div>
-  <div id="toast"></div><div id="sub"></div>
-  <div class="touch"><div id="joy"><div id="knob"></div></div>
-    <button class="tb" id="bUp" aria-label="صعود">⬆</button><button class="tb" id="bDn" aria-label="هبوط">⬇</button>
-    <button class="tb" id="bLamp" aria-label="المصباح">💡</button><button class="tb" id="bAct" aria-label="تفاعل">✋</button></div>
-  <div class="ov" id="intro"><div class="card">
-    <h2>مغامرة يونس عليه السلام</h2>
-    <p>أنت مستكشف صغير في غواصة بحثية، ومعك المرشد الخيالي «نور». ستتعلم قصة نبي الله يونس عليه السلام كما وردت في القرآن الكريم.</p>
-    <p class="note">لا يظهر النبي في اللعبة بأي صورة. الغواصة والمرشد والعالم من الخيال التعليمي، أما المعلومات فمأخوذة من القرآن الكريم مع ذكر السورة والآية.</p>
-    <button id="go">ابدأ الاستكشاف</button><button class="alt" id="fresh" style="display:none">ابدأ من جديد</button>
-  </div></div>
-  <div class="ov hidden" id="card"><div class="card">
-    <h2 id="ct"></h2><p id="cb"></p><div class="dua" id="cd"></div><div class="ref" id="cr"></div><button id="cok">متابعة</button>
-  </div></div>
-  <div class="ov hidden" id="nogl"><div class="card"><h2>تعذّر تشغيل العرض ثلاثي الأبعاد</h2><p>هذا المتصفح أو الجهاز لا يدعم WebGL. جرّب متصفحًا آخر.</p></div></div>
+<div class="wrap">
+  <h1>رحلة الأنبياء</h1>
+  <div class="sub">مركز أسرار الزمان</div>
+  <div class="nour"><div class="orb"></div><p id="nt"></p></div>
+  <div class="top">
+    <div class="prog"><small id="pt"></small><div class="pb"><b id="pf"></b></div></div>
+    <button class="btn" id="ba">🏆 الإنجازات</button>
+    <button class="btn" id="br">إعادة ضبط التقدم</button>
+  </div>
+  <div class="grid" id="g"></div>
+  <div class="foot">«نور» مرشد خيالي تعليمي وليس شخصية من القصص القرآنية. لا يظهر أي نبي في اللعبة بأي صورة. المغامرات التي تظهر «قيد التطوير» لم تُبنَ بعد.</div>
 </div>
-<script src="prophets-journey/vendor/three.min.js"></script>
+<div class="ov" id="ov"><div class="card"><h2>الإنجازات</h2><div id="al"></div><button class="btn" id="ac">إغلاق</button></div></div>
+<div id="toast"></div>
+<script src="prophets-journey/shared/save.js"></script>
+<script src="prophets-journey/adventures.js"></script>
 <script>
 (function(){
 'use strict';
-const $=id=>document.getElementById(id),clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),ss=t=>{t=clamp(t,0,1);return t*t*(3-2*t)};
-if(typeof THREE==='undefined'){$('nogl').classList.remove('hidden');return}
-const isTouch=matchMedia('(pointer:coarse)').matches||'ontouchstart' in window;
-if(isTouch)document.getElementById('root').classList.add('istouch');
-
-/* ---- حفظ التقدم ---- */
-const KEY='pj.save.v1';
-function load(){try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&s.v===1&&s.yunus)return s}catch(e){}return{v:1,yunus:{step:0,pearls:0,done:false}}}
-let save=load();
-function store(){try{localStorage.setItem(KEY,JSON.stringify(save))}catch(e){}}
-
-/* ---- المشهد ---- */
-let R;try{R=new THREE.WebGLRenderer({canvas:$('c'),antialias:true})}catch(e){$('nogl').classList.remove('hidden');return}
-R.setPixelRatio(Math.min(devicePixelRatio,2));R.setSize(innerWidth,innerHeight);
-const S=new THREE.Scene(),FOG_A=new THREE.Color(0x10739a),FOG_B=new THREE.Color(0x020a12);
-S.background=FOG_A.clone();S.fog=new THREE.Fog(FOG_A.clone(),20,140);
-const cam=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.1,300);
-const hemi=new THREE.HemisphereLight(0xaee8ff,0x0a2a3a,1.6);S.add(hemi);
-const sun=new THREE.DirectionalLight(0xdff3ff,1.2);sun.position.set(20,60,10);S.add(sun);
-let seed=7;const rnd=()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
-
-function H(x,z){let y=-9+Math.sin(x*.07)*1.6+Math.cos(z*.05+x*.03)*1.8+Math.sin(x*.19+z*.13)*.5;return y-ss((-z-170)/30)*20}
-const SURF=11.5;
-
-(function terrain(){
-  const g=new THREE.PlaneGeometry(150,340,75,170);g.rotateX(-Math.PI/2);g.translate(0,0,-120);
-  const p=g.attributes.position,col=new Float32Array(p.count*3),c=new THREE.Color();
-  for(let i=0;i<p.count;i++){const y=H(p.getX(i),p.getZ(i));p.setY(i,y);c.setHSL(.1+clamp((y+30)/40,0,1)*.05,.35,.12+clamp((y+30)/40,0,1)*.32);col.set([c.r,c.g,c.b],i*3)}
-  g.setAttribute('color',new THREE.BufferAttribute(col,3));g.computeVertexNormals();
-  S.add(new THREE.Mesh(g,new THREE.MeshStandardMaterial({vertexColors:true,flatShading:true,roughness:1})));
-  const w=new THREE.Mesh(new THREE.PlaneGeometry(500,700),new THREE.MeshBasicMaterial({color:0x8fdcf2,transparent:true,opacity:.35,side:THREE.DoubleSide}));
-  w.rotation.x=-Math.PI/2;w.position.set(0,12,-120);S.add(w);
-})();
-
-const rockM=new THREE.MeshStandardMaterial({color:0x40606f,roughness:.95,flatShading:true});
-function rock(x,z,s,y){const m=new THREE.Mesh(new THREE.DodecahedronGeometry(1,0),rockM);m.scale.set(s,s*(.7+rnd()*.6),s);m.position.set(x,(y===undefined?H(x,z):y)+s*.3,z);m.rotation.set(rnd()*3,rnd()*3,rnd()*3);S.add(m);return m}
-for(let i=0;i<40;i++){const x=(rnd()-.5)*110,z=40-rnd()*200;if(Math.abs(x)>6||z>-10)rock(x,z,1+rnd()*2.5)}
-for(let i=0;i<45;i++){const side=rnd()<.5?-1:1,z=-175-rnd()*105;rock(side*(22+rnd()*34),z,3+rnd()*5)}
-/* الكهف: نفق من الصخور بين z=-138 و z=-168 */
-for(let z=-138;z>-168;z-=3){for(let a=-.2;a<Math.PI+.2;a+=.38){const x=Math.cos(a)*9,y=-4+Math.sin(a)*9;rock(x,z+rnd()*2,2.4+rnd()*1.2,y-2)}}
-/* مرجان وأعشاب */
-const coralC=[0xff7a8a,0xffb259,0xc78bff,0x6fe0c8];
-for(let i=0;i<70;i++){const x=(rnd()-.5)*60,z=-62-rnd()*85;if(z<-136&&Math.abs(x)<12)continue;const m=new THREE.Mesh(new THREE.ConeGeometry(.5+rnd()*.7,1.5+rnd()*2.4,7),new THREE.MeshStandardMaterial({color:coralC[i%4],emissive:coralC[i%4],emissiveIntensity:.18,roughness:.7}));m.position.set(x,H(x,z)+.8,z);S.add(m)}
-const kelp=[];for(let i=0;i<60;i++){const x=(rnd()-.5)*100,z=30-rnd()*110;const m=new THREE.Mesh(new THREE.CylinderGeometry(.06,.16,5+rnd()*4,6),new THREE.MeshStandardMaterial({color:0x2f9a62,emissive:0x0a3a22,roughness:.8}));m.geometry.translate(0,2.7,0);m.position.set(x,H(x,z),z);m.userData.p=rnd()*6;S.add(m);kelp.push(m)}
-/* أسماك */
-const fish=[];const fishM=[0xffd166,0x7fd7ef,0xff8fa3].map(c=>new THREE.MeshStandardMaterial({color:c,roughness:.6}));
-for(let i=0;i<36;i++){const f=new THREE.Group();const b=new THREE.Mesh(new THREE.SphereGeometry(.4,10,8),fishM[i%3]);b.scale.set(1.6,.8,.7);const t=new THREE.Mesh(new THREE.ConeGeometry(.3,.6,8),fishM[i%3]);t.rotation.z=Math.PI/2;t.position.x=-.8;f.add(b,t);
-  f.userData={cx:(rnd()-.5)*50,cz:-30-rnd()*100,r:5+rnd()*12,s:.25+rnd()*.35,ph:rnd()*6,y:-2+rnd()*9};S.add(f);fish.push(f)}
-/* أشعة الضوء قرب السطح */
-for(let i=0;i<8;i++){const m=new THREE.Mesh(new THREE.ConeGeometry(2.5+rnd()*2,24,10,1,true),new THREE.MeshBasicMaterial({color:0xbfefff,transparent:true,opacity:.07,side:THREE.DoubleSide,depthWrite:false}));m.position.set((rnd()-.5)*70,0,10-rnd()*130);S.add(m)}
-/* ثلج بحري */
-const SN=500,snG=new THREE.BufferGeometry(),snP=new Float32Array(SN*3);for(let i=0;i<SN*3;i++)snP[i]=(rnd()-.5)*60;
-snG.setAttribute('position',new THREE.BufferAttribute(snP,3));const snow=new THREE.Points(snG,new THREE.PointsMaterial({color:0xd8f6ff,size:.18,transparent:true,opacity:.7}));S.add(snow);
-
-/* ---- الغواصة (وسيلة تنقل خيالية) ---- */
-const sub=new THREE.Group();
-(function(){
-  const hull=new THREE.MeshStandardMaterial({color:0xf2c14e,metalness:.3,roughness:.4});
-  const glass=new THREE.MeshStandardMaterial({color:0x9fe8ff,emissive:0x2aa6c8,emissiveIntensity:.5,transparent:true,opacity:.8});
-  const body=new THREE.Mesh(new THREE.CapsuleGeometry(1.3,3,6,16),hull);body.rotation.x=Math.PI/2;sub.add(body);
-  const dome=new THREE.Mesh(new THREE.SphereGeometry(.95,16,12),glass);dome.position.set(0,.7,-.8);sub.add(dome);
-  const fin=new THREE.Mesh(new THREE.BoxGeometry(.2,1.6,1.3),hull);fin.position.set(0,.9,2.1);sub.add(fin);
-  const prop=new THREE.Mesh(new THREE.BoxGeometry(1.8,.14,.1),new THREE.MeshStandardMaterial({color:0x444}));prop.position.z=3.1;sub.add(prop);sub.userData.prop=prop;
-  const lamp=new THREE.Mesh(new THREE.SphereGeometry(.28,10,8),new THREE.MeshStandardMaterial({color:0xffffff,emissive:0xfff0c0,emissiveIntensity:0}));lamp.position.set(0,-.3,-2.5);sub.add(lamp);sub.userData.lamp=lamp;
-  const spot=new THREE.SpotLight(0xfff0c0,0,90,.55,.6,1.1);spot.position.set(0,-.3,-2.3);const tg=new THREE.Object3D();tg.position.set(0,-1,-25);sub.add(spot,tg);spot.target=tg;sub.userData.spot=spot;
-  const beam=new THREE.Mesh(new THREE.ConeGeometry(4,18,16,1,true),new THREE.MeshBasicMaterial({color:0xfff0c0,transparent:true,opacity:.1,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));
-  beam.rotation.x=Math.PI/2;beam.position.set(0,-.4,-11.5);beam.visible=false;sub.add(beam);sub.userData.beam=beam;
-})();
-S.add(sub);
-
-/* ---- عناصر المهام ---- */
-const ringPos=[[0,5,-18],[9,6,-38],[-7,7,-58]].map(a=>new THREE.Vector3(...a));
-const rings=ringPos.map(p=>{const m=new THREE.Mesh(new THREE.TorusGeometry(3.2,.28,12,32),new THREE.MeshStandardMaterial({color:0xf4c95d,emissive:0xf4c95d,emissiveIntensity:.7}));m.position.copy(p);S.add(m);return m});
-const pearlPos=[[-10,-82],[12,-96],[-6,-110],[14,-122],[0,-132]].map(a=>new THREE.Vector3(a[0],H(a[0],a[1])+2.8,a[1]));
-const pearlM=new THREE.MeshStandardMaterial({color:0xfff6e0,emissive:0xffe9b0,emissiveIntensity:1,roughness:.2});
-const pearls=pearlPos.map(p=>{const g=new THREE.Group(),m=new THREE.Mesh(new THREE.SphereGeometry(.7,16,12),pearlM);const h=new THREE.Mesh(new THREE.SphereGeometry(1.4,12,10),new THREE.MeshBasicMaterial({color:0xffe9b0,transparent:true,opacity:.25,depthWrite:false}));g.add(m,h);g.position.copy(p);g.visible=false;S.add(g);return g});
-const BP=new THREE.Vector3(0,H(0,-232)+2,-232);
-const beacon=new THREE.Group();{const t=new THREE.Mesh(new THREE.CylinderGeometry(.9,1.4,4,12),new THREE.MeshStandardMaterial({color:0x5a7a8c,roughness:.7}));const cr=new THREE.Mesh(new THREE.OctahedronGeometry(1.2),new THREE.MeshStandardMaterial({color:0x7ad0ff,emissive:0x2a8fc8,emissiveIntensity:.5}));cr.position.y=3.2;beacon.add(t,cr);beacon.userData.crystal=cr;
-  const pl=new THREE.PointLight(0x9fe8ff,0,70,1.2);pl.position.y=3.2;beacon.add(pl);beacon.userData.light=pl;beacon.position.copy(BP);beacon.position.y-=1;S.add(beacon)}
-const whale=new THREE.Group();{const m=new THREE.MeshStandardMaterial({color:0x4a6f86,emissive:0x0e2d40,emissiveIntensity:.6,roughness:.8});
-  const b=new THREE.Mesh(new THREE.SphereGeometry(1,24,16),m);b.scale.set(9,3.2,3.4);const tl=new THREE.Mesh(new THREE.ConeGeometry(1.6,5,12),m);tl.rotation.z=-Math.PI/2;tl.position.x=10.5;
-  const fl=new THREE.Mesh(new THREE.BoxGeometry(1.6,.3,6),m);fl.position.x=12.6;whale.add(b,tl,fl);whale.visible=false;S.add(whale)}
-
-/* ---- الحالة ---- */
-const STEPS=[
- {t:'تعلّم القيادة',m:()=>isTouch?'مرّ عبر الحلقات الذهبية الثلاث. حرّك العصا، واسحب الشاشة للنظر حولك، واستعمل ⬆ و ⬇ للارتفاع والانخفاض.':'مرّ عبر الحلقات الذهبية الثلاث: W A S D للحركة، المسافة للصعود، C للهبوط، والأسهم لتدوير الكاميرا.',spawn:[0,4,0]},
- {t:'شعاب المرجان',m:()=>'اجمع اللآلئ الخمس بالترتيب. كل لؤلؤة تكشف معلومة من القصة القرآنية.',spawn:[0,4,-66]},
- {t:'الكهف المظلم',m:()=>isTouch?'ادخل الكهف وشغّل مصباح الغواصة بزر 💡 لترى الطريق.':'ادخل الكهف وشغّل مصباح الغواصة بمفتاح L لترى الطريق.',spawn:[0,-2,-130]},
- {t:'الأعماق',m:()=>isTouch?'تقدّم نحو المنارة وأبقِ إصبعك على زر ✋ حتى تضيء.':'تقدّم نحو المنارة واضغط مطولًا على F حتى تضيء.',spawn:[0,-4,-182]},
- {t:'العودة إلى السطح',m:()=>'اصعد بالغواصة إلى سطح البحر.',spawn:[0,-8,-226]}
-];
-const FACTS=[
- ['أُرسل يونس عليه السلام إلى قومٍ كثيرين.','الصافات: 139، 147'],
- ['غادر قومه غاضبًا.','الأنبياء: 87'],
- ['التقمه الحوت.','الصافات: 142'],
- ['نادى ربّه في الظلمات بدعاءٍ عظيم.','الأنبياء: 87'],
- ['استجاب الله له ونجّاه، وكان يونس من المسبّحين.','الأنبياء: 88 — الصافات: 143–144']
-];
-let step=0,paused=true,cine=null,cineDone=false,lamp=false,lit=false,hold=0,pr=0,ringHit=[false,false,false],caveT=0,tTimer=0,sTimer=0;
-const pips=$('pips');for(let i=0;i<5;i++)pips.appendChild(document.createElement('i'));
-
-function toast(t,ms){const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(tTimer);tTimer=setTimeout(()=>e.classList.remove('on'),ms||6000)}
-function subtitle(t,ms){const e=$('sub');e.textContent=t;e.classList.add('on');clearTimeout(sTimer);sTimer=setTimeout(()=>e.classList.remove('on'),ms||6000)}
-function hud(){const s=STEPS[step];if(!s)return;$('mt').textContent=s.t;$('mx').textContent=s.m();[...pips.children].forEach((p,i)=>p.className=i<step?'on':i===step?'cur':'');
-  $('cnt').textContent=step===0?`الحلقات: ${ringHit.filter(Boolean).length}/3`:step===1?`اللآلئ: ${pr}/5`:''}
-function setStep(n,spawn){step=n;ringHit=[false,false,false];rings.forEach((r,i)=>r.visible=n===0);
-  pearls.forEach((p,i)=>p.visible=n===1&&i===pr);beacon.userData.light.intensity=lit?60:0;
-  if(n!==1)pr=n>1?5:0;if(n===1)pearls.forEach((p,i)=>p.visible=i===pr);
-  save.yunus.step=n;save.yunus.pearls=pr;store();if(spawn){const s=STEPS[n].spawn;sub.position.set(...s);yaw=0;vel.set(0,0,0)}hud()}
-function card(o){$('ct').textContent=o.t;$('cb').textContent=o.b||'';$('cd').textContent=o.d||'';$('cr').textContent=o.r||'';$('cok').textContent=o.btn||'متابعة';
-  $('card').classList.remove('hidden');paused=true;$('cok').onclick=()=>{$('card').classList.add('hidden');paused=false;o.done&&o.done()}}
-
-/* ---- الصوت ---- */
-let ac,mg,muted=false;
-function setVol(){if(mg)mg.gain.setTargetAtTime(muted?0:$('vol').value/100,ac.currentTime,.1);$('mute').textContent=muted?'🔇':'🔊'}
-function audio(){if(ac)return;try{const C=window.AudioContext||window.webkitAudioContext;if(!C)return;ac=new C();mg=ac.createGain();mg.connect(ac.destination);
-  const a=ac.createGain();a.gain.value=.09;a.connect(mg);const o=ac.createOscillator();o.frequency.value=55;const f=ac.createBiquadFilter();f.type='lowpass';f.frequency.value=500;o.connect(f);f.connect(a);o.start();
-  const n=ac.sampleRate*2,b=ac.createBuffer(1,n,ac.sampleRate),d=b.getChannelData(0);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*.2;
-  const s=ac.createBufferSource();s.buffer=b;s.loop=true;const nf=ac.createBiquadFilter();nf.type='bandpass';nf.frequency.value=400;const ng=ac.createGain();ng.gain.value=.05;s.connect(nf);nf.connect(ng);ng.connect(a);s.start();setVol()}catch(e){ac=null}}
-function tone(f,d,t,v){if(!ac||muted)return;const o=ac.createOscillator(),g=ac.createGain(),n=ac.currentTime;o.type=t||'sine';o.frequency.value=f;o.connect(g);g.connect(mg);g.gain.setValueAtTime(v||.06,n);g.gain.exponentialRampToValueAtTime(.0001,n+(d||.25));o.start();o.stop(n+(d||.25)+.05)}
-$('mute').onclick=()=>{muted=!muted;setVol()};$('vol').oninput=setVol;
-
-/* ---- الإدخال ---- */
-let keys={},joy={x:0,y:0},tUp=false,tDn=false,tAct=false,yaw=0,pitch=-.12;const vel=new THREE.Vector3();
-function setLamp(v){lamp=v;sub.userData.spot.intensity=v?140:0;sub.userData.beam.visible=v;sub.userData.lamp.material.emissiveIntensity=v?2:0;$('bLamp').classList.toggle('act',v);tone(v?660:440,.12,'triangle')}
-addEventListener('keydown',e=>{if(/^(Space|Arrow)/.test(e.code))e.preventDefault();keys[e.code]=true;if(e.code==='KeyL'&&!e.repeat&&!paused)setLamp(!lamp)});
-addEventListener('keyup',e=>{keys[e.code]=false});addEventListener('blur',()=>{keys={}});
-const pad=$('joy'),knob=$('knob');let jid=null;
-function jset(e){const r=pad.getBoundingClientRect(),m=r.width*.4;let dx=e.clientX-(r.left+r.width/2),dy=e.clientY-(r.top+r.height/2);const l=Math.hypot(dx,dy);if(l>m){dx*=m/l;dy*=m/l}joy.x=dx/m;joy.y=dy/m;knob.style.transform=`translate(${dx}px,${dy}px)`}
-pad.addEventListener('pointerdown',e=>{jid=e.pointerId;pad.setPointerCapture(jid);jset(e)});
-pad.addEventListener('pointermove',e=>{if(e.pointerId===jid)jset(e)});
-const jend=e=>{if(e.pointerId===jid){jid=null;joy.x=joy.y=0;knob.style.transform=''}};pad.addEventListener('pointerup',jend);pad.addEventListener('pointercancel',jend);
-function hb(id,fn){const b=$(id);b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture(e.pointerId);fn(true)});const u=()=>fn(false);b.addEventListener('pointerup',u);b.addEventListener('pointercancel',u)}
-hb('bUp',v=>tUp=v);hb('bDn',v=>tDn=v);hb('bAct',v=>{tAct=v;$('bAct').classList.toggle('act',v)});
-$('bLamp').addEventListener('pointerdown',e=>{e.preventDefault();if(!paused)setLamp(!lamp)});
-let cid=null,lx=0,ly=0;const cv=$('c');
-cv.addEventListener('pointerdown',e=>{cid=e.pointerId;lx=e.clientX;ly=e.clientY;cv.setPointerCapture(cid)});
-cv.addEventListener('pointermove',e=>{if(e.pointerId!==cid)return;yaw-=(e.clientX-lx)*.005;pitch=clamp(pitch-(e.clientY-ly)*.003,-.7,.5);lx=e.clientX;ly=e.clientY});
-const cend=e=>{if(e.pointerId===cid)cid=null};cv.addEventListener('pointerup',cend);cv.addEventListener('pointercancel',cend);
-addEventListener('resize',()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();R.setSize(innerWidth,innerHeight)});
-
-/* ---- منطق اللعب ---- */
-function startWhale(){cineDone=true;whale.visible=true;whale.userData={t:0,z:sub.position.z-34,y:sub.position.y+3};
-  cine={t:0,dur:7};document.getElementById('root').classList.add('cinema');
-  subtitle('يظهر في الأعماق حوتٌ عظيم. وقد ورد في القرآن الكريم أن الحوت التقم يونس عليه السلام (الصافات: 142).',7000);tone(120,1.2,'sine',.08)}
-function nextPearl(){tone(520+pr*90,.3,'triangle');const f=FACTS[pr];pearls[pr].visible=false;pr++;save.yunus.pearls=pr;store();
-  card({t:'لؤلؤة من القصة',b:f[0],r:'['+f[1]+']',btn:'متابعة',done:()=>{if(pr>=5){setStep(2)}else{pearls[pr].visible=true}hud()}});hud()}
-function lightBeacon(){lit=true;beacon.userData.light.intensity=60;beacon.userData.crystal.material.emissiveIntensity=2.5;tone(440,.5,'triangle');tone(660,.7,'sine');$('bar').style.display='none';
-  card({t:'دعاء يونس عليه السلام',b:'أضاءت المنارة، وهذا دعاءٌ ورد في القرآن الكريم عن يونس عليه السلام حين كان في الظلمات:',d:'لَا إِلَٰهَ إِلَّا أَنتَ سُبْحَانَكَ إِنِّي كُنتُ مِنَ الظَّالِمِينَ',r:'سورة الأنبياء، الآية 87',btn:'متابعة',
-    done:()=>{toast('ثم قال الله تعالى: ﴿فَاسْتَجَبْنَا لَهُ وَنَجَّيْنَاهُ مِنَ الْغَمِّ﴾ — الأنبياء: 88',8000);setStep(4)}})}
-function finish(){save.yunus.done=true;save.yunus.step=5;store();tone(660,.5,'triangle');
-  card({t:'تمت الرحلة',b:'ورد في القرآن أن الله نجّى يونس عليه السلام ونبذه بالعراء وهو سقيم وأنبت عليه شجرة من يقطين (الصافات: 145–146)، وأنه أُرسل إلى مئة ألفٍ أو يزيدون فآمنوا (الصافات: 147–148). ومما نتعلمه: أن نلجأ إلى الله بالدعاء والتسبيح في الشدة، وأن لا ننسى شكر نعمة النجاة.',r:'ختم «أسرار الزمان» لمغامرة يونس',btn:'إعادة المغامرة',done:()=>{save.yunus={step:0,pearls:0,done:true};pr=0;lit=false;cineDone=false;whale.visible=false;setLamp(false);setStep(0,true)}})}
-
-function update(dt,t){
-  const sp=sub.position;
-  if(!paused&&!cine){
-    const f=(keys.KeyW||keys.ArrowUp?1:0)-(keys.KeyS||keys.ArrowDown?1:0)-joy.y,r=(keys.KeyD?1:0)-(keys.KeyA?1:0)+joy.x,u=(keys.Space||tUp?1:0)-(keys.KeyC||keys.ShiftLeft||tDn?1:0);
-    if(keys.ArrowLeft)yaw+=1.6*dt;if(keys.ArrowRight)yaw-=1.6*dt;
-    const fx=-Math.sin(yaw),fz=-Math.cos(yaw),want=new THREE.Vector3(fx*f+Math.cos(yaw)*r,u*.8,fz*f-Math.sin(yaw)*r);
-    if(want.lengthSq()>1)want.normalize();want.multiplyScalar(15);vel.lerp(want,1-Math.exp(-4*dt));sp.addScaledVector(vel,dt);
-  }else vel.multiplyScalar(.95);
-  sp.x=clamp(sp.x,-62,62);sp.z=clamp(sp.z,-282,42);sp.y=clamp(sp.y,H(sp.x,sp.z)+2.4,SURF-1);
-  sub.rotation.set(vel.y*.02,yaw,-vel.x*.012*Math.cos(yaw)+Math.sin(t*2)*.03);sub.userData.prop.rotation.z+=dt*(8+vel.length());
-  /* المهام */
-  if(!paused&&!cine){
-    if(step===0){rings.forEach((m,i)=>{if(!ringHit[i]&&sp.distanceTo(ringPos[i])<3.4){ringHit[i]=true;m.material.emissiveIntensity=2;tone(480+i*120,.25,'triangle');hud();if(ringHit.every(Boolean)){toast('أحسنت! أنت الآن جاهز لاستكشاف الشعاب.');card({t:'أحسنت يا مستكشف',b:'تعلّمتَ قيادة الغواصة. هيا إلى شعاب المرجان.',done:()=>setStep(1)})}}})}
-    else if(step===1&&pearls[pr]&&sp.distanceTo(pearlPos[pr])<3.6)nextPearl();
-    else if(step===2){const inCave=sp.z<-138&&sp.z>-168&&Math.abs(sp.x)<10;
-      if(inCave){if(lamp){caveT+=dt;if(caveT>1.5){caveT=0;toast('أضاء المصباح الطريق. تابع إلى الأعماق.');tone(560,.3,'triangle');setStep(3)}}else{caveT=0;if(!tTimer||!$('toast').classList.contains('on'))toast('الظلام شديد. شغّل مصباح الغواصة.',3000)}}else caveT=0}
-    else if(step===3){
-      if(!cineDone&&sp.z<-195)startWhale();
-      if(cineDone&&!lit){const d=sp.distanceTo(BP);if(d<9){const h=keys.KeyF||keys.KeyE||tAct;if(h){hold=Math.min(1,hold+dt/3);if(hold>=1){hold=0;lightBeacon()}}else hold=Math.max(0,hold-dt*.6);$('bar').style.display=hold>0||d<9?'block':'none';$('barf').style.width=hold*100+'%'}else{hold=0;$('bar').style.display='none'}}}
-    else if(step===4&&sp.y>SURF-2.2)finish();
-  }
-  /* سينما الحوت */
-  if(whale.visible){const w=whale.userData;w.t+=dt;whale.position.set(60-w.t*7,w.y+Math.sin(w.t)*.6,w.z);whale.rotation.y=0;if(w.t>18)whale.visible=false}
-  if(cine){cine.t+=dt;if(cine.t>cine.dur){cine=null;document.getElementById('root').classList.remove('cinema');toast('اقترب من المنارة وأضئها.',5000)}}
-  /* الإضاءة حسب العمق والمنطقة */
-  const cave=ss((sp.z+138)/-4)*(1-ss((sp.z+168)/-4)),dk=Math.max(clamp((6-sp.y)/32,0,1)*.65,cave*.85,ss((-sp.z-175)/25)*(lit?.45:.95));
-  S.fog.color.copy(FOG_A).lerp(FOG_B,dk);S.background.copy(S.fog.color);S.fog.far=26+(1-dk)*115+(lamp?18:0);S.fog.near=6;
-  hemi.intensity=.35+(1-dk)*1.25;sun.intensity=.2+(1-dk)*1.1;
-  /* حركة العالم */
-  kelp.forEach(k=>{k.rotation.z=Math.sin(t*.9+k.userData.p)*.1;k.rotation.x=Math.cos(t*.7+k.userData.p)*.07});
-  fish.forEach(f=>{const d=f.userData,a=t*d.s+d.ph;f.position.set(d.cx+Math.cos(a)*d.r,d.y+Math.sin(a*2)*.8,d.cz+Math.sin(a)*d.r);f.rotation.y=-a-Math.PI/2+Math.PI;f.children[1].rotation.y=Math.sin(t*8+d.ph)*.4});
-  rings.forEach((m,i)=>{m.rotation.y=t*.5+i;if(!ringHit[i])m.material.emissiveIntensity=.7+Math.sin(t*3)*.25});
-  pearls.forEach(p=>{if(p.visible){p.position.y+=Math.sin(t*2.5)*.01;p.scale.setScalar(1+Math.sin(t*3)*.08)}});
-  beacon.userData.crystal.rotation.y=t;
-  const p=snow.geometry.attributes.position;for(let i=0;i<SN;i++){let x=p.getX(i),y=p.getY(i)-dt*.3,z=p.getZ(i);if(y-sp.y<-30)y+=60;else if(y-sp.y>30)y-=60;if(x-sp.x>30)x-=60;else if(x-sp.x<-30)x+=60;if(z-sp.z>30)z-=60;else if(z-sp.z<-30)z+=60;p.setXYZ(i,x,y,z)}p.needsUpdate=true;
-  /* الكاميرا */
-  if(cine){const k=cine.t/cine.dur;cam.position.lerp(new THREE.Vector3(sp.x-9,sp.y+3,sp.z+8),1-Math.exp(-3*dt));cam.lookAt(whale.position.x*(.4+k*.6)+sp.x*(1-.4-k*.6),whale.position.y,whale.position.z)}
-  else{const off=new THREE.Vector3(0,3.2-pitch*4,10.5).applyAxisAngle(new THREE.Vector3(0,1,0),yaw),tg=sp.clone().add(off);tg.y=clamp(tg.y,H(tg.x,tg.z)+1,SURF-.3);cam.position.lerp(tg,1-Math.exp(-7*dt));
-    cam.lookAt(sp.x-Math.sin(yaw)*12,sp.y+1.5+pitch*6,sp.z-Math.cos(yaw)*12)}
+var $=function(i){return document.getElementById(i)};
+var S=PJ.load(),A=window.ADVENTURES||[];
+function st(a){
+  if(!a.file)return{c:'soon',t:'قيد التطوير'};
+  var d=S[a.id]||{};
+  if(d.done)return{c:'done',t:'مكتملة ✓'};
+  if(d.step>0)return{c:'prog',t:'متابعة — المهمة '+(d.step+1)+' من '+(a.steps||5)};
+  return{c:'open',t:'متاحة'};
 }
-
-let last=performance.now();
-function loop(now){const dt=Math.min((now-last)/1000,.05);last=now;update(dt,now/1000);R.render(S,cam);requestAnimationFrame(loop)}
-
-/* ---- البدء ---- */
-function begin(fresh){
-  audio();try{window.focus()}catch(e){}
-  if(fresh)save.yunus={step:0,pearls:0,done:false};
-  pr=clamp(save.yunus.pearls||0,0,5);let s=clamp(save.yunus.step||0,0,4);if(save.yunus.done&&!fresh)s=0;
-  lit=false;cineDone=false;setStep(s,true);$('intro').classList.add('hidden');paused=false;
+var tt;function toast(m){var e=$('toast');e.textContent=m;e.className='on';clearTimeout(tt);tt=setTimeout(function(){e.className=''},2600)}
+function render(){
+  var done=A.filter(function(a){return S[a.id]&&S[a.id].done}).length;
+  $('pt').textContent='المغامرات المكتملة: '+done+' من '+A.length;
+  $('pf').style.width=(done/A.length*100)+'%';
+  $('nt').textContent=done?'أحسنت! أكملتَ '+done+' من المغامرات. اختر عالمًا جديدًا أو أعد زيارة عالم تحبه.':'مرحبًا! أنا نور، مرشدك في مركز أسرار الزمان. اختر عالمًا لتبدأ رحلتك. المغامرة المتاحة الآن هي مغامرة يونس عليه السلام.';
+  var g=$('g');g.innerHTML='';
+  A.forEach(function(a,i){
+    var s=st(a),b=document.createElement('button');
+    b.className='w '+s.c;
+    b.innerHTML='<div class="n">'+(i+1)+'</div><h3></h3><span class="s">'+s.t+'</span>';
+    b.querySelector('h3').textContent=a.name;
+    b.onclick=function(){if(a.file){location.href=a.file}else toast('هذه المغامرة قيد التطوير وستُفتح قريبًا')};
+    g.appendChild(b);
+  });
 }
-if(save.yunus.step>0&&!save.yunus.done){$('go').textContent='متابعة المغامرة';$('fresh').style.display=''}
-$('go').onclick=()=>begin(false);$('fresh').onclick=()=>begin(true);
-cam.position.set(0,6,14);setStep(0,true);requestAnimationFrame(loop);
+function achievements(){
+  var y=S.yunus||{};
+  return[
+    {i:'🧭',t:'أول غوص',d:'ابدأ مغامرة يونس وتجاوز مهمة التدريب',on:y.done||y.step>0},
+    {i:'🔮',t:'جامع اللآلئ',d:'اجمع لآلئ القصة الخمس',on:y.done||y.pearls>=5||y.step>=2},
+    {i:'🌟',t:'ختم أسرار الزمان: يونس',d:'أكمل مغامرة يونس عليه السلام',on:!!y.done}
+  ];
+}
+$('ba').onclick=function(){
+  var l=$('al');l.innerHTML='';
+  achievements().forEach(function(a){var d=document.createElement('div');d.className='ach'+(a.on?'':' off');d.innerHTML='<span>'+a.i+'</span><div><b></b><div style="font-size:12px;color:#bfe7f2"></div></div>';d.querySelector('b').textContent=a.t;d.querySelector('div div').textContent=a.d;l.appendChild(d)});
+  $('ov').className='ov on';
+};
+$('ac').onclick=function(){$('ov').className='ov'};
+$('br').onclick=function(){if(confirm('هل تريد مسح كل تقدمك في رحلة الأنبياء؟')){if(PJ.reset()){S=PJ.load();render();toast('تمت إعادة ضبط التقدم')}else toast('تعذّر مسح التقدم')}};
+render();
 })();
 </script>
 </body>
