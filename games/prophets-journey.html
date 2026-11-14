@@ -9,21 +9,23 @@
   <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg-1: #071b2a;
-      --bg-2: #0a2435;
-      --bg-3: #0f3349;
-      --panel: rgba(7, 17, 24, 0.75);
-      --panel-strong: rgba(8, 22, 31, 0.85);
-      --gold: #d8b35f;
-      --gold-soft: #f5e5b7;
-      --sea: #61c8df;
-      --sea-deep: #1b7ca8;
-      --mint: #8ae3c3;
-      --text: #edf7fb;
-      --muted: #cde6ee;
-      --line: rgba(195, 225, 233, 0.22);
-      --danger: #ef8b6a;
-      --shadow: rgba(0, 0, 0, 0.4);
+      --bg-1: #041b2c;
+      --bg-2: #0a2a3a;
+      --bg-3: #10354d;
+      --panel: rgba(4, 15, 22, 0.76);
+      --panel-strong: rgba(6, 22, 31, 0.9);
+      --gold: #d9b86a;
+      --gold-soft: #f4e6b4;
+      --sky: #7fd7ef;
+      --sea-1: #0a3f63;
+      --sea-2: #0f6a8d;
+      --sea-3: #0f8aa8;
+      --mint: #7fe1bf;
+      --text: #edf8ff;
+      --muted: #d6eaef;
+      --line: rgba(200, 229, 238, 0.24);
+      --danger: #ee8d77;
+      --shadow: rgba(0, 0, 0, 0.35);
     }
 
     * { box-sizing: border-box; }
@@ -43,8 +45,8 @@
       position: fixed;
       inset: 0;
       background:
-        radial-gradient(circle at 20% 10%, rgba(97, 200, 223, 0.15), transparent 25%),
-        radial-gradient(circle at 80% 30%, rgba(216, 179, 95, 0.12), transparent 30%);
+        radial-gradient(circle at 20% 15%, rgba(127, 215, 239, 0.14), transparent 20%),
+        radial-gradient(circle at 80% 30%, rgba(217, 184, 106, 0.12), transparent 26%);
       pointer-events: none;
       z-index: 0;
     }
@@ -60,27 +62,28 @@
       display: block;
       width: 100%;
       height: 100%;
-      background: linear-gradient(180deg, #061d2c, #0d2940 55%, #0b1f2c);
+      background: linear-gradient(180deg, #061d2d, #0b2d42 52%, #0a2231);
+      touch-action: none;
     }
 
     .ui {
       position: absolute;
       inset: 0;
       pointer-events: none;
-      z-index: 8;
+      z-index: 20;
     }
 
     .hud {
       position: absolute;
       top: 16px;
       right: 16px;
-      width: min(320px, calc(100vw - 32px));
+      width: min(360px, calc(100vw - 32px));
       padding: 12px 14px;
       border: 1px solid var(--line);
       border-radius: 18px;
-      background: rgba(6, 18, 26, 0.55);
-      backdrop-filter: blur(5px);
-      box-shadow: 0 12px 30px rgba(0,0,0,0.18);
+      background: rgba(5, 18, 26, 0.56);
+      box-shadow: 0 16px 34px rgba(0, 0, 0, 0.18);
+      backdrop-filter: blur(7px);
     }
 
     .eyebrow {
@@ -92,37 +95,58 @@
     }
 
     .missionTitle {
-      font-size: clamp(20px, 4vw, 30px);
-      font-family: 'Amiri', serif;
-      color: var(--gold-soft);
       margin: 0 0 6px;
+      font-family: 'Amiri', serif;
+      font-size: clamp(22px, 3.4vw, 34px);
+      color: var(--gold-soft);
       line-height: 1.15;
     }
 
     .missionText {
-      font-size: 13px;
-      line-height: 1.7;
-      color: var(--muted);
       margin: 0;
+      line-height: 1.75;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .statusRow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(127, 225, 191, 0.35);
+      background: rgba(127, 225, 191, 0.08);
+      color: var(--mint);
+      font-size: 11px;
+      line-height: 1;
     }
 
     .controls {
       position: absolute;
       left: 16px;
       bottom: 16px;
-      width: min(360px, calc(100vw - 32px));
-      background: rgba(5, 18, 25, 0.62);
-      border: 1px solid var(--line);
-      border-radius: 18px;
+      width: min(380px, calc(100vw - 32px));
       padding: 10px 14px;
-      backdrop-filter: blur(5px);
+      border: 1px solid var(--line);
+      background: rgba(4, 16, 21, 0.62);
+      border-radius: 18px;
+      box-shadow: 0 16px 30px rgba(0,0,0,0.18);
+      backdrop-filter: blur(7px);
     }
 
     .controls .row {
       display: flex;
+      align-items: center;
       flex-wrap: wrap;
       gap: 8px;
-      align-items: center;
       margin-top: 6px;
     }
 
@@ -132,13 +156,13 @@
       justify-content: center;
       min-width: 30px;
       height: 28px;
-      padding: 0 9px;
-      border: 1px solid var(--line);
+      padding: 0 8px;
       border-radius: 7px;
-      background: rgba(255,255,255,0.03);
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--line);
       color: var(--gold-soft);
+      font-size: 12px;
+      font-family: 'JetBrains Mono', monospace;
     }
 
     .small {
@@ -147,16 +171,63 @@
       line-height: 1.6;
     }
 
+    .mobilePad {
+      position: absolute;
+      left: 16px;
+      bottom: 110px;
+      display: none;
+      pointer-events: auto;
+      gap: 10px;
+      align-items: center;
+      justify-content: center;
+      z-index: 30;
+    }
+
+    .padGroup {
+      display: grid;
+      grid-template-columns: repeat(3, 48px);
+      grid-template-rows: repeat(3, 48px);
+      gap: 6px;
+      padding: 6px;
+      border-radius: 18px;
+      background: rgba(5, 16, 22, 0.58);
+      border: 1px solid var(--line);
+      backdrop-filter: blur(7px);
+    }
+
+    .touchBtn {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+      color: var(--gold-soft);
+      padding: 0;
+      font-size: 22px;
+      touch-action: none;
+      user-select: none;
+    }
+
+    .touchBtn.action {
+      width: 68px;
+      height: 68px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--gold), #f2d791);
+      color: #1a1a1a;
+      border: none;
+      font-size: 20px;
+    }
+
     .overlay {
       position: absolute;
       inset: 0;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 20px;
-      background: rgba(2, 8, 14, 0.32);
-      backdrop-filter: blur(5px);
-      z-index: 20;
+      background: rgba(2, 10, 16, 0.34);
+      backdrop-filter: blur(6px);
+      z-index: 30;
+      padding: 18px;
     }
 
     .overlay.hidden {
@@ -168,26 +239,26 @@
       padding: 24px 22px 20px;
       border: 1px solid var(--line);
       border-radius: 24px;
-      background: linear-gradient(180deg, rgba(8, 21, 29, 0.88), rgba(5, 13, 19, 0.9));
-      box-shadow: 0 30px 60px rgba(0,0,0,0.35);
+      background: linear-gradient(180deg, rgba(8, 21, 29, 0.9), rgba(4, 12, 18, 0.92));
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.32);
     }
 
     .panelTitle {
       margin: 0 0 14px;
       font-family: 'Amiri', serif;
-      font-size: clamp(30px, 5vw, 52px);
+      font-size: clamp(28px, 5vw, 56px);
       color: var(--gold-soft);
       text-align: center;
-      line-height: 1.1;
+      line-height: 1.08;
     }
 
     .panelText {
       margin: 0 auto 18px;
       max-width: 58ch;
-      line-height: 2;
+      line-height: 1.95;
       color: var(--muted);
-      text-align: center;
       font-size: clamp(16px, 2vw, 20px);
+      text-align: center;
     }
 
     .buttonRow {
@@ -211,19 +282,19 @@
 
     button:hover {
       transform: translateY(-1px);
-      box-shadow: 0 12px 24px rgba(216, 179, 95, 0.12);
+      box-shadow: 0 12px 24px rgba(217, 184, 106, 0.15);
     }
 
     .primary {
-      color: #12120f;
-      background: linear-gradient(135deg, var(--gold), #f4dd9a);
+      color: #171611;
+      background: linear-gradient(135deg, var(--gold), #f2d98f);
       border-color: transparent;
     }
 
     .secondary {
       background: transparent;
-      color: var(--text);
       border-color: var(--line);
+      color: var(--text);
     }
 
     .pulse {
@@ -231,19 +302,31 @@
     }
 
     @keyframes flash {
-      0%, 100% { box-shadow: 0 0 0 rgba(216,179,95,0); }
-      50% { box-shadow: 0 0 0 10px rgba(216,179,95,0.15); }
+      0%, 100% { box-shadow: 0 0 0 rgba(217,184,106,0); }
+      50% { box-shadow: 0 0 0 10px rgba(217,184,106,0.14); }
+    }
+
+    @media (max-width: 900px) {
+      .mobilePad { display: flex; }
+      .controls { display: none; }
     }
 
     @media (max-width: 640px) {
-      .hud, .controls {
-        width: calc(100vw - 24px);
-        left: 12px;
+      .hud {
+        top: 12px;
         right: 12px;
+        left: 12px;
+        width: auto;
       }
 
-      .hud { top: 12px; }
-      .controls { bottom: 12px; }
+      .mobilePad {
+        left: 12px;
+        bottom: 16px;
+      }
+
+      .panel {
+        padding: 20px 18px 18px;
+      }
     }
   </style>
 </head>
@@ -255,7 +338,11 @@
       <div class="hud" id="hud">
         <div class="eyebrow">MISSION</div>
         <h1 class="missionTitle">أسرار أعماق البحار</h1>
-        <p class="missionText" id="missionText">ابحث عن الحوت العظيم، واستكشف الممر المظلم، ثم عد إلى مركز الاستكشاف.</p>
+        <p class="missionText" id="missionText">استكشف الأعماق، لاحظ الحوت العظيم، ثم وجّه الغواصة إلى المخطوطة المفقودة.</p>
+        <div class="statusRow">
+          <span class="pill" id="statusWhale">الحوت: غير مكتشف</span>
+          <span class="pill" id="statusRelic">المخطوطة: غير موجودة</span>
+        </div>
       </div>
 
       <div class="controls">
@@ -265,11 +352,25 @@
           <span class="small">التقدم / التراجع / الجانبي</span>
         </div>
         <div class="row">
-          <span class="key">Q</span><span class="key">E</span><span class="key">F</span><span class="key">E</span>
-          <span class="small">الارتفاع / الفحص / التفاعل</span>
+          <span class="key">Q</span><span class="key">E</span><span class="key">F</span>
+          <span class="small">الارتفاع / الانخفاض / التفاعل</span>
         </div>
         <div class="row" style="margin-top:10px;">
           <span class="small">اسحب المؤشر لرؤية المحيط من حولك.</span>
+        </div>
+      </div>
+
+      <div class="mobilePad" aria-label="لوحة تحكم الهاتف">
+        <div class="padGroup" id="padGroup">
+          <div></div>
+          <button class="touchBtn" data-control="KeyW" aria-label="تقدم">▲</button>
+          <div></div>
+          <button class="touchBtn" data-control="KeyA" aria-label="يسار">◀</button>
+          <button class="touchBtn" data-control="KeyS" aria-label="تراجع">▼</button>
+          <button class="touchBtn" data-control="KeyD" aria-label="يمين">▶</button>
+          <button class="touchBtn" data-control="KeyQ" aria-label="صعود">↑</button>
+          <button class="touchBtn" data-control="KeyE" aria-label="هبوط">↓</button>
+          <button class="touchBtn action" data-control="KeyF" aria-label="تفاعل">◎</button>
         </div>
       </div>
     </div>
@@ -278,7 +379,7 @@
       <div class="panel">
         <h2 class="panelTitle">رحلة الأنبياء — أسرار الزمان</h2>
         <p class="panelText">
-          أنت داخل مركز استكشاف ضخم في أعماق البحر. رفيقك <strong style="color: var(--gold-soft);">نور</strong> أرسل لك إلى غواصة تعليمية لاستكشاف ممر المحيط العميق. اكتشف حيوانًا ضخمًا، وافحص أثرًا معرفيًا، ثم عد إلى المركز بسلام.
+          أنت داخل مركز استكشاف ضخم في أعماق البحر. رفيقك <strong style="color: var(--gold-soft);">نور</strong> أرسلك في غواصة بحثية لاستكشاف ممر المحيط العميق. اكتشف الحوت العظيم، وابحث عن المخطوطة المفقودة، ثم عد إلى المركز بسلام.
         </p>
         <div class="buttonRow">
           <button class="primary" id="startBtn">ابدأ الاستكشاف</button>
@@ -289,7 +390,7 @@
     <div class="overlay hidden" id="storyOverlay">
       <div class="panel">
         <h3 class="panelTitle" id="storyTitle">اكتشاف الحوت</h3>
-        <p class="panelText" id="storyText">يقترب من الممر المظلم صوت البحر، ويجعل الأفق يتغير.</p>
+        <p class="panelText" id="storyText">يفتح البحر طياته، والضوء يمرّ عبر المياه ببطء.</p>
         <div class="buttonRow">
           <button class="primary" id="storyContinue">متابعة</button>
         </div>
@@ -307,71 +408,91 @@
     const storyContinue = document.getElementById('storyContinue');
     const startBtn = document.getElementById('startBtn');
     const missionText = document.getElementById('missionText');
+    const statusWhale = document.getElementById('statusWhale');
+    const statusRelic = document.getElementById('statusRelic');
 
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setClearColor(0x071d2b, 1);
+    renderer.setClearColor(0x081c2b, 1);
 
     const scene = new THREE.Scene();
-    scene.fog = new THREE.Fog(0x061d2b, 35, 120);
+    scene.fog = new THREE.Fog(0x081c2b, 30, 140);
 
-    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 250);
-    camera.position.set(0, 5, 18);
+    const camera = new THREE.PerspectiveCamera(58, window.innerWidth / window.innerHeight, 0.1, 260);
+    camera.position.set(0, 5, 20);
 
     const clock = new THREE.Clock();
 
     const state = {
       started: false,
-      storyStep: 0,
       whaleSeen: false,
       relicFound: false,
       finished: false,
-      introDone: false,
-      overHome: false
+      audioReady: false
     };
 
     const keys = {};
     let pointerActive = false;
     let lastPointerX = 0;
     let lastPointerY = 0;
+    let yaw = 0;
+    let pitch = -0.12;
 
     const homeZone = new THREE.Vector3(0, 0, 0);
-    const whalePosition = new THREE.Vector3(38, 4, -18);
-    const relicPosition = new THREE.Vector3(-34, 2, 18);
+    const whalePosition = new THREE.Vector3(38, 3.8, -20);
+    const relicPosition = new THREE.Vector3(-34, 0.5, 18);
 
-    function adjustCameraTarget() {
-      if (!submarine) return;
-      const cameraOffset = new THREE.Vector3(0, 3.5, 9.5);
-      const direction = new THREE.Vector3(0, 0, 1).applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw);
-      const offset = cameraOffset.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw);
-      offset.y += pitch;
-      camera.position.lerp(submarine.position.clone().add(offset), 0.1);
-      const lookAtTarget = submarine.position.clone().add(direction.clone().multiplyScalar(12)).add(new THREE.Vector3(0, 1.8, 0));
-      camera.lookAt(lookAtTarget);
+    let audioCtx = null;
+    let masterGain = null;
+
+    function initAudio() {
+      if (state.audioReady || !window.AudioContext && !window.webkitAudioContext) return;
+      const AudioCtor = window.AudioContext || window.webkitAudioContext;
+      audioCtx = new AudioCtor();
+      masterGain = audioCtx.createGain();
+      masterGain.gain.value = 0.05;
+      masterGain.connect(audioCtx.destination);
+      state.audioReady = true;
+    }
+
+    function playTone(freq, duration, type = 'sine', volume = 0.03) {
+      if (!audioCtx || !masterGain) return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.frequency.value = freq;
+      osc.type = type;
+      gain.gain.value = volume;
+      osc.connect(gain);
+      gain.connect(masterGain);
+      osc.start();
+      const now = audioCtx.currentTime;
+      gain.gain.setValueAtTime(volume, now);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+      osc.stop(now + duration + 0.04);
     }
 
     function createLights() {
-      const hemi = new THREE.HemisphereLight(0x97d9ef, 0x072332, 1.6);
+      const hemi = new THREE.HemisphereLight(0x9de9ff, 0x061d2a, 1.6);
       scene.add(hemi);
 
-      const sun = new THREE.DirectionalLight(0xd4ebff, 1.2);
-      sun.position.set(18, 16, 8);
-      scene.add(sun);
+      const moon = new THREE.DirectionalLight(0xdfeeff, 1.3);
+      moon.position.set(18, 12, 8);
+      scene.add(moon);
 
-      const glow = new THREE.PointLight(0x74d7ff, 1.8, 80, 2);
-      glow.position.set(0, 5, 14);
+      const glow = new THREE.PointLight(0x6dd8f4, 1.8, 90, 2);
+      glow.position.set(0, 3, 0);
       scene.add(glow);
     }
 
     function createWater() {
-      const geometry = new THREE.PlaneGeometry(220, 220, 80, 80);
+      const geometry = new THREE.PlaneGeometry(240, 240, 80, 80);
       const material = new THREE.MeshStandardMaterial({
-        color: 0x1a5e86,
-        roughness: 0.42,
+        color: 0x114f78,
+        roughness: 0.48,
         metalness: 0.15,
         transparent: true,
-        opacity: 0.95
+        opacity: 0.96
       });
 
       const water = new THREE.Mesh(geometry, material);
@@ -390,7 +511,7 @@
       for (let i = 0; i < arr.length; i += 3) {
         const x = base[i];
         const z = base[i + 1];
-        const wave = Math.sin((x + t * 0.8) * 0.25) * 0.42 + Math.cos((z - t * 0.7) * 0.2) * 0.52;
+        const wave = Math.sin((x + t * 0.9) * 0.25) * 0.52 + Math.cos((z - t * 0.7) * 0.25) * 0.45;
         arr[i + 2] = wave;
       }
       positions.needsUpdate = true;
@@ -400,7 +521,7 @@
     function createRock(x, y, z, scale) {
       const rock = new THREE.Mesh(
         new THREE.DodecahedronGeometry(1.6, 0),
-        new THREE.MeshStandardMaterial({ color: 0x3d5966, roughness: 0.9, metalness: 0.1 })
+        new THREE.MeshStandardMaterial({ color: 0x3b5869, roughness: 0.9, metalness: 0.08 })
       );
       rock.position.set(x, y, z);
       rock.scale.setScalar(scale);
@@ -411,12 +532,12 @@
 
     function createCoralCluster(x, z) {
       const cluster = new THREE.Group();
-      for (let i = 0; i < 6; i++) {
+      for (let i = 0; i < 7; i++) {
         const branch = new THREE.Mesh(
-          new THREE.CylinderGeometry(0.12, 0.18, 1.9 + Math.random() * 1.6, 7),
-          new THREE.MeshStandardMaterial({ color: i % 2 === 0 ? 0x69d6a3 : 0x7cc8d8, roughness: 0.7 })
+          new THREE.CylinderGeometry(0.12, 0.18, 1.8 + Math.random() * 1.5, 8),
+          new THREE.MeshStandardMaterial({ color: i % 2 === 0 ? 0x82d8a2 : 0x75d0d9, roughness: 0.72 })
         );
-        branch.position.set((Math.random() - 0.5) * 2.5, 0.9, (Math.random() - 0.5) * 2.5);
+        branch.position.set((Math.random() - 0.5) * 2.8, 0.9, (Math.random() - 0.5) * 2.8);
         branch.rotation.z = (Math.random() - 0.5) * 1.4;
         cluster.add(branch);
       }
@@ -424,41 +545,56 @@
       scene.add(cluster);
     }
 
+    function createBubbles() {
+      const bubbleGroup = new THREE.Group();
+      for (let i = 0; i < 60; i++) {
+        const bubble = new THREE.Mesh(
+          new THREE.SphereGeometry(0.18 + Math.random() * 0.18, 10, 10),
+          new THREE.MeshStandardMaterial({ color: 0xd5f8ff, transparent: true, opacity: 0.7, emissive: 0x7dd8f0, emissiveIntensity: 0.2 })
+        );
+        bubble.position.set((Math.random() - 0.5) * 140, -4 + Math.random() * 18, (Math.random() - 0.5) * 120);
+        bubble.userData = { drift: Math.random() * 4 + 0.8 };
+        bubbleGroup.add(bubble);
+      }
+      scene.add(bubbleGroup);
+      return bubbleGroup;
+    }
+
     function createSubmarine() {
       const root = new THREE.Group();
 
-      const hullMaterial = new THREE.MeshStandardMaterial({ color: 0x9ec7d9, metalness: 0.45, roughness: 0.4 });
-      const accentMaterial = new THREE.MeshStandardMaterial({ color: 0x78d8f2, emissive: 0x1a7ea1, emissiveIntensity: 0.3, metalness: 0.3, roughness: 0.5 });
+      const hullMaterial = new THREE.MeshStandardMaterial({ color: 0x9ecbdc, metalness: 0.45, roughness: 0.38 });
+      const accentMaterial = new THREE.MeshStandardMaterial({ color: 0x7eceef, emissive: 0x1b83a6, emissiveIntensity: 0.35, metalness: 0.35, roughness: 0.42 });
 
-      const body = new THREE.Mesh(new THREE.CapsuleGeometry(3.2, 6.4, 8, 16), hullMaterial);
+      const body = new THREE.Mesh(new THREE.CapsuleGeometry(3.2, 6.7, 8, 18), hullMaterial);
       body.rotation.z = Math.PI / 2;
       root.add(body);
 
-      const bridge = new THREE.Mesh(new THREE.SphereGeometry(1.3, 18, 18), accentMaterial);
-      bridge.position.set(0, 1.5, 0);
+      const bridge = new THREE.Mesh(new THREE.SphereGeometry(1.2, 18, 18), accentMaterial);
+      bridge.position.set(0, 1.2, 0.3);
       root.add(bridge);
 
-      const windowMesh = new THREE.Mesh(new THREE.SphereGeometry(0.95, 18, 18), new THREE.MeshStandardMaterial({ color: 0xdfeef4, emissive: 0x6a9bbd, emissiveIntensity: 0.5, transparent: true, opacity: 0.75 }));
-      windowMesh.position.set(0, 1.5, 1.8);
-      root.add(windowMesh);
+      const lens = new THREE.Mesh(new THREE.SphereGeometry(0.8, 18, 18), new THREE.MeshStandardMaterial({ color: 0xe8f6ff, emissive: 0x87bfd9, emissiveIntensity: 0.8, transparent: true, opacity: 0.75 }));
+      lens.position.set(0, 1.2, 2.4);
+      root.add(lens);
 
-      const finLeft = new THREE.Mesh(new THREE.ConeGeometry(0.8, 1.4, 12), accentMaterial);
+      const finLeft = new THREE.Mesh(new THREE.ConeGeometry(0.8, 1.5, 12), accentMaterial);
       finLeft.rotation.z = Math.PI / 2;
-      finLeft.position.set(-2.2, 0, 0);
+      finLeft.position.set(-2.4, 0, 0);
       root.add(finLeft);
 
       const finRight = finLeft.clone();
-      finRight.position.x = 2.2;
+      finRight.position.x = 2.4;
       root.add(finRight);
 
-      const tail = new THREE.Mesh(new THREE.ConeGeometry(1.1, 2.2, 12), accentMaterial);
+      const tail = new THREE.Mesh(new THREE.ConeGeometry(1.1, 2.3, 12), accentMaterial);
       tail.rotation.z = -Math.PI / 2;
-      tail.position.set(-4.4, 0, 0);
+      tail.position.set(-4.6, 0, 0);
       root.add(tail);
 
-      const engine = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.7, 1.4, 12), new THREE.MeshStandardMaterial({ color: 0x1d2d3d, emissive: 0x2d7b95, emissiveIntensity: 0.7 }));
+      const engine = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.7, 1.5, 12), new THREE.MeshStandardMaterial({ color: 0x1b2c3b, emissive: 0x2a7279, emissiveIntensity: 0.7 }));
       engine.rotation.z = Math.PI / 2;
-      engine.position.set(4.3, 0, 0);
+      engine.position.set(4.4, 0, 0);
       root.add(engine);
 
       root.position.set(0, 0, 0);
@@ -468,19 +604,19 @@
 
     function createWhale() {
       const whale = new THREE.Group();
-      const bodyMaterial = new THREE.MeshStandardMaterial({ color: 0x7ca0b7, roughness: 0.8, metalness: 0.2 });
-      const body = new THREE.Mesh(new THREE.SphereGeometry(3.7, 24, 20), bodyMaterial);
+      const bodyMaterial = new THREE.MeshStandardMaterial({ color: 0x7fa4b6, roughness: 0.8, metalness: 0.25 });
+      const body = new THREE.Mesh(new THREE.SphereGeometry(3.8, 24, 20), bodyMaterial);
       body.scale.set(2.2, 1, 1);
       whale.add(body);
 
-      const tail = new THREE.Mesh(new THREE.ConeGeometry(2.3, 3.8, 18), new THREE.MeshStandardMaterial({ color: 0x6d8fa9, roughness: 0.9 }));
+      const tail = new THREE.Mesh(new THREE.ConeGeometry(2.4, 4.1, 18), new THREE.MeshStandardMaterial({ color: 0x708ea4, roughness: 0.9 }));
       tail.rotation.z = -Math.PI / 2;
-      tail.position.set(-5.3, 0, 0);
+      tail.position.set(-5.7, 0, 0);
       whale.add(tail);
 
-      const fin = new THREE.Mesh(new THREE.ConeGeometry(1.4, 2.2, 16), new THREE.MeshStandardMaterial({ color: 0x607d97, roughness: 0.85 }));
+      const fin = new THREE.Mesh(new THREE.ConeGeometry(1.5, 2.5, 16), new THREE.MeshStandardMaterial({ color: 0x6b8199, roughness: 0.86 }));
       fin.rotation.x = Math.PI / 2;
-      fin.position.set(1.2, 2.1, 0);
+      fin.position.set(1.5, 2.2, 0);
       whale.add(fin);
 
       whale.position.copy(whalePosition);
@@ -492,180 +628,273 @@
       const relic = new THREE.Group();
 
       const base = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.8, 1.1, 0.6, 18),
-        new THREE.MeshStandardMaterial({ color: 0x7ad9d0, emissive: 0x2ea3bf, emissiveIntensity: 0.7, metalness: 0.5, roughness: 0.4 })
+        new THREE.CylinderGeometry(0.9, 1.1, 0.75, 18),
+        new THREE.MeshStandardMaterial({ color: 0x7de0d1, emissive: 0x2daac4, emissiveIntensity: 0.7, metalness: 0.4, roughness: 0.45 })
       );
       base.position.y = -0.2;
       relic.add(base);
 
-      const core = new THREE.Mesh(
+      const top = new THREE.Mesh(
         new THREE.OctahedronGeometry(0.9, 0),
-        new THREE.MeshStandardMaterial({ color: 0xf5e6a8, emissive: 0xd8b35f, emissiveIntensity: 0.9, metalness: 0.4, roughness: 0.3 })
+        new THREE.MeshStandardMaterial({ color: 0xf4e5aa, emissive: 0xd8b35f, emissiveIntensity: 1, metalness: 0.5, roughness: 0.3 })
       );
-      core.position.y = 1.1;
-      relic.add(core);
+      top.position.y = 1.1;
+      relic.add(top);
 
       relic.position.copy(relicPosition);
       scene.add(relic);
       return relic;
     }
 
-    function createCenter() {
-      const center = new THREE.Group();
+    function createBeacon() {
+      const group = new THREE.Group();
 
       const platform = new THREE.Mesh(
         new THREE.CylinderGeometry(7, 8, 2, 20),
-        new THREE.MeshStandardMaterial({ color: 0x6a8c9f, roughness: 0.8, metalness: 0.2 })
+        new THREE.MeshStandardMaterial({ color: 0x728ea1, roughness: 0.82, metalness: 0.16 })
       );
       platform.position.y = -5.5;
-      center.add(platform);
+      group.add(platform);
 
       const tower = new THREE.Mesh(
-        new THREE.CylinderGeometry(1.6, 1.8, 8, 18),
-        new THREE.MeshStandardMaterial({ color: 0x9eb7c6, emissive: 0x1e4a63, emissiveIntensity: 0.15, metalness: 0.3, roughness: 0.6 })
+        new THREE.CylinderGeometry(1.2, 1.8, 8, 18),
+        new THREE.MeshStandardMaterial({ color: 0x9db8c9, emissive: 0x1a4865, emissiveIntensity: 0.18, metalness: 0.28, roughness: 0.62 })
       );
-      tower.position.y = -1.5;
-      center.add(tower);
+      tower.position.y = -1.2;
+      group.add(tower);
 
       const beacon = new THREE.Mesh(
-        new THREE.SphereGeometry(1.6, 18, 18),
-        new THREE.MeshStandardMaterial({ color: 0x8be3cb, emissive: 0x4ae2d7, emissiveIntensity: 1.2, metalness: 0.5, roughness: 0.4 })
+        new THREE.SphereGeometry(1.5, 18, 18),
+        new THREE.MeshStandardMaterial({ color: 0x93ebd6, emissive: 0x4fe4cb, emissiveIntensity: 1.2, metalness: 0.45, roughness: 0.35 })
       );
       beacon.position.y = 3.2;
-      center.add(beacon);
+      group.add(beacon);
 
-      center.position.set(0, 0, 0);
-      scene.add(center);
-      return center;
+      scene.add(group);
+      return group;
+    }
+
+    function createFishSchool() {
+      const group = new THREE.Group();
+      const count = 20;
+      for (let i = 0; i < count; i++) {
+        const fish = new THREE.Group();
+        const body = new THREE.Mesh(
+          new THREE.SphereGeometry(0.5 + Math.random() * 0.3, 10, 10),
+          new THREE.MeshStandardMaterial({ color: new THREE.Color().setHSL(0.52 + Math.random() * 0.24, 0.5, 0.6), roughness: 0.8 })
+        );
+        body.scale.set(1.7, 0.8, 0.8);
+        fish.add(body);
+
+        const tail = new THREE.Mesh(
+          new THREE.ConeGeometry(0.4, 0.8, 10),
+          new THREE.MeshStandardMaterial({ color: 0xe5f4ff, roughness: 0.9 })
+        );
+        tail.rotation.z = -Math.PI / 2;
+        tail.position.set(-0.9, 0, 0);
+        fish.add(tail);
+
+        fish.position.set((Math.random() - 0.5) * 120, -2 + Math.random() * 12, (Math.random() - 0.5) * 120);
+        fish.userData = { speed: 0.8 + Math.random() * 1.5, offset: Math.random() * Math.PI * 2, drift: (Math.random() - 0.5) * 1.5 };
+        group.add(fish);
+      }
+      scene.add(group);
+      return group;
     }
 
     function buildWorld() {
       createLights();
       const water = createWater();
-      const center = createCenter();
+      const beacon = createBeacon();
       const whale = createWhale();
       const relic = createRelic();
+      const bubbles = createBubbles();
+      const fish = createFishSchool();
 
-      for (let i = 0; i < 25; i++) {
-        const x = (Math.random() - 0.5) * 140;
-        const z = (Math.random() - 0.5) * 120;
-        const y = -6.6 + (Math.random() * 1.5);
-        createRock(x, y, z, 0.5 + Math.random() * 1.6);
+      for (let i = 0; i < 28; i++) {
+        const x = (Math.random() - 0.5) * 150;
+        const z = (Math.random() - 0.5) * 130;
+        const y = -6.6 + (Math.random() * 2.2);
+        createRock(x, y, z, 0.7 + Math.random() * 1.5);
       }
 
       for (let i = 0; i < 18; i++) {
         createCoralCluster((Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100);
       }
 
-      return { water, center, whale, relic };
+      return { water, beacon, whale, relic, bubbles, fish };
     }
 
     const world = buildWorld();
     const submarine = createSubmarine();
 
-    let yaw = 0;
-    let pitch = -0.06;
+    function setMissionText() {
+      if (!state.started) return;
+      if (!state.whaleSeen) {
+        missionText.textContent = 'استكشف الأعماق، لاحظ الحوت العظيم، ثم وجّه الغواصة إلى المخطوطة المفقودة.';
+      } else if (!state.relicFound) {
+        missionText.textContent = 'الحوت مرئي الآن. تنقل إلى الشراع المضيء وسجل المخطوطة المفقودة.';
+      } else if (!state.finished) {
+        missionText.textContent = 'تم اكتشاف المخطوطة. أعد الغواصة إلى مركز الاستكشاف.';
+      } else {
+        missionText.textContent = 'تمت المهمة بنجاح. تم إرجاع الختم إلى مركز أسرار الزمان.';
+      }
+    }
+
+    function updateStatusBadges() {
+      statusWhale.textContent = state.whaleSeen ? 'الحوت: تم اكتشافه' : 'الحوت: غير مكتشف';
+      statusRelic.textContent = state.relicFound ? 'المخطوطة: تم العثور عليها' : 'المخطوطة: غير موجودة';
+    }
 
     function startNarrative(title, text, callback) {
       storyTitle.textContent = title;
       storyText.textContent = text;
       storyOverlay.classList.remove('hidden');
-      storyContinue.onclick = () => {
+      const handle = () => {
         storyOverlay.classList.add('hidden');
         if (callback) callback();
+        storyContinue.onclick = handle;
       };
+      storyContinue.onclick = handle;
     }
 
     function beginWhaleEncounter() {
+      if (state.whaleSeen) return;
       state.whaleSeen = true;
-      state.started = true;
-      missionText.textContent = 'اكتشف الحوت العظيم، ثم ابحث عن المخطوطة المفقودة قرب الشراع المضيء.';
-      startNarrative('رؤية الحوت العظيم', 'يظهر الحوت الضخم في الظلام، وينتقل الضوء عبر المياه مثل شبحٍ هادئ. يذكر نور الطفل بالآية الربانية، وتُسمع في القلوب رائحة الصبر والرحمة والرجوع إلى الله.', () => {
-        const pulse = document.createElement('div');
-        pulse.className = 'pulse';
-      });
+      setMissionText();
+      updateStatusBadges();
+      playTone(260, 0.24, 'sine', 0.05);
+      playTone(180, 0.32, 'triangle', 0.03);
+      startNarrative(
+        'رؤية الحوت العظيم',
+        'يتوقف بحار الأعماق تحت ضوءٍ خافت، بينما يمضي الحوت الضخم كأثرٍ من الوئام والرحمة. يذكّر نور الطفل بالآية: «لا إله إلا أنت سبحانك إني كنت من الظالمين» فيتجسد في القلب معنى الرجوع إلى الله، والصبر، والرحمة.',
+        () => {
+          setMissionText();
+        }
+      );
     }
 
     function finishRelicDiscovery() {
+      if (state.relicFound) return;
       state.relicFound = true;
-      missionText.textContent = 'تم العثور على المخطوطة. عد إلى مركز الاستكشاف بالغواصة عبر القوس المضيء.';
-      startNarrative('مخطوطة الأعماق', 'تظهر قطعة من المخطوطة بين الشعاب، وتحتوي على كلمات عن التوبة، والرحمة، والرجوع إلى الله، وتؤكد أن القصة لا تُروى بالتمثيل بل بالمعنى والعبرة.', () => {});
+      setMissionText();
+      updateStatusBadges();
+      playTone(440, 0.18, 'triangle', 0.05);
+      playTone(550, 0.22, 'sine', 0.04);
+      startNarrative(
+        'مخطوطة الأعماق',
+        'تظهر المخطوطة داخل ممر شعابٍ صغير، وتدور حول الفكرة نفسها: التوبة، والرجوع إلى الله، والخروج من الضيق بذكره. في هذه اللحظة يفهم الطفل أن القصة لا تُروى بتمثيل، بل تُستخلص من القيم والمعاني.',
+        () => {
+          setMissionText();
+        }
+      );
     }
 
     function finishMission() {
+      if (state.finished) return;
       state.finished = true;
-      missionText.textContent = 'تم إكمال المرحلة — تم إرجاع ختم يونس إلى المركز.';
-      startNarrative('العودة إلى المركز', 'تعود الغواصة إلى القاعدة، ويُغلق الممر المائي بهدوء. يخرج الطفل إلى مركز أسرار الزمان محمّلًا بختم معرفي جديد، مستعدًا للمرحلة التالية.', () => {
-        try {
-          localStorage.setItem('prophets-journey-progress', JSON.stringify(['yunus']));
-        } catch (e) {}
-      });
-      const button = document.createElement('button');
-      button.className = 'primary';
-      button.textContent = 'إغلاق';
-      button.onclick = () => { storyOverlay.classList.add('hidden'); };
-      storyContinue.replaceWith(button);
+      setMissionText();
+      updateStatusBadges();
+      playTone(660, 0.25, 'triangle', 0.05);
+      playTone(520, 0.28, 'sine', 0.04);
+      startNarrative(
+        'إكمال المهمة',
+        'تعود الغواصة إلى مركز أسرار الزمان بهدوء، وتُغلق الأبواب المائية خلفها. يُسند إلى الطفل ختم معرفي جديد، ويكتمل درس يونس عليه السلام من خلال الصبر، والرحمة، والعودة إلى الله.',
+        () => {
+          try {
+            localStorage.setItem('prophets-journey-progress', JSON.stringify(['yunus']));
+          } catch (error) {}
+          storyOverlay.classList.remove('hidden');
+          storyTitle.textContent = 'تمت الرحلة بنجاح';
+          storyText.textContent = 'مرحلة يونس عليه السلام مكتملة. الممر البحري مهيأ للمرحلة التالية، بينما يبقى الدرس في قلب الطفل: لا يئس من رحمة الله، ولا ينسى الصبر في الشدة.';
+          storyContinue.textContent = 'إغلاق';
+          storyContinue.onclick = () => {
+            storyOverlay.classList.add('hidden');
+          };
+        }
+      );
     }
 
     function attemptInteraction() {
-      if (!state.started) return;
+      if (!state.started || state.finished) return;
       const dWhale = submarine.position.distanceTo(whalePosition);
       const dRelic = submarine.position.distanceTo(relicPosition);
-
-      if (!state.whaleSeen && dWhale < 12) {
+      if (!state.whaleSeen && dWhale < 13) {
         beginWhaleEncounter();
         return;
       }
-
-      if (!state.relicFound && dRelic < 9) {
+      if (!state.relicFound && dRelic < 11) {
         finishRelicDiscovery();
         return;
       }
-
-      if (state.relicFound && submarine.position.distanceTo(homeZone) < 15) {
+      if (state.relicFound && submarine.position.distanceTo(homeZone) < 18) {
         finishMission();
       }
     }
 
     function updateSubmarine(delta) {
-      const targetMove = new THREE.Vector3();
+      const move = new THREE.Vector3();
       const speed = 18;
-      if (keys.KeyW) targetMove.z -= 1;
-      if (keys.KeyS) targetMove.z += 1;
-      if (keys.KeyA) targetMove.x -= 1;
-      if (keys.KeyD) targetMove.x += 1;
-      if (keys.KeyQ) targetMove.y += 1;
-      if (keys.KeyE) targetMove.y -= 1;
+      if (keys.KeyW) move.z -= 1;
+      if (keys.KeyS) move.z += 1;
+      if (keys.KeyA) move.x -= 1;
+      if (keys.KeyD) move.x += 1;
+      if (keys.KeyQ) move.y += 1;
+      if (keys.KeyE) move.y -= 1;
 
-      if (targetMove.lengthSq() > 0) {
-        targetMove.normalize().multiplyScalar(speed * delta);
-        const rotation = new THREE.Euler(0, yaw, 0, 'YXZ');
-        targetMove.applyEuler(rotation);
-        submarine.position.add(targetMove);
+      if (move.lengthSq() > 0) {
+        move.normalize().multiplyScalar(speed * delta);
+        const orientation = new THREE.Euler(0, yaw, 0, 'YXZ');
+        move.applyEuler(orientation);
+        submarine.position.add(move);
       }
 
       submarine.position.x = THREE.MathUtils.clamp(submarine.position.x, -65, 65);
       submarine.position.y = THREE.MathUtils.clamp(submarine.position.y, -7, 14);
       submarine.position.z = THREE.MathUtils.clamp(submarine.position.z, -60, 60);
       submarine.rotation.y = yaw;
-      submarine.rotation.x = pitch * 0.25;
+      submarine.rotation.x = pitch * 0.35;
     }
 
     function updateCamera(delta) {
-      const offset = new THREE.Vector3(0, 3.5, 9.5);
+      const offset = new THREE.Vector3(0, 3.5, 9);
       const dir = new THREE.Vector3(0, 0, 1).applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw);
       const camOffset = offset.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw);
       camOffset.y += pitch;
       const idealPosition = submarine.position.clone().add(camOffset);
-      camera.position.lerp(idealPosition, 0.1 + delta * 0.6);
+      camera.position.lerp(idealPosition, 0.15 + delta * 0.6);
       const lookTarget = submarine.position.clone().add(dir.clone().multiplyScalar(12)).add(new THREE.Vector3(0, 1.5, 0));
       camera.lookAt(lookTarget);
+    }
+
+    function animateFishSchool(time) {
+      world.fish.children.forEach((fish, index) => {
+        fish.rotation.y = Math.sin(time * 0.8 + fish.userData.offset) * 0.5;
+        fish.position.x += Math.sin(time * 0.5 + fish.userData.offset) * 0.12;
+        fish.position.z += Math.cos(time * 0.9 + fish.userData.offset) * 0.11;
+        fish.position.y += Math.sin(time * 1.4 + index) * 0.02;
+      });
+    }
+
+    function animateBubbles(time) {
+      world.bubbles.children.forEach((bubble, index) => {
+        bubble.position.y += 0.04 + (index % 3) * 0.01;
+        bubble.position.x += Math.sin(time * 0.7 + index) * 0.03;
+        bubble.position.z += Math.cos(time * 0.8 + index) * 0.03;
+        if (bubble.position.y > 12) {
+          bubble.position.y = -5;
+          bubble.position.x = (Math.random() - 0.5) * 120;
+          bubble.position.z = (Math.random() - 0.5) * 110;
+        }
+      });
     }
 
     function animate() {
       const delta = Math.min(clock.getDelta(), 0.033);
       const elapsed = clock.elapsedTime;
       updateWater(world.water, elapsed);
+      animateFishSchool(elapsed);
+      animateBubbles(elapsed);
 
       if (state.started && !state.finished) {
         updateSubmarine(delta);
@@ -679,7 +908,7 @@
           beginWhaleEncounter();
         }
 
-        if (!state.relicFound && dRelic < 11) {
+        if (!state.relicFound && dRelic < 12) {
           finishRelicDiscovery();
         }
 
@@ -688,28 +917,50 @@
         }
       }
 
-      world.whale.rotation.z = Math.sin(elapsed * 0.6) * 0.08;
-      world.whale.position.y = whalePosition.y + Math.sin(elapsed * 0.8) * 0.6;
+      world.whale.rotation.z = Math.sin(elapsed * 0.8) * 0.08;
+      world.whale.position.y = whalePosition.y + Math.sin(elapsed * 0.9) * 0.6;
       world.relic.rotation.y += 0.02;
       world.relic.position.y = relicPosition.y + Math.sin(elapsed * 2.1) * 0.8;
+      world.beacon.rotation.y += 0.008;
 
       renderer.render(scene, camera);
       requestAnimationFrame(animate);
     }
 
+    function bindTouchControls() {
+      document.querySelectorAll('.touchBtn').forEach((button) => {
+        const code = button.dataset.control;
+        const press = (event) => {
+          event.preventDefault();
+          keys[code] = true;
+          if (code === 'KeyF') attemptInteraction();
+        };
+        const lift = (event) => {
+          event.preventDefault();
+          keys[code] = false;
+        };
+        button.addEventListener('pointerdown', press);
+        button.addEventListener('pointerup', lift);
+        button.addEventListener('pointerleave', lift);
+      });
+    }
+
     startBtn.addEventListener('click', () => {
+      initAudio();
       introOverlay.classList.add('hidden');
       state.started = true;
-      state.introDone = true;
-      missionText.textContent = 'استكشف المحيط، لاحظ الحوت العظيم، وبعدها اكتشف المخطوطة المفقودة ثم عد إلى المركز.';
+      setMissionText();
+      updateStatusBadges();
+      playTone(220, 0.18, 'sine', 0.04);
     });
 
     document.addEventListener('keydown', (event) => {
       keys[event.code] = true;
-      if (event.code === 'KeyF') {
+      if (event.code === 'KeyF' || event.code === 'KeyE') {
         attemptInteraction();
       }
-      if (event.code === 'KeyE') {
+      if (event.code === 'Space') {
+        event.preventDefault();
         attemptInteraction();
       }
     });
@@ -735,13 +986,8 @@
       lastPointerY = event.clientY;
     });
 
-    canvas.addEventListener('pointerup', () => {
-      pointerActive = false;
-    });
-
-    canvas.addEventListener('pointerleave', () => {
-      pointerActive = false;
-    });
+    canvas.addEventListener('pointerup', () => { pointerActive = false; });
+    canvas.addEventListener('pointerleave', () => { pointerActive = false; });
 
     window.addEventListener('resize', () => {
       camera.aspect = window.innerWidth / window.innerHeight;
@@ -750,7 +996,8 @@
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     });
 
-    adjustCameraTarget();
+    bindTouchControls();
+    updateStatusBadges();
     animate();
   </script>
 </body>
