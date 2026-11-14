@@ -15,13 +15,13 @@
     if (file) { file.volume = s.vol / 100; file.muted = s.muted; }
   }
   function stopBed() { bed.forEach(function (n) { try { n.stop(); } catch (e) {} }); bed = []; }
-  function sea() {
+  function sea(m) {
     stopBed();
     var n = ac.sampleRate * 2, b = ac.createBuffer(1, n, ac.sampleRate), d = b.getChannelData(0);
     for (var i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * .2;
     var s = ac.createBufferSource(); s.buffer = b; s.loop = true;
-    var f = ac.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 420;
-    var g = ac.createGain(); g.gain.value = .06;
+    var f = ac.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = m === 'wind' ? 900 : 420;
+    var g = ac.createGain(); g.gain.value = m === 'wind' ? .04 : .06;
     var lfo = ac.createOscillator(), lg = ac.createGain(); lfo.frequency.value = .11; lg.gain.value = .03; lfo.connect(lg); lg.connect(g.gain);
     s.connect(f); f.connect(g); g.connect(mg); s.start(); lfo.start(); bed.push(s, lfo);
   }
@@ -41,7 +41,7 @@
           ac = new C(); mg = ac.createGain(); mg.gain.value = 0; mg.connect(ac.destination);
         }
         if (ac.state === 'suspended' && ac.resume) ac.resume();
-        if (mode !== m) { mode = m; if (m === 'sea') sea(); else stopBed(); }
+        if (mode !== m) { mode = m; if (m === 'sea' || m === 'wind') sea(m); else stopBed(); }
         apply();
       } catch (e) { ac = null; }
     },

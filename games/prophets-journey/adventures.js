@@ -2,10 +2,10 @@
 window.ADVENTURES = [
   { id: 'adam', name: 'آدم عليه السلام' },
   { id: 'idris', name: 'إدريس عليه السلام' },
-  { id: 'nuh', name: 'نوح عليه السلام' },
+  { id: 'nuh', name: 'نوح عليه السلام', file: 'prophets-journey/play.html?id=nuh', steps: 4 },
   { id: 'hud', name: 'هود عليه السلام' },
   { id: 'salih', name: 'صالح عليه السلام' },
-  { id: 'ibrahim', name: 'إبراهيم عليه السلام' },
+  { id: 'ibrahim', name: 'إبراهيم عليه السلام', file: 'prophets-journey/play.html?id=ibrahim', steps: 2 },
   { id: 'lut', name: 'لوط عليه السلام' },
   { id: 'ismail', name: 'إسماعيل عليه السلام' },
   { id: 'ishaq', name: 'إسحاق عليه السلام' },

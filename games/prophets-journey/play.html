@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>رحلة الأنبياء — مغامرة يونس عليه السلام</title>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#f4e6b4;--txt:#edf8ff;--line:rgba(200,229,238,.28);--pn:rgba(4,15,22,.78)}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:#041b2c;color:var(--txt);font-family:Tajawal,Tahoma,sans-serif}
+#root{position:fixed;inset:0;touch-action:none;user-select:none;-webkit-user-select:none}
+canvas{display:block;width:100%;height:100%}
+.hud{position:absolute;top:10px;right:10px;width:min(340px,calc(100vw - 20px));padding:10px 14px;border:1px solid var(--line);border-radius:16px;background:var(--pn);pointer-events:none}
+.hud h1{margin:0 0 4px;font:700 22px Amiri,serif;color:var(--gold)}
+.hud p{margin:0;font-size:13px;line-height:1.7}
+.pips{display:flex;gap:6px;margin-top:8px}.pips i{flex:1;height:5px;border-radius:3px;background:rgba(255,255,255,.18)}.pips i.on{background:#f4c95d}.pips i.cur{background:#7fd7ef}
+#cnt{margin-top:6px;font-size:12px;color:#bfe7f2}
+.bar{position:absolute;bottom:22%;left:50%;width:min(260px,60vw);height:10px;transform:translateX(-50%);border-radius:6px;background:rgba(0,0,0,.5);border:1px solid var(--line);display:none}
+.bar b{display:block;height:100%;width:0;border-radius:6px;background:#f4c95d}
+#toast{position:absolute;top:14%;left:50%;transform:translateX(-50%);max-width:min(520px,92vw);padding:10px 16px;border-radius:14px;background:var(--pn);border:1px solid var(--line);font-size:14px;line-height:1.8;text-align:center;opacity:0;transition:opacity .35s;pointer-events:none}
+#toast.on{opacity:1}
+.cine{position:absolute;left:0;right:0;height:0;background:#000;transition:height .8s;pointer-events:none}
+#cT{top:0}#cB{bottom:0}.cinema .cine{height:13%}.cinema .hud,.cinema .help,.cinema .nav,.cinema .audio,.cinema .back{opacity:0;transition:opacity .5s}
+#sub{position:absolute;bottom:15%;left:50%;transform:translateX(-50%);width:min(640px,92vw);text-align:center;font-size:15px;line-height:1.9;opacity:0;transition:opacity .4s;text-shadow:0 2px 6px #000;pointer-events:none}
+#sub.on{opacity:1}
+.back{position:absolute;top:58px;left:10px;padding:7px 14px;border-radius:14px;background:var(--pn);border:1px solid var(--line);color:#fff;text-decoration:none;font-size:13px;font-weight:700}
+.audio{position:absolute;top:10px;left:10px;display:flex;gap:8px;align-items:center;padding:6px 10px;border-radius:14px;background:var(--pn);border:1px solid var(--line)}
+.audio button{background:none;border:0;color:#fff;font-size:20px;cursor:pointer}.audio input{width:80px}
+.help{position:absolute;bottom:12px;right:12px;padding:10px 12px;border-radius:14px;background:var(--pn);border:1px solid var(--line);font-size:12px;line-height:1.9;pointer-events:none}
+kbd{display:inline-block;min-width:22px;padding:0 6px;margin:0 2px;border:1px solid var(--line);border-radius:6px;text-align:center;background:rgba(255,255,255,.08)}
+.touch{display:none}.istouch .touch{display:block}.istouch .help{display:none}
+#joy{position:absolute;left:18px;bottom:22px;width:130px;height:130px;border-radius:50%;background:rgba(255,255,255,.1);border:2px solid var(--line);touch-action:none}
+#knob{position:absolute;left:35px;top:35px;width:60px;height:60px;border-radius:50%;background:rgba(244,201,93,.55);pointer-events:none}
+.tb{position:absolute;width:62px;height:62px;border-radius:50%;border:2px solid var(--line);background:rgba(4,15,22,.6);color:#fff;font-size:24px;touch-action:none}
+.tb.act{background:rgba(244,201,93,.55)}
+#bUp{right:18px;bottom:150px}#bDn{right:18px;bottom:82px}#bLamp{right:90px;bottom:116px}#bAct{right:90px;bottom:34px;width:72px;height:72px}
+.ov{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(2,10,16,.72);z-index:30}
+.ov.hidden{display:none}
+.card{width:min(620px,100%);max-height:92vh;overflow:auto;padding:24px 22px;border:1px solid var(--line);border-radius:22px;background:rgba(6,22,31,.95);text-align:center}
+.card h2{margin:0 0 10px;font:700 clamp(24px,5vw,34px) Amiri,serif;color:var(--gold)}
+.card p{margin:0 0 12px;line-height:1.9;font-size:15px}
+.dua{font:700 clamp(26px,6vw,38px) Amiri,serif;line-height:2;color:#fff;margin:14px 0 4px}
+.ref{font-size:13px;color:#bfe7f2;margin-bottom:12px}
+.card button{margin:6px;padding:11px 22px;border-radius:999px;border:0;font:700 16px Tajawal,sans-serif;cursor:pointer;background:linear-gradient(#f4c95d,#d9a93f);color:#2a1d00}
+.card button.alt{background:rgba(255,255,255,.14);color:#fff}
+.note{font-size:11px;color:#9fc4d0}
+.vig{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 55%,rgba(0,12,24,.5))}
+.nav{position:absolute;top:12px;left:50%;transform:translateX(-50%);display:none;align-items:center;gap:10px;padding:6px 16px;border-radius:999px;background:var(--pn);border:1px solid var(--line);pointer-events:none;font-weight:700;font-size:14px}
+#na{display:inline-block;font-size:20px;color:#f4c95d;transition:transform .1s}
+.hud,.audio,.help,.back,.nav,#toast{backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+#intro{background:linear-gradient(rgba(2,10,16,.3),rgba(2,10,16,.8))}
+#bLamp,#bAct{display:none}
+</style>
+</head>
+<body>
+<div id="root">
+  <canvas id="c"></canvas><div class="vig"></div>
+  <div class="cine" id="cT"></div><div class="cine" id="cB"></div>
+  <div class="hud"><h1 id="mt"></h1><p id="mx"></p><div class="pips" id="pips"></div><div id="cnt"></div></div>
+  <a class="back" href="../prophets-journey.html">↩ مركز أسرار الزمان</a>
+  <div class="audio"><button id="mute" aria-label="كتم">🔊</button><input id="vol" type="range" min="0" max="100" value="40" aria-label="مستوى الصوت"></div>
+  <div class="help"><div><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> حركة</div><div><kbd>Space</kbd> صعود <kbd>C</kbd> هبوط</div><div>اقترب من العنصر ليلتقطه تلقائيًا</div><div><kbd>←</kbd><kbd>→</kbd> أو اسحب بالفأرة: الكاميرا</div></div>
+  <div class="nav" id="nav"><span id="na">▲</span><span id="nd"></span></div>
+  <div class="bar" id="bar"><b id="barf"></b></div>
+  <div id="toast"></div><div id="sub"></div>
+  <div class="touch"><div id="joy"><div id="knob"></div></div>
+    <button class="tb" id="bUp" aria-label="صعود">⬆</button><button class="tb" id="bDn" aria-label="هبوط">⬇</button>
+    <button class="tb" id="bLamp" aria-label="المصباح">💡</button><button class="tb" id="bAct" aria-label="تفاعل">✋</button></div>
+  <div class="ov" id="intro"><div class="card">
+    <h2>مغامرة يونس عليه السلام</h2>
+    <p>أنت مستكشف صغير في غواصة بحثية، ومعك المرشد الخيالي «نور». ستتعلم قصة نبي الله يونس عليه السلام كما وردت في القرآن الكريم.</p>
+    <p class="note">لا يظهر النبي في اللعبة بأي صورة. المركبة والمرشد والعالم من الخيال التعليمي، أما المعلومات فمأخوذة من القرآن الكريم مع ذكر السورة والآية.</p>
+    <div style="margin-bottom:6px"><button class="alt" id="ai" style="display:none">🔊 استمع إلى التعليمات</button><button class="alt" id="as" style="display:none">🎧 استمع إلى القصة</button></div>
+    <button id="go">ابدأ الاستكشاف</button><button class="alt" id="fresh" style="display:none">ابدأ من جديد</button>
+  </div></div>
+  <div class="ov hidden" id="card"><div class="card">
+    <h2 id="ct"></h2><p id="cb"></p><div class="dua" id="cd"></div><div class="ref" id="cr"></div><button class="alt" id="cs" style="display:none">🔊 استمع إلى التلاوة</button><button id="cok">متابعة</button>
+  </div></div>
+  <div class="ov hidden" id="nogl"><div class="card"><h2>تعذّر تشغيل العرض ثلاثي الأبعاد</h2><p>هذا المتصفح أو الجهاز لا يدعم WebGL. جرّب متصفحًا آخر.</p></div></div>
+</div>
+<script src="shared/save.js"></script>
+<script src="shared/audio.js"></script>
+<script src="vendor/three.min.js"></script>
+<script src="shared/engine.js"></script>
+</body>
+</html>
