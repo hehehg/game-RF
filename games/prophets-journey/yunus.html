@@ -64,6 +64,7 @@ kbd{display:inline-block;min-width:22px;padding:0 6px;margin:0 2px;border:1px so
     <h2>مغامرة يونس عليه السلام</h2>
     <p>أنت مستكشف صغير في غواصة بحثية، ومعك المرشد الخيالي «نور». ستتعلم قصة نبي الله يونس عليه السلام كما وردت في القرآن الكريم.</p>
     <p class="note">لا يظهر النبي في اللعبة بأي صورة. الغواصة والمرشد والعالم من الخيال التعليمي، أما المعلومات فمأخوذة من القرآن الكريم مع ذكر السورة والآية.</p>
+    <div style="margin-bottom:6px"><button class="alt" id="ai" style="display:none">🔊 استمع إلى التعليمات</button><button class="alt" id="as" style="display:none">🎧 استمع إلى القصة</button></div>
     <button id="go">ابدأ الاستكشاف</button><button class="alt" id="fresh" style="display:none">ابدأ من جديد</button>
   </div></div>
   <div class="ov hidden" id="card"><div class="card">
@@ -187,6 +188,10 @@ function setStep(n,spawn){step=n;ringHit=[false,false,false];rings.forEach((r,i)
   pearls.forEach((p,i)=>p.visible=n===1&&i===pr);beacon.userData.light.intensity=lit?60:0;
   if(n!==1)pr=n>1?5:0;if(n===1)pearls.forEach((p,i)=>p.visible=i===pr);
   save.yunus.step=n;save.yunus.pearls=pr;store();if(spawn){const s=STEPS[n].spawn;sub.position.set(...s);yaw=0;vel.set(0,0,0)}hud()}
+const VI={ai:['🔊 استمع إلى التعليمات',['audio/instructions.mp3']],as:['🎧 استمع إلى القصة',['audio/story-yunus-1.mp3','audio/dua-yunus.mp3','audio/story-yunus-2.mp3']]};
+function vReset(){for(const k in VI){$(k).dataset.on='0';$(k).textContent=VI[k][0]}}
+for(const k in VI){let n=0;VI[k][1].forEach(u=>PJ.audio.probe(u,ok=>{if(ok&&++n===VI[k][1].length)$(k).style.display=''}));
+  $(k).onclick=()=>{const was=$(k).dataset.on==='1';PJ.audio.stop();vReset();if(was)return;$(k).dataset.on='1';$(k).textContent='⏸ إيقاف';PJ.audio.seq(VI[k][1],vReset)}}
 let duaOK=false;PJ.audio.probe('audio/dua-yunus.mp3',ok=>{duaOK=ok});
 function card(o){$('cs').style.display=(o.audio&&duaOK)?'':'none';$('cs').onclick=()=>PJ.audio.play(o.audio);$('ct').textContent=o.t;$('cb').textContent=o.b||'';$('cd').textContent=o.d||'';$('cr').textContent=o.r||'';$('cok').textContent=o.btn||'متابعة';
   $('card').classList.remove('hidden');paused=true;$('cok').onclick=()=>{PJ.audio.stop();$('card').classList.add('hidden');paused=false;o.done&&o.done()}}
@@ -273,7 +278,7 @@ function loop(now){const dt=Math.min((now-last)/1000,.05);last=now;update(dt,now
 
 /* ---- البدء ---- */
 function begin(fresh){
-  audio();try{window.focus()}catch(e){}
+  PJ.audio.stop();vReset();audio();try{window.focus()}catch(e){}
   if(fresh)save.yunus={step:0,pearls:0,done:false};
   pr=clamp(save.yunus.pearls||0,0,5);let s=clamp(save.yunus.step||0,0,4);if(save.yunus.done&&!fresh)s=0;
   lit=false;cineDone=false;setStep(s,true);$('intro').classList.add('hidden');paused=false;

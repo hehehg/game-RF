@@ -4,7 +4,7 @@
   var PJ = window.PJ = window.PJ || {};
   var SK = 'pj.settings.v1', ac = null, mg = null, bed = [], mode = '', file = null;
   function get() {
-    var d = { vol: 40, muted: false };
+    var d = { vol: 70, muted: false };
     try { var s = JSON.parse(localStorage.getItem(SK) || 'null'); if (s) { if (typeof s.vol === 'number') d.vol = s.vol; d.muted = !!s.muted; } } catch (e) {}
     return d;
   }
@@ -55,8 +55,16 @@
         a.src = url;
       } catch (e) { cb(false); }
     },
-    play: function (url, loop) {
-      try { PJ.audio.stop(); file = new Audio(url); file.loop = !!loop; apply(); var p = file.play(); if (p && p.catch) p.catch(function () {}); } catch (e) {}
+    play: function (url, loop, onend) {
+      try { PJ.audio.stop(); file = new Audio(url); file.loop = !!loop; if (onend) file.onended = onend; apply(); var p = file.play(); if (p && p.catch) p.catch(function () {}); } catch (e) {}
+    },
+    /* تشغيل عدة ملفات بالتتابع ثم استدعاء done */
+    seq: function (urls, done) {
+      var i = 0;
+      (function next() {
+        if (i >= urls.length) { if (done) done(); return; }
+        PJ.audio.play(urls[i++], false, next);
+      })();
     },
     stop: function () { if (file) { try { file.pause(); } catch (e) {} file = null; } },
     playing: function () { return !!file && !file.paused; },
