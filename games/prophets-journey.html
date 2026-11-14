@@ -1,1177 +1,286 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>رحلة الأنبياء — أسرار الزمان</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet" />
-  <style>
-    :root {
-      --bg-1: #041b2c;
-      --bg-2: #0a2a3a;
-      --bg-3: #10354d;
-      --panel: rgba(4, 15, 22, 0.76);
-      --panel-strong: rgba(6, 22, 31, 0.9);
-      --gold: #d9b86a;
-      --gold-soft: #f4e6b4;
-      --sky: #7fd7ef;
-      --sea-1: #0a3f63;
-      --sea-2: #0f6a8d;
-      --sea-3: #0f8aa8;
-      --mint: #7fe1bf;
-      --text: #edf8ff;
-      --muted: #d6eaef;
-      --line: rgba(200, 229, 238, 0.24);
-      --danger: #ee8d77;
-      --shadow: rgba(0, 0, 0, 0.35);
-    }
-
-    * { box-sizing: border-box; }
-    html, body {
-      margin: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      background: linear-gradient(180deg, var(--bg-1), var(--bg-2), var(--bg-3));
-      color: var(--text);
-      font-family: 'Tajawal', sans-serif;
-      direction: rtl;
-    }
-
-    body::before {
-      content: "";
-      position: fixed;
-      inset: 0;
-      background:
-        radial-gradient(circle at 20% 15%, rgba(127, 215, 239, 0.14), transparent 20%),
-        radial-gradient(circle at 80% 30%, rgba(217, 184, 106, 0.12), transparent 26%);
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    #gameRoot {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      z-index: 1;
-    }
-
-    canvas {
-      display: block;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(180deg, #061d2d, #0b2d42 52%, #0a2231);
-      touch-action: none;
-    }
-
-    .ui {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      z-index: 20;
-    }
-
-    .hud {
-      position: absolute;
-      top: 16px;
-      right: 16px;
-      width: min(360px, calc(100vw - 32px));
-      padding: 12px 14px;
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      background: rgba(5, 18, 26, 0.56);
-      box-shadow: 0 16px 34px rgba(0, 0, 0, 0.18);
-      backdrop-filter: blur(7px);
-    }
-
-    .eyebrow {
-      color: var(--gold-soft);
-      letter-spacing: 0.08em;
-      font-size: 11px;
-      text-transform: uppercase;
-      margin-bottom: 4px;
-    }
-
-    .missionTitle {
-      margin: 0 0 6px;
-      font-family: 'Amiri', serif;
-      font-size: clamp(22px, 3.4vw, 34px);
-      color: var(--gold-soft);
-      line-height: 1.15;
-    }
-
-    .missionText {
-      margin: 0;
-      line-height: 1.75;
-      font-size: 13px;
-      color: var(--muted);
-    }
-
-    .statusRow {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 12px;
-    }
-
-    .pill {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 6px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(127, 225, 191, 0.35);
-      background: rgba(127, 225, 191, 0.08);
-      color: var(--mint);
-      font-size: 11px;
-      line-height: 1;
-    }
-
-    .controls {
-      position: absolute;
-      left: 16px;
-      bottom: 16px;
-      width: min(380px, calc(100vw - 32px));
-      padding: 10px 14px;
-      border: 1px solid var(--line);
-      background: rgba(4, 16, 21, 0.62);
-      border-radius: 18px;
-      box-shadow: 0 16px 30px rgba(0,0,0,0.18);
-      backdrop-filter: blur(7px);
-    }
-
-    .audioBar {
-      position: absolute;
-      top: 16px;
-      left: 16px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 12px;
-      border-radius: 14px;
-      border: 1px solid var(--line);
-      background: rgba(5, 18, 26, 0.58);
-      box-shadow: 0 18px 30px rgba(0,0,0,0.18);
-      backdrop-filter: blur(8px);
-      z-index: 25;
-      pointer-events: auto;
-    }
-
-    .audioToggle {
-      appearance: none;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,0.04);
-      color: var(--gold-soft);
-      border-radius: 999px;
-      padding: 8px 12px;
-      font-size: 12px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .audioSlider {
-      width: 120px;
-      accent-color: var(--gold);
-    }
-
-    .controls .row {
-      display: flex;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 6px;
-    }
-
-    .key {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 30px;
-      height: 28px;
-      padding: 0 8px;
-      border-radius: 7px;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid var(--line);
-      color: var(--gold-soft);
-      font-size: 12px;
-      font-family: 'JetBrains Mono', monospace;
-    }
-
-    .small {
-      font-size: 12px;
-      color: var(--muted);
-      line-height: 1.6;
-    }
-
-    .mobilePad {
-      position: absolute;
-      left: 16px;
-      bottom: 110px;
-      display: none;
-      pointer-events: auto;
-      gap: 10px;
-      align-items: center;
-      justify-content: center;
-      z-index: 30;
-    }
-
-    .padGroup {
-      display: grid;
-      grid-template-columns: repeat(3, 48px);
-      grid-template-rows: repeat(3, 48px);
-      gap: 6px;
-      padding: 6px;
-      border-radius: 18px;
-      background: rgba(5, 16, 22, 0.58);
-      border: 1px solid var(--line);
-      backdrop-filter: blur(7px);
-    }
-
-    .touchBtn {
-      width: 48px;
-      height: 48px;
-      border-radius: 14px;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,0.04);
-      color: var(--gold-soft);
-      padding: 0;
-      font-size: 22px;
-      touch-action: none;
-      user-select: none;
-    }
-
-    .touchBtn.action {
-      width: 68px;
-      height: 68px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--gold), #f2d791);
-      color: #1a1a1a;
-      border: none;
-      font-size: 20px;
-    }
-
-    .overlay {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(2, 10, 16, 0.34);
-      backdrop-filter: blur(6px);
-      z-index: 30;
-      padding: 18px;
-    }
-
-    .overlay.hidden {
-      display: none;
-    }
-
-    .panel {
-      width: min(780px, 100%);
-      padding: 24px 22px 20px;
-      border: 1px solid var(--line);
-      border-radius: 24px;
-      background: linear-gradient(180deg, rgba(8, 21, 29, 0.9), rgba(4, 12, 18, 0.92));
-      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.32);
-    }
-
-    .panelTitle {
-      margin: 0 0 14px;
-      font-family: 'Amiri', serif;
-      font-size: clamp(28px, 5vw, 56px);
-      color: var(--gold-soft);
-      text-align: center;
-      line-height: 1.08;
-    }
-
-    .panelText {
-      margin: 0 auto 18px;
-      max-width: 58ch;
-      line-height: 1.95;
-      color: var(--muted);
-      font-size: clamp(16px, 2vw, 20px);
-      text-align: center;
-    }
-
-    .buttonRow {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-top: 18px;
-    }
-
-    button {
-      appearance: none;
-      border: 1px solid var(--gold);
-      border-radius: 999px;
-      font: inherit;
-      font-weight: 700;
-      padding: 12px 22px;
-      cursor: pointer;
-      transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
-    }
-
-    button:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 12px 24px rgba(217, 184, 106, 0.15);
-    }
-
-    .primary {
-      color: #171611;
-      background: linear-gradient(135deg, var(--gold), #f2d98f);
-      border-color: transparent;
-    }
-
-    .secondary {
-      background: transparent;
-      border-color: var(--line);
-      color: var(--text);
-    }
-
-    .pulse {
-      animation: flash 1.6s ease-in-out infinite;
-    }
-
-    @keyframes flash {
-      0%, 100% { box-shadow: 0 0 0 rgba(217,184,106,0); }
-      50% { box-shadow: 0 0 0 10px rgba(217,184,106,0.14); }
-    }
-
-    @media (max-width: 900px) {
-      .mobilePad { display: flex; }
-      .controls { display: none; }
-    }
-
-    @media (max-width: 640px) {
-      .hud {
-        top: 12px;
-        right: 12px;
-        left: 12px;
-        width: auto;
-      }
-
-      .mobilePad {
-        left: 12px;
-        bottom: 16px;
-      }
-
-      .panel {
-        padding: 20px 18px 18px;
-      }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>رحلة الأنبياء — مغامرة يونس عليه السلام</title>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#f4e6b4;--txt:#edf8ff;--line:rgba(200,229,238,.28);--pn:rgba(4,15,22,.78)}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:#041b2c;color:var(--txt);font-family:Tajawal,Tahoma,sans-serif}
+#root{position:fixed;inset:0;touch-action:none;user-select:none;-webkit-user-select:none}
+canvas{display:block;width:100%;height:100%}
+.hud{position:absolute;top:10px;right:10px;width:min(340px,calc(100vw - 20px));padding:10px 14px;border:1px solid var(--line);border-radius:16px;background:var(--pn);pointer-events:none}
+.hud h1{margin:0 0 4px;font:700 22px Amiri,serif;color:var(--gold)}
+.hud p{margin:0;font-size:13px;line-height:1.7}
+.pips{display:flex;gap:6px;margin-top:8px}.pips i{flex:1;height:5px;border-radius:3px;background:rgba(255,255,255,.18)}.pips i.on{background:#f4c95d}.pips i.cur{background:#7fd7ef}
+#cnt{margin-top:6px;font-size:12px;color:#bfe7f2}
+.bar{position:absolute;bottom:22%;left:50%;width:min(260px,60vw);height:10px;transform:translateX(-50%);border-radius:6px;background:rgba(0,0,0,.5);border:1px solid var(--line);display:none}
+.bar b{display:block;height:100%;width:0;border-radius:6px;background:#f4c95d}
+#toast{position:absolute;top:14%;left:50%;transform:translateX(-50%);max-width:min(520px,92vw);padding:10px 16px;border-radius:14px;background:var(--pn);border:1px solid var(--line);font-size:14px;line-height:1.8;text-align:center;opacity:0;transition:opacity .35s;pointer-events:none}
+#toast.on{opacity:1}
+.cine{position:absolute;left:0;right:0;height:0;background:#000;transition:height .8s;pointer-events:none}
+#cT{top:0}#cB{bottom:0}.cinema .cine{height:13%}
+#sub{position:absolute;bottom:15%;left:50%;transform:translateX(-50%);width:min(640px,92vw);text-align:center;font-size:15px;line-height:1.9;opacity:0;transition:opacity .4s;text-shadow:0 2px 6px #000;pointer-events:none}
+#sub.on{opacity:1}
+.audio{position:absolute;top:10px;left:10px;display:flex;gap:8px;align-items:center;padding:6px 10px;border-radius:14px;background:var(--pn);border:1px solid var(--line)}
+.audio button{background:none;border:0;color:#fff;font-size:20px;cursor:pointer}.audio input{width:80px}
+.help{position:absolute;bottom:12px;right:12px;padding:10px 12px;border-radius:14px;background:var(--pn);border:1px solid var(--line);font-size:12px;line-height:1.9;pointer-events:none}
+kbd{display:inline-block;min-width:22px;padding:0 6px;margin:0 2px;border:1px solid var(--line);border-radius:6px;text-align:center;background:rgba(255,255,255,.08)}
+.touch{display:none}.istouch .touch{display:block}.istouch .help{display:none}
+#joy{position:absolute;left:18px;bottom:22px;width:130px;height:130px;border-radius:50%;background:rgba(255,255,255,.1);border:2px solid var(--line);touch-action:none}
+#knob{position:absolute;left:35px;top:35px;width:60px;height:60px;border-radius:50%;background:rgba(244,201,93,.55);pointer-events:none}
+.tb{position:absolute;width:62px;height:62px;border-radius:50%;border:2px solid var(--line);background:rgba(4,15,22,.6);color:#fff;font-size:24px;touch-action:none}
+.tb.act{background:rgba(244,201,93,.55)}
+#bUp{right:18px;bottom:150px}#bDn{right:18px;bottom:82px}#bLamp{right:90px;bottom:116px}#bAct{right:90px;bottom:34px;width:72px;height:72px}
+.ov{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(2,10,16,.72);z-index:30}
+.ov.hidden{display:none}
+.card{width:min(620px,100%);max-height:92vh;overflow:auto;padding:24px 22px;border:1px solid var(--line);border-radius:22px;background:rgba(6,22,31,.95);text-align:center}
+.card h2{margin:0 0 10px;font:700 clamp(24px,5vw,34px) Amiri,serif;color:var(--gold)}
+.card p{margin:0 0 12px;line-height:1.9;font-size:15px}
+.dua{font:700 clamp(26px,6vw,38px) Amiri,serif;line-height:2;color:#fff;margin:14px 0 4px}
+.ref{font-size:13px;color:#bfe7f2;margin-bottom:12px}
+.card button{margin:6px;padding:11px 22px;border-radius:999px;border:0;font:700 16px Tajawal,sans-serif;cursor:pointer;background:linear-gradient(#f4c95d,#d9a93f);color:#2a1d00}
+.card button.alt{background:rgba(255,255,255,.14);color:#fff}
+.note{font-size:11px;color:#9fc4d0}
+</style>
 </head>
 <body>
-  <div id="gameRoot">
-    <canvas id="sceneCanvas"></canvas>
-
-    <div class="ui">
-      <div class="hud" id="hud">
-        <div class="eyebrow">MISSION</div>
-        <h1 class="missionTitle">أسرار أعماق البحار</h1>
-        <p class="missionText" id="missionText">استكشف الأعماق، لاحظ الحوت العظيم، ثم وجّه الغواصة إلى المخطوطة المفقودة.</p>
-        <div class="statusRow">
-          <span class="pill" id="statusWhale">الحوت: غير مكتشف</span>
-          <span class="pill" id="statusRelic">المخطوطة: غير موجودة</span>
-        </div>
-      </div>
-
-      <div class="audioBar">
-        <button class="audioToggle" id="audioToggle" type="button" aria-label="صوت">🔊</button>
-        <input id="volumeSlider" class="audioSlider" type="range" min="0" max="100" value="35" aria-label="مستوى الصوت" />
-      </div>
-
-      <div class="controls">
-        <div class="eyebrow" style="margin-bottom:0;">التحكم</div>
-        <div class="row">
-          <span class="key">W</span><span class="key">S</span><span class="key">A</span><span class="key">D</span>
-          <span class="small">التقدم / التراجع / الجانبي</span>
-        </div>
-        <div class="row">
-          <span class="key">Q</span><span class="key">E</span><span class="key">F</span>
-          <span class="small">الارتفاع / الانخفاض / التفاعل</span>
-        </div>
-        <div class="row" style="margin-top:10px;">
-          <span class="small">اسحب المؤشر لرؤية المحيط من حولك.</span>
-        </div>
-      </div>
-
-      <div class="mobilePad" aria-label="لوحة تحكم الهاتف">
-        <div class="padGroup" id="padGroup">
-          <div></div>
-          <button class="touchBtn" data-control="KeyW" aria-label="تقدم">▲</button>
-          <div></div>
-          <button class="touchBtn" data-control="KeyA" aria-label="يسار">◀</button>
-          <button class="touchBtn" data-control="KeyS" aria-label="تراجع">▼</button>
-          <button class="touchBtn" data-control="KeyD" aria-label="يمين">▶</button>
-          <button class="touchBtn" data-control="KeyQ" aria-label="صعود">↑</button>
-          <button class="touchBtn" data-control="KeyE" aria-label="هبوط">↓</button>
-          <button class="touchBtn action" data-control="KeyF" aria-label="تفاعل">◎</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="overlay" id="introOverlay">
-      <div class="panel">
-        <h2 class="panelTitle">رحلة الأنبياء — أسرار الزمان</h2>
-        <p class="panelText">
-          أنت داخل مركز استكشاف ضخم في أعماق البحر. رفيقك <strong style="color: var(--gold-soft);">نور</strong> أرسلك في غواصة بحثية لاستكشاف ممر المحيط العميق. اكتشف الحوت العظيم، وابحث عن المخطوطة المفقودة، ثم عد إلى المركز بسلام.
-        </p>
-        <div class="buttonRow">
-          <button class="primary" id="startBtn">ابدأ الاستكشاف</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="overlay hidden" id="storyOverlay">
-      <div class="panel">
-        <h3 class="panelTitle" id="storyTitle">اكتشاف الحوت</h3>
-        <p class="panelText" id="storyText">يفتح البحر طياته، والضوء يمرّ عبر المياه ببطء.</p>
-        <div class="buttonRow">
-          <button class="primary" id="storyContinue">متابعة</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
-  <script>
-    const canvas = document.getElementById('sceneCanvas');
-    const introOverlay = document.getElementById('introOverlay');
-    const storyOverlay = document.getElementById('storyOverlay');
-    const storyTitle = document.getElementById('storyTitle');
-    const storyText = document.getElementById('storyText');
-    const storyContinue = document.getElementById('storyContinue');
-    const startBtn = document.getElementById('startBtn');
-    const missionText = document.getElementById('missionText');
-    const statusWhale = document.getElementById('statusWhale');
-    const statusRelic = document.getElementById('statusRelic');
-    const audioToggle = document.getElementById('audioToggle');
-    const volumeSlider = document.getElementById('volumeSlider');
-
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setClearColor(0x081c2b, 1);
-
-    const scene = new THREE.Scene();
-    scene.fog = new THREE.Fog(0x081c2b, 30, 140);
-
-    const camera = new THREE.PerspectiveCamera(58, window.innerWidth / window.innerHeight, 0.1, 260);
-    camera.position.set(0, 5, 20);
-
-    const clock = new THREE.Clock();
-
-    const state = {
-      started: false,
-      whaleSeen: false,
-      relicFound: false,
-      finished: false,
-      audioReady: false
-    };
-
-    const keys = {};
-    let pointerActive = false;
-    let lastPointerX = 0;
-    let lastPointerY = 0;
-    let yaw = 0;
-    let pitch = -0.12;
-
-    const homeZone = new THREE.Vector3(0, 0, 0);
-    const whalePosition = new THREE.Vector3(38, 3.8, -20);
-    const relicPosition = new THREE.Vector3(-34, 0.5, 18);
-
-    let audioCtx = null;
-    let masterGain = null;
-    let ambientGain = null;
-    let ambientOscillators = [];
-    let ambientNoise = null;
-    let isMuted = false;
-
-    function setAudioState() {
-      const value = Number(volumeSlider.value) / 100;
-      if (!masterGain) return;
-      const effective = isMuted ? 0 : value;
-      masterGain.gain.setTargetAtTime(effective, audioCtx.currentTime, 0.12);
-      audioToggle.textContent = isMuted ? '🔇' : '🔊';
-    }
-
-    function initAudio() {
-      if (state.audioReady || !(window.AudioContext || window.webkitAudioContext)) return;
-      const AudioCtor = window.AudioContext || window.webkitAudioContext;
-      audioCtx = new AudioCtor();
-      masterGain = audioCtx.createGain();
-      masterGain.gain.value = 0;
-      masterGain.connect(audioCtx.destination);
-
-      ambientGain = audioCtx.createGain();
-      ambientGain.gain.value = 0.08;
-      ambientGain.connect(masterGain);
-
-      const tonic = audioCtx.createOscillator();
-      const drift = audioCtx.createOscillator();
-      const filter = audioCtx.createBiquadFilter();
-      filter.type = 'lowpass';
-      filter.frequency.value = 650;
-      filter.Q.value = 0.6;
-      tonic.type = 'sine';
-      tonic.frequency.value = 54;
-      drift.type = 'triangle';
-      drift.frequency.value = 0.19;
-      tonic.connect(filter);
-      drift.connect(filter);
-      filter.connect(ambientGain);
-      tonic.start();
-      drift.start();
-      ambientOscillators.push({ osc: tonic, gain: ambientGain, kind: 'tonic' });
-      ambientOscillators.push({ osc: drift, gain: ambientGain, kind: 'drift' });
-
-      const bufferSize = 2 * audioCtx.sampleRate;
-      const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-      const output = noiseBuffer.getChannelData(0);
-      for (let i = 0; i < bufferSize; i++) {
-        output[i] = (Math.random() * 2 - 1) * 0.2;
-      }
-      const source = audioCtx.createBufferSource();
-      source.buffer = noiseBuffer;
-      source.loop = true;
-      const noiseFilter = audioCtx.createBiquadFilter();
-      noiseFilter.type = 'bandpass';
-      noiseFilter.frequency.value = 420;
-      noiseFilter.Q.value = 0.2;
-      const noiseGain = audioCtx.createGain();
-      noiseGain.gain.value = 0.03;
-      source.connect(noiseFilter);
-      noiseFilter.connect(noiseGain);
-      noiseGain.connect(ambientGain);
-      source.start();
-      ambientNoise = { source, noiseGain };
-
-      state.audioReady = true;
-      setAudioState();
-    }
-
-    function playTone(freq, duration, type = 'sine', volume = 0.03) {
-      if (!audioCtx || !masterGain || isMuted) return;
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.frequency.value = freq;
-      osc.type = type;
-      gain.gain.value = volume;
-      osc.connect(gain);
-      gain.connect(masterGain);
-      osc.start();
-      const now = audioCtx.currentTime;
-      gain.gain.setValueAtTime(volume, now);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
-      osc.stop(now + duration + 0.04);
-    }
-
-    function createLights() {
-      const hemi = new THREE.HemisphereLight(0x9de9ff, 0x061d2a, 1.6);
-      scene.add(hemi);
-
-      const moon = new THREE.DirectionalLight(0xdfeeff, 1.3);
-      moon.position.set(18, 12, 8);
-      scene.add(moon);
-
-      const glow = new THREE.PointLight(0x6dd8f4, 1.8, 90, 2);
-      glow.position.set(0, 3, 0);
-      scene.add(glow);
-    }
-
-    function createWater() {
-      const geometry = new THREE.PlaneGeometry(240, 240, 90, 90);
-      const material = new THREE.MeshStandardMaterial({
-        color: 0x114f78,
-        roughness: 0.38,
-        metalness: 0.2,
-        transparent: true,
-        opacity: 0.96,
-        emissive: 0x092a39,
-        emissiveIntensity: 0.12
-      });
-
-      const water = new THREE.Mesh(geometry, material);
-      water.rotation.x = -Math.PI / 2;
-      water.position.y = -8;
-      scene.add(water);
-
-      water.userData = { geometry, base: geometry.attributes.position.array.slice() };
-      return water;
-    }
-
-    function createLightRays() {
-      const group = new THREE.Group();
-      for (let i = 0; i < 12; i++) {
-        const ray = new THREE.Mesh(
-          new THREE.ConeGeometry(2.3 + Math.random() * 1.9, 20 + Math.random() * 10, 12, 1, true),
-          new THREE.MeshBasicMaterial({
-            color: new THREE.Color().setHSL(0.56 + Math.random() * 0.08, 0.9, 0.7),
-            transparent: true,
-            opacity: 0.08,
-            side: THREE.DoubleSide
-          })
-        );
-        ray.position.set((Math.random() - 0.5) * 130, 18 + Math.random() * 15, (Math.random() - 0.5) * 110);
-        ray.rotation.z = Math.random() * Math.PI;
-        ray.rotation.x = Math.PI / 2;
-        group.add(ray);
-      }
-      scene.add(group);
-      return group;
-    }
-
-    function createSeafloor() {
-      const seafloor = new THREE.Mesh(
-        new THREE.CircleGeometry(110, 48),
-        new THREE.MeshStandardMaterial({
-          color: 0x1a3b3a,
-          roughness: 1,
-          metalness: 0.06
-        })
-      );
-      seafloor.rotation.x = -Math.PI / 2;
-      seafloor.position.y = -10.8;
-      scene.add(seafloor);
-      return seafloor;
-    }
-
-    function updateWater(water, t) {
-      const positions = water.geometry.attributes.position;
-      const arr = positions.array;
-      const base = water.userData.base;
-      for (let i = 0; i < arr.length; i += 3) {
-        const x = base[i];
-        const z = base[i + 1];
-        const wave = Math.sin((x + t * 0.9) * 0.25) * 0.52 + Math.cos((z - t * 0.7) * 0.25) * 0.45;
-        arr[i + 2] = wave;
-      }
-      positions.needsUpdate = true;
-      water.geometry.computeVertexNormals();
-    }
-
-    function createRock(x, y, z, scale) {
-      const rock = new THREE.Mesh(
-        new THREE.DodecahedronGeometry(1.6, 0),
-        new THREE.MeshStandardMaterial({ color: 0x3b5869, roughness: 0.9, metalness: 0.08 })
-      );
-      rock.position.set(x, y, z);
-      rock.scale.setScalar(scale);
-      rock.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
-      scene.add(rock);
-      return rock;
-    }
-
-    function createCoralCluster(x, z) {
-      const cluster = new THREE.Group();
-      for (let i = 0; i < 7; i++) {
-        const branch = new THREE.Mesh(
-          new THREE.CylinderGeometry(0.12, 0.18, 1.8 + Math.random() * 1.5, 8),
-          new THREE.MeshStandardMaterial({ color: i % 2 === 0 ? 0x82d8a2 : 0x75d0d9, roughness: 0.72 })
-        );
-        branch.position.set((Math.random() - 0.5) * 2.8, 0.9, (Math.random() - 0.5) * 2.8);
-        branch.rotation.z = (Math.random() - 0.5) * 1.4;
-        cluster.add(branch);
-      }
-      cluster.position.set(x, -6.5, z);
-      scene.add(cluster);
-    }
-
-    function createBubbles() {
-      const bubbleGroup = new THREE.Group();
-      for (let i = 0; i < 80; i++) {
-        const bubble = new THREE.Mesh(
-          new THREE.SphereGeometry(0.18 + Math.random() * 0.18, 12, 12),
-          new THREE.MeshStandardMaterial({ color: 0xd5f8ff, transparent: true, opacity: 0.7, emissive: 0x7dd8f0, emissiveIntensity: 0.18 })
-        );
-        bubble.position.set((Math.random() - 0.5) * 150, -6 + Math.random() * 22, (Math.random() - 0.5) * 130);
-        bubble.userData = { drift: Math.random() * 4 + 0.8, bob: Math.random() * Math.PI * 2 };
-        bubbleGroup.add(bubble);
-      }
-      scene.add(bubbleGroup);
-      return bubbleGroup;
-    }
-
-    function createSubmarine() {
-      const root = new THREE.Group();
-
-      const hullMaterial = new THREE.MeshStandardMaterial({ color: 0x9ecbdc, metalness: 0.45, roughness: 0.38 });
-      const accentMaterial = new THREE.MeshStandardMaterial({ color: 0x7eceef, emissive: 0x1b83a6, emissiveIntensity: 0.35, metalness: 0.35, roughness: 0.42 });
-
-      const body = new THREE.Mesh(new THREE.CapsuleGeometry(3.2, 6.7, 8, 18), hullMaterial);
-      body.rotation.z = Math.PI / 2;
-      root.add(body);
-
-      const bridge = new THREE.Mesh(new THREE.SphereGeometry(1.2, 18, 18), accentMaterial);
-      bridge.position.set(0, 1.2, 0.3);
-      root.add(bridge);
-
-      const lens = new THREE.Mesh(new THREE.SphereGeometry(0.8, 18, 18), new THREE.MeshStandardMaterial({ color: 0xe8f6ff, emissive: 0x87bfd9, emissiveIntensity: 0.8, transparent: true, opacity: 0.75 }));
-      lens.position.set(0, 1.2, 2.4);
-      root.add(lens);
-
-      const finLeft = new THREE.Mesh(new THREE.ConeGeometry(0.8, 1.5, 12), accentMaterial);
-      finLeft.rotation.z = Math.PI / 2;
-      finLeft.position.set(-2.4, 0, 0);
-      root.add(finLeft);
-
-      const finRight = finLeft.clone();
-      finRight.position.x = 2.4;
-      root.add(finRight);
-
-      const tail = new THREE.Mesh(new THREE.ConeGeometry(1.1, 2.3, 12), accentMaterial);
-      tail.rotation.z = -Math.PI / 2;
-      tail.position.set(-4.6, 0, 0);
-      root.add(tail);
-
-      const engine = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.7, 1.5, 12), new THREE.MeshStandardMaterial({ color: 0x1b2c3b, emissive: 0x2a7279, emissiveIntensity: 0.7 }));
-      engine.rotation.z = Math.PI / 2;
-      engine.position.set(4.4, 0, 0);
-      root.add(engine);
-
-      root.position.set(0, 0, 0);
-      scene.add(root);
-      return root;
-    }
-
-    function createWhale() {
-      const whale = new THREE.Group();
-      const bodyMaterial = new THREE.MeshStandardMaterial({ color: 0x7fa4b6, roughness: 0.8, metalness: 0.25 });
-      const body = new THREE.Mesh(new THREE.SphereGeometry(3.8, 24, 20), bodyMaterial);
-      body.scale.set(2.2, 1, 1);
-      whale.add(body);
-
-      const tail = new THREE.Mesh(new THREE.ConeGeometry(2.4, 4.1, 18), new THREE.MeshStandardMaterial({ color: 0x708ea4, roughness: 0.9 }));
-      tail.rotation.z = -Math.PI / 2;
-      tail.position.set(-5.7, 0, 0);
-      whale.add(tail);
-
-      const fin = new THREE.Mesh(new THREE.ConeGeometry(1.5, 2.5, 16), new THREE.MeshStandardMaterial({ color: 0x6b8199, roughness: 0.86 }));
-      fin.rotation.x = Math.PI / 2;
-      fin.position.set(1.5, 2.2, 0);
-      whale.add(fin);
-
-      whale.position.copy(whalePosition);
-      scene.add(whale);
-      return whale;
-    }
-
-    function createRelic() {
-      const relic = new THREE.Group();
-
-      const base = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.9, 1.1, 0.75, 18),
-        new THREE.MeshStandardMaterial({ color: 0x7de0d1, emissive: 0x2daac4, emissiveIntensity: 0.7, metalness: 0.4, roughness: 0.45 })
-      );
-      base.position.y = -0.2;
-      relic.add(base);
-
-      const top = new THREE.Mesh(
-        new THREE.OctahedronGeometry(0.9, 0),
-        new THREE.MeshStandardMaterial({ color: 0xf4e5aa, emissive: 0xd8b35f, emissiveIntensity: 1, metalness: 0.5, roughness: 0.3 })
-      );
-      top.position.y = 1.1;
-      relic.add(top);
-
-      relic.position.copy(relicPosition);
-      scene.add(relic);
-      return relic;
-    }
-
-    function createBeacon() {
-      const group = new THREE.Group();
-
-      const platform = new THREE.Mesh(
-        new THREE.CylinderGeometry(7, 8, 2, 20),
-        new THREE.MeshStandardMaterial({ color: 0x728ea1, roughness: 0.82, metalness: 0.16 })
-      );
-      platform.position.y = -5.5;
-      group.add(platform);
-
-      const tower = new THREE.Mesh(
-        new THREE.CylinderGeometry(1.2, 1.8, 8, 18),
-        new THREE.MeshStandardMaterial({ color: 0x9db8c9, emissive: 0x1a4865, emissiveIntensity: 0.18, metalness: 0.28, roughness: 0.62 })
-      );
-      tower.position.y = -1.2;
-      group.add(tower);
-
-      const beacon = new THREE.Mesh(
-        new THREE.SphereGeometry(1.5, 18, 18),
-        new THREE.MeshStandardMaterial({ color: 0x93ebd6, emissive: 0x4fe4cb, emissiveIntensity: 1.2, metalness: 0.45, roughness: 0.35 })
-      );
-      beacon.position.y = 3.2;
-      group.add(beacon);
-
-      scene.add(group);
-      return group;
-    }
-
-    function createFishSchool() {
-      const group = new THREE.Group();
-      const count = 20;
-      for (let i = 0; i < count; i++) {
-        const fish = new THREE.Group();
-        const body = new THREE.Mesh(
-          new THREE.SphereGeometry(0.5 + Math.random() * 0.3, 10, 10),
-          new THREE.MeshStandardMaterial({ color: new THREE.Color().setHSL(0.52 + Math.random() * 0.24, 0.5, 0.6), roughness: 0.8 })
-        );
-        body.scale.set(1.7, 0.8, 0.8);
-        fish.add(body);
-
-        const tail = new THREE.Mesh(
-          new THREE.ConeGeometry(0.4, 0.8, 10),
-          new THREE.MeshStandardMaterial({ color: 0xe5f4ff, roughness: 0.9 })
-        );
-        tail.rotation.z = -Math.PI / 2;
-        tail.position.set(-0.9, 0, 0);
-        fish.add(tail);
-
-        fish.position.set((Math.random() - 0.5) * 120, -2 + Math.random() * 12, (Math.random() - 0.5) * 120);
-        fish.userData = { speed: 0.8 + Math.random() * 1.5, offset: Math.random() * Math.PI * 2, drift: (Math.random() - 0.5) * 1.5 };
-        group.add(fish);
-      }
-      scene.add(group);
-      return group;
-    }
-
-    function buildWorld() {
-      createLights();
-      const seafloor = createSeafloor();
-      const lights = createLightRays();
-      const water = createWater();
-      const beacon = createBeacon();
-      const whale = createWhale();
-      const relic = createRelic();
-      const bubbles = createBubbles();
-      const fish = createFishSchool();
-
-      for (let i = 0; i < 32; i++) {
-        const x = (Math.random() - 0.5) * 150;
-        const z = (Math.random() - 0.5) * 130;
-        const y = -6.6 + (Math.random() * 2.2);
-        createRock(x, y, z, 0.7 + Math.random() * 1.5);
-      }
-
-      for (let i = 0; i < 22; i++) {
-        createCoralCluster((Math.random() - 0.5) * 100, (Math.random() - 0.5) * 100);
-      }
-
-      return { water, beacon, whale, relic, bubbles, fish, seafloor, lights };
-    }
-
-    const world = buildWorld();
-    const submarine = createSubmarine();
-
-    function setMissionText() {
-      if (!state.started) return;
-      if (!state.whaleSeen) {
-        missionText.textContent = 'استكشف الأعماق، لاحظ الحوت العظيم، ثم وجّه الغواصة إلى المخطوطة المفقودة.';
-      } else if (!state.relicFound) {
-        missionText.textContent = 'الحوت مرئي الآن. تنقل إلى الشراع المضيء وسجل المخطوطة المفقودة.';
-      } else if (!state.finished) {
-        missionText.textContent = 'تم اكتشاف المخطوطة. أعد الغواصة إلى مركز الاستكشاف.';
-      } else {
-        missionText.textContent = 'تمت المهمة بنجاح. تم إرجاع الختم إلى مركز أسرار الزمان.';
-      }
-    }
-
-    function updateStatusBadges() {
-      statusWhale.textContent = state.whaleSeen ? 'الحوت: تم اكتشافه' : 'الحوت: غير مكتشف';
-      statusRelic.textContent = state.relicFound ? 'المخطوطة: تم العثور عليها' : 'المخطوطة: غير موجودة';
-    }
-
-    function startNarrative(title, text, callback) {
-      storyTitle.textContent = title;
-      storyText.textContent = text;
-      storyOverlay.classList.remove('hidden');
-      const handle = () => {
-        storyOverlay.classList.add('hidden');
-        if (callback) callback();
-        storyContinue.onclick = handle;
-      };
-      storyContinue.onclick = handle;
-    }
-
-    function beginWhaleEncounter() {
-      if (state.whaleSeen) return;
-      state.whaleSeen = true;
-      setMissionText();
-      updateStatusBadges();
-      playTone(260, 0.24, 'sine', 0.05);
-      playTone(180, 0.32, 'triangle', 0.03);
-      startNarrative(
-        'رؤية الحوت العظيم',
-        'يتوقف بحار الأعماق تحت ضوءٍ خافت، بينما يمضي الحوت الضخم كأثرٍ من الوئام والرحمة. يذكّر نور الطفل بالآية: «لا إله إلا أنت سبحانك إني كنت من الظالمين» فيتجسد في القلب معنى الرجوع إلى الله، والصبر، والرحمة.',
-        () => {
-          setMissionText();
-        }
-      );
-    }
-
-    function finishRelicDiscovery() {
-      if (state.relicFound) return;
-      state.relicFound = true;
-      setMissionText();
-      updateStatusBadges();
-      playTone(440, 0.18, 'triangle', 0.05);
-      playTone(550, 0.22, 'sine', 0.04);
-      startNarrative(
-        'مخطوطة الأعماق',
-        'تظهر المخطوطة داخل ممر شعابٍ صغير، وتدور حول الفكرة نفسها: التوبة، والرجوع إلى الله، والخروج من الضيق بذكره. في هذه اللحظة يفهم الطفل أن القصة لا تُروى بتمثيل، بل تُستخلص من القيم والمعاني.',
-        () => {
-          setMissionText();
-        }
-      );
-    }
-
-    function finishMission() {
-      if (state.finished) return;
-      state.finished = true;
-      setMissionText();
-      updateStatusBadges();
-      playTone(660, 0.25, 'triangle', 0.05);
-      playTone(520, 0.28, 'sine', 0.04);
-      startNarrative(
-        'إكمال المهمة',
-        'تعود الغواصة إلى مركز أسرار الزمان بهدوء، وتُغلق الأبواب المائية خلفها. يُسند إلى الطفل ختم معرفي جديد، ويكتمل درس يونس عليه السلام من خلال الصبر، والرحمة، والعودة إلى الله.',
-        () => {
-          try {
-            localStorage.setItem('prophets-journey-progress', JSON.stringify(['yunus']));
-          } catch (error) {}
-          storyOverlay.classList.remove('hidden');
-          storyTitle.textContent = 'تمت الرحلة بنجاح';
-          storyText.textContent = 'مرحلة يونس عليه السلام مكتملة. الممر البحري مهيأ للمرحلة التالية، بينما يبقى الدرس في قلب الطفل: لا يئس من رحمة الله، ولا ينسى الصبر في الشدة.';
-          storyContinue.textContent = 'إغلاق';
-          storyContinue.onclick = () => {
-            storyOverlay.classList.add('hidden');
-          };
-        }
-      );
-    }
-
-    function attemptInteraction() {
-      if (!state.started || state.finished) return;
-      const dWhale = submarine.position.distanceTo(whalePosition);
-      const dRelic = submarine.position.distanceTo(relicPosition);
-      if (!state.whaleSeen && dWhale < 13) {
-        beginWhaleEncounter();
-        return;
-      }
-      if (!state.relicFound && dRelic < 11) {
-        finishRelicDiscovery();
-        return;
-      }
-      if (state.relicFound && submarine.position.distanceTo(homeZone) < 18) {
-        finishMission();
-      }
-    }
-
-    function updateSubmarine(delta) {
-      const move = new THREE.Vector3();
-      const speed = 18;
-      if (keys.KeyW) move.z -= 1;
-      if (keys.KeyS) move.z += 1;
-      if (keys.KeyA) move.x -= 1;
-      if (keys.KeyD) move.x += 1;
-      if (keys.KeyQ) move.y += 1;
-      if (keys.KeyE) move.y -= 1;
-
-      if (move.lengthSq() > 0) {
-        move.normalize().multiplyScalar(speed * delta);
-        const orientation = new THREE.Euler(0, yaw, 0, 'YXZ');
-        move.applyEuler(orientation);
-        submarine.position.add(move);
-      }
-
-      submarine.position.x = THREE.MathUtils.clamp(submarine.position.x, -65, 65);
-      submarine.position.y = THREE.MathUtils.clamp(submarine.position.y, -7, 14);
-      submarine.position.z = THREE.MathUtils.clamp(submarine.position.z, -60, 60);
-      submarine.rotation.y = yaw;
-      submarine.rotation.x = pitch * 0.35;
-      submarine.rotation.z = THREE.MathUtils.clamp((move.x * 0.18) + Math.sin(clock.elapsedTime * 2.5) * 0.06, -0.45, 0.45);
-    }
-
-    function updateCamera(delta) {
-      const offset = new THREE.Vector3(0, 3.8, 10.5);
-      const dir = new THREE.Vector3(0, 0, 1).applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw);
-      const camOffset = offset.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw);
-      camOffset.y += pitch * 1.7;
-      const idealPosition = submarine.position.clone().add(camOffset);
-      camera.position.lerp(idealPosition, 0.12 + delta * 0.8);
-      const lookTarget = submarine.position.clone().add(dir.clone().multiplyScalar(12)).add(new THREE.Vector3(0, 1.8, 0));
-      camera.lookAt(lookTarget);
-    }
-
-    function animateFishSchool(time) {
-      world.fish.children.forEach((fish, index) => {
-        fish.rotation.y = Math.sin(time * 0.8 + fish.userData.offset) * 0.5;
-        fish.position.x += Math.sin(time * 0.5 + fish.userData.offset) * 0.12;
-        fish.position.z += Math.cos(time * 0.9 + fish.userData.offset) * 0.11;
-        fish.position.y += Math.sin(time * 1.4 + index) * 0.02;
-      });
-    }
-
-    function animateBubbles(time) {
-      world.bubbles.children.forEach((bubble, index) => {
-        bubble.position.y += 0.04 + (index % 3) * 0.01;
-        bubble.position.x += Math.sin(time * 0.7 + index) * 0.03 + bubble.userData.drift * 0.015;
-        bubble.position.z += Math.cos(time * 0.8 + bubble.userData.bob) * 0.025;
-        if (bubble.position.y > 12) {
-          bubble.position.y = -5;
-          bubble.position.x = (Math.random() - 0.5) * 120;
-          bubble.position.z = (Math.random() - 0.5) * 110;
-        }
-      });
-    }
-
-    function animate() {
-      const delta = Math.min(clock.getDelta(), 0.033);
-      const elapsed = clock.elapsedTime;
-      updateWater(world.water, elapsed);
-      animateFishSchool(elapsed);
-      animateBubbles(elapsed);
-      world.lights.children.forEach((ray, index) => {
-        ray.rotation.z += 0.0008 + index * 0.00008;
-      });
-
-      if (state.started && !state.finished) {
-        updateSubmarine(delta);
-        updateCamera(delta);
-
-        const dWhale = submarine.position.distanceTo(whalePosition);
-        const dRelic = submarine.position.distanceTo(relicPosition);
-        const dHome = submarine.position.distanceTo(homeZone);
-
-        if (!state.whaleSeen && dWhale < 14) {
-          beginWhaleEncounter();
-        }
-
-        if (!state.relicFound && dRelic < 12) {
-          finishRelicDiscovery();
-        }
-
-        if (state.relicFound && dHome < 18) {
-          finishMission();
-        }
-      }
-
-      world.whale.rotation.z = Math.sin(elapsed * 0.8) * 0.08;
-      world.whale.position.y = whalePosition.y + Math.sin(elapsed * 0.9) * 0.6;
-      world.relic.rotation.y += 0.02;
-      world.relic.position.y = relicPosition.y + Math.sin(elapsed * 2.1) * 0.8;
-      world.beacon.rotation.y += 0.008;
-
-      renderer.render(scene, camera);
-      requestAnimationFrame(animate);
-    }
-
-    function bindTouchControls() {
-      document.querySelectorAll('.touchBtn').forEach((button) => {
-        const code = button.dataset.control;
-        const press = (event) => {
-          event.preventDefault();
-          keys[code] = true;
-          if (code === 'KeyF') attemptInteraction();
-        };
-        const lift = (event) => {
-          event.preventDefault();
-          keys[code] = false;
-        };
-        button.addEventListener('pointerdown', press);
-        button.addEventListener('pointerup', lift);
-        button.addEventListener('pointerleave', lift);
-      });
-    }
-
-    startBtn.addEventListener('click', () => {
-      initAudio();
-      setAudioState();
-      introOverlay.classList.add('hidden');
-      state.started = true;
-      setMissionText();
-      updateStatusBadges();
-      playTone(220, 0.18, 'sine', 0.04);
-    });
-
-    audioToggle.addEventListener('click', () => {
-      isMuted = !isMuted;
-      setAudioState();
-    });
-
-    volumeSlider.addEventListener('input', () => {
-      setAudioState();
-    });
-
-    document.addEventListener('keydown', (event) => {
-      keys[event.code] = true;
-      if (event.code === 'KeyF' || event.code === 'KeyE') {
-        attemptInteraction();
-      }
-      if (event.code === 'Space') {
-        event.preventDefault();
-        attemptInteraction();
-      }
-    });
-
-    document.addEventListener('keyup', (event) => {
-      keys[event.code] = false;
-    });
-
-    canvas.addEventListener('pointerdown', (event) => {
-      pointerActive = true;
-      lastPointerX = event.clientX;
-      lastPointerY = event.clientY;
-      canvas.setPointerCapture(event.pointerId);
-    });
-
-    canvas.addEventListener('pointermove', (event) => {
-      if (!pointerActive) return;
-      const dx = event.clientX - lastPointerX;
-      const dy = event.clientY - lastPointerY;
-      yaw -= dx * 0.004;
-      pitch = THREE.MathUtils.clamp(pitch - dy * 0.002, -1.2, 0.8);
-      lastPointerX = event.clientX;
-      lastPointerY = event.clientY;
-    });
-
-    canvas.addEventListener('pointerup', () => { pointerActive = false; });
-    canvas.addEventListener('pointerleave', () => { pointerActive = false; });
-
-    window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    });
-
-    const params = new URLSearchParams(window.location.search);
-    const autoPlay = params.get('autoPlay') === '1' || params.get('autoPlay') === 'true';
-    const autoComplete = params.get('autoComplete') === '1' || params.get('autoComplete') === 'true';
-
-    bindTouchControls();
-    updateStatusBadges();
-
-    if (autoPlay) {
-      window.setTimeout(() => {
-        introOverlay.classList.add('hidden');
-        state.started = true;
-        setMissionText();
-        updateStatusBadges();
-        if (autoComplete) {
-          state.whaleSeen = true;
-          state.relicFound = true;
-          state.finished = false;
-          submarine.position.set(0, 0, 0);
-          finishMission();
-        }
-      }, 350);
-    }
-
-    animate();
-  </script>
+<div id="root">
+  <canvas id="c"></canvas>
+  <div class="cine" id="cT"></div><div class="cine" id="cB"></div>
+  <div class="hud"><h1 id="mt"></h1><p id="mx"></p><div class="pips" id="pips"></div><div id="cnt"></div></div>
+  <div class="audio"><button id="mute" aria-label="كتم">🔊</button><input id="vol" type="range" min="0" max="100" value="40" aria-label="مستوى الصوت"></div>
+  <div class="help"><div><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> حركة</div><div><kbd>Space</kbd> صعود <kbd>C</kbd> هبوط</div><div><kbd>L</kbd> المصباح <kbd>F</kbd> تفاعل (اضغط مطولًا)</div><div><kbd>←</kbd><kbd>→</kbd> أو اسحب بالفأرة: الكاميرا</div></div>
+  <div class="bar" id="bar"><b id="barf"></b></div>
+  <div id="toast"></div><div id="sub"></div>
+  <div class="touch"><div id="joy"><div id="knob"></div></div>
+    <button class="tb" id="bUp" aria-label="صعود">⬆</button><button class="tb" id="bDn" aria-label="هبوط">⬇</button>
+    <button class="tb" id="bLamp" aria-label="المصباح">💡</button><button class="tb" id="bAct" aria-label="تفاعل">✋</button></div>
+  <div class="ov" id="intro"><div class="card">
+    <h2>مغامرة يونس عليه السلام</h2>
+    <p>أنت مستكشف صغير في غواصة بحثية، ومعك المرشد الخيالي «نور». ستتعلم قصة نبي الله يونس عليه السلام كما وردت في القرآن الكريم.</p>
+    <p class="note">لا يظهر النبي في اللعبة بأي صورة. الغواصة والمرشد والعالم من الخيال التعليمي، أما المعلومات فمأخوذة من القرآن الكريم مع ذكر السورة والآية.</p>
+    <button id="go">ابدأ الاستكشاف</button><button class="alt" id="fresh" style="display:none">ابدأ من جديد</button>
+  </div></div>
+  <div class="ov hidden" id="card"><div class="card">
+    <h2 id="ct"></h2><p id="cb"></p><div class="dua" id="cd"></div><div class="ref" id="cr"></div><button id="cok">متابعة</button>
+  </div></div>
+  <div class="ov hidden" id="nogl"><div class="card"><h2>تعذّر تشغيل العرض ثلاثي الأبعاد</h2><p>هذا المتصفح أو الجهاز لا يدعم WebGL. جرّب متصفحًا آخر.</p></div></div>
+</div>
+<script src="prophets-journey/vendor/three.min.js"></script>
+<script>
+(function(){
+'use strict';
+const $=id=>document.getElementById(id),clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),ss=t=>{t=clamp(t,0,1);return t*t*(3-2*t)};
+if(typeof THREE==='undefined'){$('nogl').classList.remove('hidden');return}
+const isTouch=matchMedia('(pointer:coarse)').matches||'ontouchstart' in window;
+if(isTouch)document.getElementById('root').classList.add('istouch');
+
+/* ---- حفظ التقدم ---- */
+const KEY='pj.save.v1';
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&s.v===1&&s.yunus)return s}catch(e){}return{v:1,yunus:{step:0,pearls:0,done:false}}}
+let save=load();
+function store(){try{localStorage.setItem(KEY,JSON.stringify(save))}catch(e){}}
+
+/* ---- المشهد ---- */
+let R;try{R=new THREE.WebGLRenderer({canvas:$('c'),antialias:true})}catch(e){$('nogl').classList.remove('hidden');return}
+R.setPixelRatio(Math.min(devicePixelRatio,2));R.setSize(innerWidth,innerHeight);
+const S=new THREE.Scene(),FOG_A=new THREE.Color(0x10739a),FOG_B=new THREE.Color(0x020a12);
+S.background=FOG_A.clone();S.fog=new THREE.Fog(FOG_A.clone(),20,140);
+const cam=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.1,300);
+const hemi=new THREE.HemisphereLight(0xaee8ff,0x0a2a3a,1.6);S.add(hemi);
+const sun=new THREE.DirectionalLight(0xdff3ff,1.2);sun.position.set(20,60,10);S.add(sun);
+let seed=7;const rnd=()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
+
+function H(x,z){let y=-9+Math.sin(x*.07)*1.6+Math.cos(z*.05+x*.03)*1.8+Math.sin(x*.19+z*.13)*.5;return y-ss((-z-170)/30)*20}
+const SURF=11.5;
+
+(function terrain(){
+  const g=new THREE.PlaneGeometry(150,340,75,170);g.rotateX(-Math.PI/2);g.translate(0,0,-120);
+  const p=g.attributes.position,col=new Float32Array(p.count*3),c=new THREE.Color();
+  for(let i=0;i<p.count;i++){const y=H(p.getX(i),p.getZ(i));p.setY(i,y);c.setHSL(.1+clamp((y+30)/40,0,1)*.05,.35,.12+clamp((y+30)/40,0,1)*.32);col.set([c.r,c.g,c.b],i*3)}
+  g.setAttribute('color',new THREE.BufferAttribute(col,3));g.computeVertexNormals();
+  S.add(new THREE.Mesh(g,new THREE.MeshStandardMaterial({vertexColors:true,flatShading:true,roughness:1})));
+  const w=new THREE.Mesh(new THREE.PlaneGeometry(500,700),new THREE.MeshBasicMaterial({color:0x8fdcf2,transparent:true,opacity:.35,side:THREE.DoubleSide}));
+  w.rotation.x=-Math.PI/2;w.position.set(0,12,-120);S.add(w);
+})();
+
+const rockM=new THREE.MeshStandardMaterial({color:0x40606f,roughness:.95,flatShading:true});
+function rock(x,z,s,y){const m=new THREE.Mesh(new THREE.DodecahedronGeometry(1,0),rockM);m.scale.set(s,s*(.7+rnd()*.6),s);m.position.set(x,(y===undefined?H(x,z):y)+s*.3,z);m.rotation.set(rnd()*3,rnd()*3,rnd()*3);S.add(m);return m}
+for(let i=0;i<40;i++){const x=(rnd()-.5)*110,z=40-rnd()*200;if(Math.abs(x)>6||z>-10)rock(x,z,1+rnd()*2.5)}
+for(let i=0;i<45;i++){const side=rnd()<.5?-1:1,z=-175-rnd()*105;rock(side*(22+rnd()*34),z,3+rnd()*5)}
+/* الكهف: نفق من الصخور بين z=-138 و z=-168 */
+for(let z=-138;z>-168;z-=3){for(let a=-.2;a<Math.PI+.2;a+=.38){const x=Math.cos(a)*9,y=-4+Math.sin(a)*9;rock(x,z+rnd()*2,2.4+rnd()*1.2,y-2)}}
+/* مرجان وأعشاب */
+const coralC=[0xff7a8a,0xffb259,0xc78bff,0x6fe0c8];
+for(let i=0;i<70;i++){const x=(rnd()-.5)*60,z=-62-rnd()*85;if(z<-136&&Math.abs(x)<12)continue;const m=new THREE.Mesh(new THREE.ConeGeometry(.5+rnd()*.7,1.5+rnd()*2.4,7),new THREE.MeshStandardMaterial({color:coralC[i%4],emissive:coralC[i%4],emissiveIntensity:.18,roughness:.7}));m.position.set(x,H(x,z)+.8,z);S.add(m)}
+const kelp=[];for(let i=0;i<60;i++){const x=(rnd()-.5)*100,z=30-rnd()*110;const m=new THREE.Mesh(new THREE.CylinderGeometry(.06,.16,5+rnd()*4,6),new THREE.MeshStandardMaterial({color:0x2f9a62,emissive:0x0a3a22,roughness:.8}));m.geometry.translate(0,2.7,0);m.position.set(x,H(x,z),z);m.userData.p=rnd()*6;S.add(m);kelp.push(m)}
+/* أسماك */
+const fish=[];const fishM=[0xffd166,0x7fd7ef,0xff8fa3].map(c=>new THREE.MeshStandardMaterial({color:c,roughness:.6}));
+for(let i=0;i<36;i++){const f=new THREE.Group();const b=new THREE.Mesh(new THREE.SphereGeometry(.4,10,8),fishM[i%3]);b.scale.set(1.6,.8,.7);const t=new THREE.Mesh(new THREE.ConeGeometry(.3,.6,8),fishM[i%3]);t.rotation.z=Math.PI/2;t.position.x=-.8;f.add(b,t);
+  f.userData={cx:(rnd()-.5)*50,cz:-30-rnd()*100,r:5+rnd()*12,s:.25+rnd()*.35,ph:rnd()*6,y:-2+rnd()*9};S.add(f);fish.push(f)}
+/* أشعة الضوء قرب السطح */
+for(let i=0;i<8;i++){const m=new THREE.Mesh(new THREE.ConeGeometry(2.5+rnd()*2,24,10,1,true),new THREE.MeshBasicMaterial({color:0xbfefff,transparent:true,opacity:.07,side:THREE.DoubleSide,depthWrite:false}));m.position.set((rnd()-.5)*70,0,10-rnd()*130);S.add(m)}
+/* ثلج بحري */
+const SN=500,snG=new THREE.BufferGeometry(),snP=new Float32Array(SN*3);for(let i=0;i<SN*3;i++)snP[i]=(rnd()-.5)*60;
+snG.setAttribute('position',new THREE.BufferAttribute(snP,3));const snow=new THREE.Points(snG,new THREE.PointsMaterial({color:0xd8f6ff,size:.18,transparent:true,opacity:.7}));S.add(snow);
+
+/* ---- الغواصة (وسيلة تنقل خيالية) ---- */
+const sub=new THREE.Group();
+(function(){
+  const hull=new THREE.MeshStandardMaterial({color:0xf2c14e,metalness:.3,roughness:.4});
+  const glass=new THREE.MeshStandardMaterial({color:0x9fe8ff,emissive:0x2aa6c8,emissiveIntensity:.5,transparent:true,opacity:.8});
+  const body=new THREE.Mesh(new THREE.CapsuleGeometry(1.3,3,6,16),hull);body.rotation.x=Math.PI/2;sub.add(body);
+  const dome=new THREE.Mesh(new THREE.SphereGeometry(.95,16,12),glass);dome.position.set(0,.7,-.8);sub.add(dome);
+  const fin=new THREE.Mesh(new THREE.BoxGeometry(.2,1.6,1.3),hull);fin.position.set(0,.9,2.1);sub.add(fin);
+  const prop=new THREE.Mesh(new THREE.BoxGeometry(1.8,.14,.1),new THREE.MeshStandardMaterial({color:0x444}));prop.position.z=3.1;sub.add(prop);sub.userData.prop=prop;
+  const lamp=new THREE.Mesh(new THREE.SphereGeometry(.28,10,8),new THREE.MeshStandardMaterial({color:0xffffff,emissive:0xfff0c0,emissiveIntensity:0}));lamp.position.set(0,-.3,-2.5);sub.add(lamp);sub.userData.lamp=lamp;
+  const spot=new THREE.SpotLight(0xfff0c0,0,90,.55,.6,1.1);spot.position.set(0,-.3,-2.3);const tg=new THREE.Object3D();tg.position.set(0,-1,-25);sub.add(spot,tg);spot.target=tg;sub.userData.spot=spot;
+  const beam=new THREE.Mesh(new THREE.ConeGeometry(4,18,16,1,true),new THREE.MeshBasicMaterial({color:0xfff0c0,transparent:true,opacity:.1,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));
+  beam.rotation.x=Math.PI/2;beam.position.set(0,-.4,-11.5);beam.visible=false;sub.add(beam);sub.userData.beam=beam;
+})();
+S.add(sub);
+
+/* ---- عناصر المهام ---- */
+const ringPos=[[0,5,-18],[9,6,-38],[-7,7,-58]].map(a=>new THREE.Vector3(...a));
+const rings=ringPos.map(p=>{const m=new THREE.Mesh(new THREE.TorusGeometry(3.2,.28,12,32),new THREE.MeshStandardMaterial({color:0xf4c95d,emissive:0xf4c95d,emissiveIntensity:.7}));m.position.copy(p);S.add(m);return m});
+const pearlPos=[[-10,-82],[12,-96],[-6,-110],[14,-122],[0,-132]].map(a=>new THREE.Vector3(a[0],H(a[0],a[1])+2.8,a[1]));
+const pearlM=new THREE.MeshStandardMaterial({color:0xfff6e0,emissive:0xffe9b0,emissiveIntensity:1,roughness:.2});
+const pearls=pearlPos.map(p=>{const g=new THREE.Group(),m=new THREE.Mesh(new THREE.SphereGeometry(.7,16,12),pearlM);const h=new THREE.Mesh(new THREE.SphereGeometry(1.4,12,10),new THREE.MeshBasicMaterial({color:0xffe9b0,transparent:true,opacity:.25,depthWrite:false}));g.add(m,h);g.position.copy(p);g.visible=false;S.add(g);return g});
+const BP=new THREE.Vector3(0,H(0,-232)+2,-232);
+const beacon=new THREE.Group();{const t=new THREE.Mesh(new THREE.CylinderGeometry(.9,1.4,4,12),new THREE.MeshStandardMaterial({color:0x5a7a8c,roughness:.7}));const cr=new THREE.Mesh(new THREE.OctahedronGeometry(1.2),new THREE.MeshStandardMaterial({color:0x7ad0ff,emissive:0x2a8fc8,emissiveIntensity:.5}));cr.position.y=3.2;beacon.add(t,cr);beacon.userData.crystal=cr;
+  const pl=new THREE.PointLight(0x9fe8ff,0,70,1.2);pl.position.y=3.2;beacon.add(pl);beacon.userData.light=pl;beacon.position.copy(BP);beacon.position.y-=1;S.add(beacon)}
+const whale=new THREE.Group();{const m=new THREE.MeshStandardMaterial({color:0x4a6f86,emissive:0x0e2d40,emissiveIntensity:.6,roughness:.8});
+  const b=new THREE.Mesh(new THREE.SphereGeometry(1,24,16),m);b.scale.set(9,3.2,3.4);const tl=new THREE.Mesh(new THREE.ConeGeometry(1.6,5,12),m);tl.rotation.z=-Math.PI/2;tl.position.x=10.5;
+  const fl=new THREE.Mesh(new THREE.BoxGeometry(1.6,.3,6),m);fl.position.x=12.6;whale.add(b,tl,fl);whale.visible=false;S.add(whale)}
+
+/* ---- الحالة ---- */
+const STEPS=[
+ {t:'تعلّم القيادة',m:()=>isTouch?'مرّ عبر الحلقات الذهبية الثلاث. حرّك العصا، واسحب الشاشة للنظر حولك، واستعمل ⬆ و ⬇ للارتفاع والانخفاض.':'مرّ عبر الحلقات الذهبية الثلاث: W A S D للحركة، المسافة للصعود، C للهبوط، والأسهم لتدوير الكاميرا.',spawn:[0,4,0]},
+ {t:'شعاب المرجان',m:()=>'اجمع اللآلئ الخمس بالترتيب. كل لؤلؤة تكشف معلومة من القصة القرآنية.',spawn:[0,4,-66]},
+ {t:'الكهف المظلم',m:()=>isTouch?'ادخل الكهف وشغّل مصباح الغواصة بزر 💡 لترى الطريق.':'ادخل الكهف وشغّل مصباح الغواصة بمفتاح L لترى الطريق.',spawn:[0,-2,-130]},
+ {t:'الأعماق',m:()=>isTouch?'تقدّم نحو المنارة وأبقِ إصبعك على زر ✋ حتى تضيء.':'تقدّم نحو المنارة واضغط مطولًا على F حتى تضيء.',spawn:[0,-4,-182]},
+ {t:'العودة إلى السطح',m:()=>'اصعد بالغواصة إلى سطح البحر.',spawn:[0,-8,-226]}
+];
+const FACTS=[
+ ['أُرسل يونس عليه السلام إلى قومٍ كثيرين.','الصافات: 139، 147'],
+ ['غادر قومه غاضبًا.','الأنبياء: 87'],
+ ['التقمه الحوت.','الصافات: 142'],
+ ['نادى ربّه في الظلمات بدعاءٍ عظيم.','الأنبياء: 87'],
+ ['استجاب الله له ونجّاه، وكان يونس من المسبّحين.','الأنبياء: 88 — الصافات: 143–144']
+];
+let step=0,paused=true,cine=null,cineDone=false,lamp=false,lit=false,hold=0,pr=0,ringHit=[false,false,false],caveT=0,tTimer=0,sTimer=0;
+const pips=$('pips');for(let i=0;i<5;i++)pips.appendChild(document.createElement('i'));
+
+function toast(t,ms){const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(tTimer);tTimer=setTimeout(()=>e.classList.remove('on'),ms||6000)}
+function subtitle(t,ms){const e=$('sub');e.textContent=t;e.classList.add('on');clearTimeout(sTimer);sTimer=setTimeout(()=>e.classList.remove('on'),ms||6000)}
+function hud(){const s=STEPS[step];if(!s)return;$('mt').textContent=s.t;$('mx').textContent=s.m();[...pips.children].forEach((p,i)=>p.className=i<step?'on':i===step?'cur':'');
+  $('cnt').textContent=step===0?`الحلقات: ${ringHit.filter(Boolean).length}/3`:step===1?`اللآلئ: ${pr}/5`:''}
+function setStep(n,spawn){step=n;ringHit=[false,false,false];rings.forEach((r,i)=>r.visible=n===0);
+  pearls.forEach((p,i)=>p.visible=n===1&&i===pr);beacon.userData.light.intensity=lit?60:0;
+  if(n!==1)pr=n>1?5:0;if(n===1)pearls.forEach((p,i)=>p.visible=i===pr);
+  save.yunus.step=n;save.yunus.pearls=pr;store();if(spawn){const s=STEPS[n].spawn;sub.position.set(...s);yaw=0;vel.set(0,0,0)}hud()}
+function card(o){$('ct').textContent=o.t;$('cb').textContent=o.b||'';$('cd').textContent=o.d||'';$('cr').textContent=o.r||'';$('cok').textContent=o.btn||'متابعة';
+  $('card').classList.remove('hidden');paused=true;$('cok').onclick=()=>{$('card').classList.add('hidden');paused=false;o.done&&o.done()}}
+
+/* ---- الصوت ---- */
+let ac,mg,muted=false;
+function setVol(){if(mg)mg.gain.setTargetAtTime(muted?0:$('vol').value/100,ac.currentTime,.1);$('mute').textContent=muted?'🔇':'🔊'}
+function audio(){if(ac)return;try{const C=window.AudioContext||window.webkitAudioContext;if(!C)return;ac=new C();mg=ac.createGain();mg.connect(ac.destination);
+  const a=ac.createGain();a.gain.value=.09;a.connect(mg);const o=ac.createOscillator();o.frequency.value=55;const f=ac.createBiquadFilter();f.type='lowpass';f.frequency.value=500;o.connect(f);f.connect(a);o.start();
+  const n=ac.sampleRate*2,b=ac.createBuffer(1,n,ac.sampleRate),d=b.getChannelData(0);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*.2;
+  const s=ac.createBufferSource();s.buffer=b;s.loop=true;const nf=ac.createBiquadFilter();nf.type='bandpass';nf.frequency.value=400;const ng=ac.createGain();ng.gain.value=.05;s.connect(nf);nf.connect(ng);ng.connect(a);s.start();setVol()}catch(e){ac=null}}
+function tone(f,d,t,v){if(!ac||muted)return;const o=ac.createOscillator(),g=ac.createGain(),n=ac.currentTime;o.type=t||'sine';o.frequency.value=f;o.connect(g);g.connect(mg);g.gain.setValueAtTime(v||.06,n);g.gain.exponentialRampToValueAtTime(.0001,n+(d||.25));o.start();o.stop(n+(d||.25)+.05)}
+$('mute').onclick=()=>{muted=!muted;setVol()};$('vol').oninput=setVol;
+
+/* ---- الإدخال ---- */
+let keys={},joy={x:0,y:0},tUp=false,tDn=false,tAct=false,yaw=0,pitch=-.12;const vel=new THREE.Vector3();
+function setLamp(v){lamp=v;sub.userData.spot.intensity=v?140:0;sub.userData.beam.visible=v;sub.userData.lamp.material.emissiveIntensity=v?2:0;$('bLamp').classList.toggle('act',v);tone(v?660:440,.12,'triangle')}
+addEventListener('keydown',e=>{if(/^(Space|Arrow)/.test(e.code))e.preventDefault();keys[e.code]=true;if(e.code==='KeyL'&&!e.repeat&&!paused)setLamp(!lamp)});
+addEventListener('keyup',e=>{keys[e.code]=false});addEventListener('blur',()=>{keys={}});
+const pad=$('joy'),knob=$('knob');let jid=null;
+function jset(e){const r=pad.getBoundingClientRect(),m=r.width*.4;let dx=e.clientX-(r.left+r.width/2),dy=e.clientY-(r.top+r.height/2);const l=Math.hypot(dx,dy);if(l>m){dx*=m/l;dy*=m/l}joy.x=dx/m;joy.y=dy/m;knob.style.transform=`translate(${dx}px,${dy}px)`}
+pad.addEventListener('pointerdown',e=>{jid=e.pointerId;pad.setPointerCapture(jid);jset(e)});
+pad.addEventListener('pointermove',e=>{if(e.pointerId===jid)jset(e)});
+const jend=e=>{if(e.pointerId===jid){jid=null;joy.x=joy.y=0;knob.style.transform=''}};pad.addEventListener('pointerup',jend);pad.addEventListener('pointercancel',jend);
+function hb(id,fn){const b=$(id);b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture(e.pointerId);fn(true)});const u=()=>fn(false);b.addEventListener('pointerup',u);b.addEventListener('pointercancel',u)}
+hb('bUp',v=>tUp=v);hb('bDn',v=>tDn=v);hb('bAct',v=>{tAct=v;$('bAct').classList.toggle('act',v)});
+$('bLamp').addEventListener('pointerdown',e=>{e.preventDefault();if(!paused)setLamp(!lamp)});
+let cid=null,lx=0,ly=0;const cv=$('c');
+cv.addEventListener('pointerdown',e=>{cid=e.pointerId;lx=e.clientX;ly=e.clientY;cv.setPointerCapture(cid)});
+cv.addEventListener('pointermove',e=>{if(e.pointerId!==cid)return;yaw-=(e.clientX-lx)*.005;pitch=clamp(pitch-(e.clientY-ly)*.003,-.7,.5);lx=e.clientX;ly=e.clientY});
+const cend=e=>{if(e.pointerId===cid)cid=null};cv.addEventListener('pointerup',cend);cv.addEventListener('pointercancel',cend);
+addEventListener('resize',()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();R.setSize(innerWidth,innerHeight)});
+
+/* ---- منطق اللعب ---- */
+function startWhale(){cineDone=true;whale.visible=true;whale.userData={t:0,z:sub.position.z-34,y:sub.position.y+3};
+  cine={t:0,dur:7};document.getElementById('root').classList.add('cinema');
+  subtitle('يظهر في الأعماق حوتٌ عظيم. وقد ورد في القرآن الكريم أن الحوت التقم يونس عليه السلام (الصافات: 142).',7000);tone(120,1.2,'sine',.08)}
+function nextPearl(){tone(520+pr*90,.3,'triangle');const f=FACTS[pr];pearls[pr].visible=false;pr++;save.yunus.pearls=pr;store();
+  card({t:'لؤلؤة من القصة',b:f[0],r:'['+f[1]+']',btn:'متابعة',done:()=>{if(pr>=5){setStep(2)}else{pearls[pr].visible=true}hud()}});hud()}
+function lightBeacon(){lit=true;beacon.userData.light.intensity=60;beacon.userData.crystal.material.emissiveIntensity=2.5;tone(440,.5,'triangle');tone(660,.7,'sine');$('bar').style.display='none';
+  card({t:'دعاء يونس عليه السلام',b:'أضاءت المنارة، وهذا دعاءٌ ورد في القرآن الكريم عن يونس عليه السلام حين كان في الظلمات:',d:'لَا إِلَٰهَ إِلَّا أَنتَ سُبْحَانَكَ إِنِّي كُنتُ مِنَ الظَّالِمِينَ',r:'سورة الأنبياء، الآية 87',btn:'متابعة',
+    done:()=>{toast('ثم قال الله تعالى: ﴿فَاسْتَجَبْنَا لَهُ وَنَجَّيْنَاهُ مِنَ الْغَمِّ﴾ — الأنبياء: 88',8000);setStep(4)}})}
+function finish(){save.yunus.done=true;save.yunus.step=5;store();tone(660,.5,'triangle');
+  card({t:'تمت الرحلة',b:'ورد في القرآن أن الله نجّى يونس عليه السلام ونبذه بالعراء وهو سقيم وأنبت عليه شجرة من يقطين (الصافات: 145–146)، وأنه أُرسل إلى مئة ألفٍ أو يزيدون فآمنوا (الصافات: 147–148). ومما نتعلمه: أن نلجأ إلى الله بالدعاء والتسبيح في الشدة، وأن لا ننسى شكر نعمة النجاة.',r:'ختم «أسرار الزمان» لمغامرة يونس',btn:'إعادة المغامرة',done:()=>{save.yunus={step:0,pearls:0,done:true};pr=0;lit=false;cineDone=false;whale.visible=false;setLamp(false);setStep(0,true)}})}
+
+function update(dt,t){
+  const sp=sub.position;
+  if(!paused&&!cine){
+    const f=(keys.KeyW||keys.ArrowUp?1:0)-(keys.KeyS||keys.ArrowDown?1:0)-joy.y,r=(keys.KeyD?1:0)-(keys.KeyA?1:0)+joy.x,u=(keys.Space||tUp?1:0)-(keys.KeyC||keys.ShiftLeft||tDn?1:0);
+    if(keys.ArrowLeft)yaw+=1.6*dt;if(keys.ArrowRight)yaw-=1.6*dt;
+    const fx=-Math.sin(yaw),fz=-Math.cos(yaw),want=new THREE.Vector3(fx*f+Math.cos(yaw)*r,u*.8,fz*f-Math.sin(yaw)*r);
+    if(want.lengthSq()>1)want.normalize();want.multiplyScalar(15);vel.lerp(want,1-Math.exp(-4*dt));sp.addScaledVector(vel,dt);
+  }else vel.multiplyScalar(.95);
+  sp.x=clamp(sp.x,-62,62);sp.z=clamp(sp.z,-282,42);sp.y=clamp(sp.y,H(sp.x,sp.z)+2.4,SURF-1);
+  sub.rotation.set(vel.y*.02,yaw,-vel.x*.012*Math.cos(yaw)+Math.sin(t*2)*.03);sub.userData.prop.rotation.z+=dt*(8+vel.length());
+  /* المهام */
+  if(!paused&&!cine){
+    if(step===0){rings.forEach((m,i)=>{if(!ringHit[i]&&sp.distanceTo(ringPos[i])<3.4){ringHit[i]=true;m.material.emissiveIntensity=2;tone(480+i*120,.25,'triangle');hud();if(ringHit.every(Boolean)){toast('أحسنت! أنت الآن جاهز لاستكشاف الشعاب.');card({t:'أحسنت يا مستكشف',b:'تعلّمتَ قيادة الغواصة. هيا إلى شعاب المرجان.',done:()=>setStep(1)})}}})}
+    else if(step===1&&pearls[pr]&&sp.distanceTo(pearlPos[pr])<3.6)nextPearl();
+    else if(step===2){const inCave=sp.z<-138&&sp.z>-168&&Math.abs(sp.x)<10;
+      if(inCave){if(lamp){caveT+=dt;if(caveT>1.5){caveT=0;toast('أضاء المصباح الطريق. تابع إلى الأعماق.');tone(560,.3,'triangle');setStep(3)}}else{caveT=0;if(!tTimer||!$('toast').classList.contains('on'))toast('الظلام شديد. شغّل مصباح الغواصة.',3000)}}else caveT=0}
+    else if(step===3){
+      if(!cineDone&&sp.z<-195)startWhale();
+      if(cineDone&&!lit){const d=sp.distanceTo(BP);if(d<9){const h=keys.KeyF||keys.KeyE||tAct;if(h){hold=Math.min(1,hold+dt/3);if(hold>=1){hold=0;lightBeacon()}}else hold=Math.max(0,hold-dt*.6);$('bar').style.display=hold>0||d<9?'block':'none';$('barf').style.width=hold*100+'%'}else{hold=0;$('bar').style.display='none'}}}
+    else if(step===4&&sp.y>SURF-2.2)finish();
+  }
+  /* سينما الحوت */
+  if(whale.visible){const w=whale.userData;w.t+=dt;whale.position.set(60-w.t*7,w.y+Math.sin(w.t)*.6,w.z);whale.rotation.y=0;if(w.t>18)whale.visible=false}
+  if(cine){cine.t+=dt;if(cine.t>cine.dur){cine=null;document.getElementById('root').classList.remove('cinema');toast('اقترب من المنارة وأضئها.',5000)}}
+  /* الإضاءة حسب العمق والمنطقة */
+  const cave=ss((sp.z+138)/-4)*(1-ss((sp.z+168)/-4)),dk=Math.max(clamp((6-sp.y)/32,0,1)*.65,cave*.85,ss((-sp.z-175)/25)*(lit?.45:.95));
+  S.fog.color.copy(FOG_A).lerp(FOG_B,dk);S.background.copy(S.fog.color);S.fog.far=26+(1-dk)*115+(lamp?18:0);S.fog.near=6;
+  hemi.intensity=.35+(1-dk)*1.25;sun.intensity=.2+(1-dk)*1.1;
+  /* حركة العالم */
+  kelp.forEach(k=>{k.rotation.z=Math.sin(t*.9+k.userData.p)*.1;k.rotation.x=Math.cos(t*.7+k.userData.p)*.07});
+  fish.forEach(f=>{const d=f.userData,a=t*d.s+d.ph;f.position.set(d.cx+Math.cos(a)*d.r,d.y+Math.sin(a*2)*.8,d.cz+Math.sin(a)*d.r);f.rotation.y=-a-Math.PI/2+Math.PI;f.children[1].rotation.y=Math.sin(t*8+d.ph)*.4});
+  rings.forEach((m,i)=>{m.rotation.y=t*.5+i;if(!ringHit[i])m.material.emissiveIntensity=.7+Math.sin(t*3)*.25});
+  pearls.forEach(p=>{if(p.visible){p.position.y+=Math.sin(t*2.5)*.01;p.scale.setScalar(1+Math.sin(t*3)*.08)}});
+  beacon.userData.crystal.rotation.y=t;
+  const p=snow.geometry.attributes.position;for(let i=0;i<SN;i++){let x=p.getX(i),y=p.getY(i)-dt*.3,z=p.getZ(i);if(y-sp.y<-30)y+=60;else if(y-sp.y>30)y-=60;if(x-sp.x>30)x-=60;else if(x-sp.x<-30)x+=60;if(z-sp.z>30)z-=60;else if(z-sp.z<-30)z+=60;p.setXYZ(i,x,y,z)}p.needsUpdate=true;
+  /* الكاميرا */
+  if(cine){const k=cine.t/cine.dur;cam.position.lerp(new THREE.Vector3(sp.x-9,sp.y+3,sp.z+8),1-Math.exp(-3*dt));cam.lookAt(whale.position.x*(.4+k*.6)+sp.x*(1-.4-k*.6),whale.position.y,whale.position.z)}
+  else{const off=new THREE.Vector3(0,3.2-pitch*4,10.5).applyAxisAngle(new THREE.Vector3(0,1,0),yaw),tg=sp.clone().add(off);tg.y=clamp(tg.y,H(tg.x,tg.z)+1,SURF-.3);cam.position.lerp(tg,1-Math.exp(-7*dt));
+    cam.lookAt(sp.x-Math.sin(yaw)*12,sp.y+1.5+pitch*6,sp.z-Math.cos(yaw)*12)}
+}
+
+let last=performance.now();
+function loop(now){const dt=Math.min((now-last)/1000,.05);last=now;update(dt,now/1000);R.render(S,cam);requestAnimationFrame(loop)}
+
+/* ---- البدء ---- */
+function begin(fresh){
+  audio();try{window.focus()}catch(e){}
+  if(fresh)save.yunus={step:0,pearls:0,done:false};
+  pr=clamp(save.yunus.pearls||0,0,5);let s=clamp(save.yunus.step||0,0,4);if(save.yunus.done&&!fresh)s=0;
+  lit=false;cineDone=false;setStep(s,true);$('intro').classList.add('hidden');paused=false;
+}
+if(save.yunus.step>0&&!save.yunus.done){$('go').textContent='متابعة المغامرة';$('fresh').style.display=''}
+$('go').onclick=()=>begin(false);$('fresh').onclick=()=>begin(true);
+cam.position.set(0,6,14);setStep(0,true);requestAnimationFrame(loop);
+})();
+</script>
 </body>
 </html>
