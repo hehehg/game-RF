@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>رحلة الأنبياء — أسرار الزمان</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-1: #071f2d;
+      --bg-2: #0d2b3d;
+      --bg-3: #112c3c;
+      --panel: rgba(13, 26, 37, 0.9);
+      --panel-2: rgba(16, 34, 48, 0.92);
+      --line: rgba(150, 197, 216, 0.26);
+      --text: #edf7fb;
+      --muted: #cbe5ee;
+      --gold: #d8b35f;
+      --gold-soft: #f7e7ba;
+      --sea: #57c3d7;
+      --sea-deep: #2099ba;
+      --leaf: #79cf99;
+      --rose: #e58d7d;
+      --shadow: rgba(0, 0, 0, 0.35);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body {
+      font-family: 'Tajawal', sans-serif;
+      background:
+        radial-gradient(circle at 20% 10%, rgba(92, 171, 196, 0.18), transparent 30%),
+        radial-gradient(circle at 80% 25%, rgba(216, 179, 95, 0.14), transparent 35%),
+        linear-gradient(180deg, var(--bg-1), var(--bg-2) 52%, var(--bg-3));
+      color: var(--text);
+      direction: rtl;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image:
+        radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1.5px),
+        linear-gradient(120deg, rgba(255,255,255,0.02), rgba(255,255,255,0));
+      background-size: 28px 28px;
+      pointer-events: none;
+      opacity: 0.7;
+    }
+
+    #app {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 28px 18px 52px;
+    }
+
+    .screen {
+      width: min(960px, 100%);
+      background: rgba(4, 14, 23, 0.4);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      box-shadow: 0 20px 60px var(--shadow);
+      overflow: hidden;
+      backdrop-filter: blur(6px);
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(11, 27, 36, 0.72);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      color: var(--gold-soft);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      font-size: 11px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--gold), var(--sea));
+      box-shadow: 0 0 16px rgba(216, 179, 95, 0.7);
+    }
+
+    .mission-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      background: rgba(87, 195, 215, 0.12);
+      color: var(--muted);
+      border-radius: 999px;
+      border: 1px solid rgba(87, 195, 215, 0.3);
+      font-size: 12px;
+    }
+
+    .content {
+      padding: 28px 22px 40px;
+    }
+
+    h1, h2, h3 {
+      margin: 0;
+      font-family: 'Amiri', serif;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    p { margin: 0; }
+
+    .intro {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 24px;
+      align-items: center;
+    }
+
+    .intro-copy {
+      padding: 16px 6px;
+    }
+
+    .eyebrow {
+      color: var(--gold-soft);
+      font-size: 14px;
+      letter-spacing: 0.08em;
+      margin-bottom: 8px;
+      display: inline-block;
+    }
+
+    .title {
+      font-size: clamp(32px, 5vw, 58px);
+      color: var(--gold-soft);
+      margin-bottom: 14px;
+      text-shadow: 0 12px 24px rgba(216, 179, 95, 0.15);
+    }
+
+    .subtitle {
+      font-size: clamp(16px, 2vw, 20px);
+      color: var(--muted);
+      line-height: 1.9;
+      margin-bottom: 18px;
+      max-width: 62ch;
+    }
+
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .btn {
+      appearance: none;
+      border: 1px solid var(--gold);
+      background: rgba(216, 179, 95, 0.1);
+      color: var(--gold-soft);
+      border-radius: 999px;
+      padding: 12px 22px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 22px rgba(216, 179, 95, 0.15);
+    }
+
+    .btn.primary {
+      background: linear-gradient(135deg, var(--gold), #f3d38e);
+      color: #1a1a18;
+      border-color: transparent;
+    }
+
+    .btn.ghost {
+      background: transparent;
+      color: var(--text);
+      border-color: var(--line);
+    }
+
+    .hero-panel {
+      background: linear-gradient(180deg, rgba(19, 43, 58, 0.95), rgba(11, 24, 32, 0.85));
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 18px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-panel::before {
+      content: "";
+      position: absolute;
+      inset: 18px 18px auto auto;
+      width: 120px;
+      height: 120px;
+      background: radial-gradient(circle, rgba(216, 179, 95, 0.12), transparent 70%);
+      border-radius: 50%;
+    }
+
+    .time-portal {
+      width: 100%;
+      aspect-ratio: 1;
+      border-radius: 24px;
+      background: radial-gradient(circle at 50% 30%, rgba(87,195,215,0.3), rgba(11,26,35,0.7) 52%, rgba(9,17,24,0.96) 100%);
+      border: 1px solid rgba(87,195,215,0.3);
+      display: grid;
+      place-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .portal-ring {
+      width: 74%;
+      height: 74%;
+      border-radius: 50%;
+      border: 2px solid rgba(216, 179, 95, 0.8);
+      box-shadow: 0 0 0 12px rgba(87, 195, 215, 0.08), 0 0 18px rgba(216, 179, 95, 0.2);
+      position: relative;
+      animation: pulse 4s ease-in-out infinite;
+      display: grid;
+      place-items: center;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 0 12px rgba(87,195,215,0.08), 0 0 18px rgba(216,179,95,0.2); }
+      50% { transform: scale(1.03); box-shadow: 0 0 0 18px rgba(87,195,215,0.12), 0 0 24px rgba(216,179,95,0.3); }
+    }
+
+    .portal-core {
+      width: 32%;
+      height: 32%;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.9), rgba(216,179,95,0.85), rgba(87,195,215,0.7));
+      box-shadow: 0 0 24px rgba(216,179,95,0.5);
+    }
+
+    .portal-label {
+      position: absolute;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(10, 18, 23, 0.82);
+      border: 1px solid rgba(216,179,95,0.3);
+      border-radius: 999px;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      padding: 7px 10px;
+      color: var(--gold-soft);
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .seal {
+      position: relative;
+      background: linear-gradient(180deg, rgba(19,39,52,0.95), rgba(10,22,30,0.9));
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px 12px 14px;
+      text-align: center;
+      min-height: 138px;
+      cursor: pointer;
+      transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .seal:hover {
+      transform: translateY(-2px);
+      border-color: rgba(216,179,95,0.5);
+      box-shadow: 0 12px 22px rgba(0,0,0,0.18);
+    }
+
+    .seal.locked {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .seal.active {
+      border-color: rgba(216,179,95,0.82);
+      box-shadow: inset 0 0 0 1px rgba(216,179,95,0.18), 0 0 20px rgba(216,179,95,0.08);
+    }
+
+    .seal .num {
+      font-size: 12px;
+      color: var(--gold-soft);
+      letter-spacing: 0.08em;
+      margin-bottom: 10px;
+    }
+
+    .seal .mark {
+      font-size: 28px;
+      margin-bottom: 7px;
+      display: block;
+    }
+
+    .seal .name {
+      font-family: 'Amiri', serif;
+      font-size: 18px;
+      color: var(--text);
+      line-height: 1.2;
+      margin-bottom: 6px;
+    }
+
+    .seal .meta {
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .seal .status {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(121, 207, 153, 0.7);
+      box-shadow: 0 0 12px rgba(121,207,153,0.6);
+    }
+
+    .seal.locked .status {
+      background: rgba(229,141,125,0.7);
+      box-shadow: 0 0 12px rgba(229,141,125,0.5);
+    }
+
+    .stage-layout {
+      display: grid;
+      grid-template-columns: 0.9fr 1.1fr;
+      gap: 20px;
+    }
+
+    .story-panel, .game-panel {
+      background: rgba(10, 22, 30, 0.82);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 20px;
+    }
+
+    .stage-header {
+      margin-bottom: 14px;
+    }
+
+    .stage-title {
+      font-size: clamp(24px, 3vw, 34px);
+      color: var(--gold-soft);
+      margin-bottom: 8px;
+    }
+
+    .scene {
+      background: linear-gradient(180deg, rgba(25,62,89,0.35), rgba(13,20,26,0.9));
+      border: 1px solid rgba(87,195,215,0.28);
+      border-radius: 18px;
+      padding: 18px;
+      margin-bottom: 18px;
+      min-height: 170px;
+      display: flex;
+      align-items: flex-end;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .scene::before,
+    .scene::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .scene::before {
+      background:
+        radial-gradient(circle at 22% 12%, rgba(255,255,255,0.17), transparent 19%),
+        linear-gradient(180deg, rgba(87,195,215,0.12), rgba(8,15,24,0.12)),
+        linear-gradient(180deg, rgba(13,42,58,0.75), rgba(9,16,20,0.85));
+    }
+
+    .scene::after {
+      background: linear-gradient(180deg, transparent 30%, rgba(4, 10, 14, 0.64));
+    }
+
+    .scene-content {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      width: 100%;
+      gap: 12px;
+    }
+
+    .scene-copy {
+      max-width: 70%;
+      font-size: 16px;
+      line-height: 1.9;
+      color: var(--muted);
+    }
+
+    .scene-figure {
+      font-size: 62px;
+      filter: drop-shadow(0 8px 16px rgba(0,0,0,0.35));
+    }
+
+    .story-text {
+      font-size: 16px;
+      line-height: 2;
+      color: var(--muted);
+    }
+
+    .story-text strong { color: var(--gold-soft); }
+
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .chip {
+      border: 1px solid rgba(87,195,215,0.38);
+      background: rgba(87,195,215,0.06);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 7px 12px;
+      font-size: 12px;
+    }
+
+    .quiz-box {
+      margin-top: 12px;
+      background: rgba(4, 14, 22, 0.62);
+      border: 1px solid rgba(216,179,95,0.22);
+      border-radius: 18px;
+      padding: 18px;
+    }
+
+    .question {
+      font-size: 18px;
+      line-height: 1.8;
+      margin-bottom: 16px;
+      color: var(--text);
+    }
+
+    .options {
+      display: grid;
+      gap: 10px;
+    }
+
+    .option {
+      width: 100%;
+      text-align: right;
+      font: inherit;
+      color: var(--text);
+      background: rgba(17, 34, 48, 0.9);
+      border: 1px solid rgba(216,179,95,0.22);
+      border-radius: 12px;
+      padding: 12px 14px;
+      cursor: pointer;
+      transition: border-color 0.18s ease, transform 0.18s ease, background 0.18s ease;
+    }
+
+    .option:hover {
+      border-color: rgba(216,179,95,0.6);
+      transform: translateY(-1px);
+    }
+
+    .option.correct {
+      background: rgba(121, 207, 153, 0.15);
+      border-color: rgba(121, 207, 153, 0.8);
+    }
+
+    .option.wrong {
+      background: rgba(229, 141, 125, 0.14);
+      border-color: rgba(229,141,125,0.8);
+    }
+
+    .result {
+      min-height: 28px;
+      margin-top: 12px;
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    .result.good { color: #a9f0be; }
+    .result.bad { color: #f7cab0; }
+
+    .fact-box {
+      margin-top: 16px;
+      border: 1px solid rgba(216,179,95,0.4);
+      border-radius: 16px;
+      padding: 16px 18px;
+      background: linear-gradient(180deg, rgba(216,179,95,0.08), rgba(87,195,215,0.05));
+      display: none;
+    }
+
+    .fact-box.visible {
+      display: block;
+    }
+
+    .fact-label {
+      color: var(--gold-soft);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      margin-bottom: 8px;
+    }
+
+    .fact-text {
+      color: var(--text);
+      line-height: 1.9;
+      font-size: 15px;
+    }
+
+    .footer-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .progress {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .final-box {
+      text-align: center;
+      padding: 12px 10px 4px;
+    }
+
+    .final-box .title {
+      font-size: clamp(30px, 5vw, 52px);
+      margin-bottom: 16px;
+    }
+
+    .final-box .message {
+      max-width: 640px;
+      margin: 0 auto;
+      line-height: 2;
+      color: var(--muted);
+      font-size: 18px;
+    }
+
+    .seal-badges {
+      margin: 18px 0 8px;
+      font-size: 28px;
+      letter-spacing: 0.3em;
+      color: var(--gold-soft);
+    }
+
+    @media (max-width: 820px) {
+      .intro, .stage-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .card-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 520px) {
+      .content { padding: 22px 14px 30px; }
+      .card-grid { grid-template-columns: 1fr; }
+      .topbar { flex-direction: column; align-items: flex-start; }
+      .footer-actions { flex-direction: column; align-items: stretch; }
+      .btn { width: 100%; }
+      .button-group { display: grid; grid-template-columns: 1fr; }
+      .scene-content { flex-direction: column; align-items: flex-start; }
+      .scene-copy { max-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+
+  <script>
+    const prophets = [
+      { id: 'adam', name: 'آدم', title: 'بداية الخلق', mark: '✦', tag: 'البداية', unlocked: true },
+      { id: 'idris', name: 'إدريس', title: 'حكمة الكتابة', mark: '✧', tag: 'العلـم', unlocked: false },
+      { id: 'nuh', name: 'نوح', title: 'الصبر على البلاء', mark: '⟡', tag: 'السفينة', unlocked: false },
+      { id: 'hud', name: 'هود', title: 'الحقّ في القلوب', mark: '✹', tag: 'الرسالة', unlocked: false },
+      { id: 'saleh', name: 'صالح', title: 'التسليم والثبات', mark: '❖', tag: 'البلد', unlocked: false },
+      { id: 'ibrahim', name: 'إبراهيم', title: 'نار الإيمان', mark: '✶', tag: 'الاستقامة', unlocked: false },
+      { id: 'lut', name: 'لوط', title: 'القيم والحكمة', mark: '✦', tag: 'الرحمة', unlocked: false },
+      { id: 'ismail', name: 'إسماعيل', title: 'الإيمان بالصبر', mark: '✧', tag: 'الرحلة', unlocked: false },
+      { id: 'ishaq', name: 'إسحاق', title: 'البركة', mark: '⟡', tag: 'الوريث', unlocked: false },
+      { id: 'yaqub', name: 'يعقوب', title: 'القلب الصابر', mark: '✹', tag: 'الأسرار', unlocked: false },
+      { id: 'yusuf', name: 'يوسف', title: 'العفو والصبر', mark: '❖', tag: 'الرؤية', unlocked: false },
+      { id: 'ayyub', name: 'أيوب', title: 'الصبر في البلاء', mark: '✶', tag: 'الرحمة', unlocked: false },
+      { id: 'shuayb', name: 'شعيب', title: 'العدالة', mark: '✦', tag: 'الناس', unlocked: false },
+      { id: 'moses', name: 'موسى', title: 'النجاة والدعوة', mark: '✧', tag: 'البحر', unlocked: false },
+      { id: 'harun', name: 'هارون', title: 'الوعظ والرفق', mark: '⟡', tag: 'الرحلة', unlocked: false },
+      { id: 'dhul-kifl', name: 'ذو الكفل', title: 'الثبات في العطاء', mark: '✹', tag: 'الرحمة', unlocked: false },
+      { id: 'dawud', name: 'داود', title: 'الحكمة والعدل', mark: '❖', tag: 'الملك', unlocked: false },
+      { id: 'sulayman', name: 'سليمان', title: 'الحكمة والشكر', mark: '✶', tag: 'الطيور', unlocked: false },
+      { id: 'ilyas', name: 'إلياس', title: 'الرسالة المستمرة', mark: '✦', tag: 'الاستمرار', unlocked: false },
+      { id: 'al-yasa', name: 'اليسع', title: 'التعافي والرحمة', mark: '✧', tag: 'النجاة', unlocked: false },
+      { id: 'yunus', name: 'يونس', title: 'أسرار أعماق البحار', mark: '⟡', tag: 'العميق', unlocked: true },
+      { id: 'zakariya', name: 'زكريا', title: 'الدعاء والرحمة', mark: '✹', tag: 'المنزل', unlocked: false },
+      { id: 'yahya', name: 'يحيى', title: 'التواضع والعلم', mark: '❖', tag: 'الرسالة', unlocked: false },
+      { id: 'isa', name: 'عيسى', title: 'الرحمة والخير', mark: '✶', tag: 'المعجزة', unlocked: false },
+      { id: 'muhammad', name: 'محمد ﷺ', title: 'الخاتمة والرحمة', mark: '✦', tag: 'الرحمة', unlocked: false }
+    ];
+
+    const defaultMap = [
+      {
+        id: 'yunus',
+        title: 'أسرار أعماق البحار',
+        subtitle: 'يونس عليه السلام',
+        icon: '🐚',
+        story: 'في الطريق الصعب عبر البحر العميق، تتسلل رياح الشكّ إلى قلب السفينة، لكن «نور» يذكر الطفل أن الصبر والخضوع لله قد يفتح أبواب الفهم حين ينتهي الاضطراب. في هذه المرحلة، يقترب الاستكشاف من جوف الماء، حيث تُرعى الحكاية عبر الآية والبحث والرحلة المعنوية.',
+        question: 'ما الذي كان سبب المهلة العظيمة التي مرّ بها يونس عليه السلام في أعماق البحر؟',
+        options: [
+          'في رحلة صيد سريعة عبر المحيط',
+          'لأنه خرج من قومه بعد توجيه الدعوة وهو غاضب على أتباعه',
+          'لأنه استراح في غابةٍ بعيدة',
+          'لأنه أراد أن يكتب قصةً جديدة'
+        ],
+        correctIndex: 1,
+        fact: 'في القصة المقررة في القرآن، يذكر يونس عليه السلام في مواقف العبودية والرجوع إلى الله، ويُستفاد منها معنى التوبة، والرحمة، والاعتماد على الله في أوقات الضيق.',
+        badge: 'المعلومة الأساسية:',
+        lesson: 'التوازن بين الحزن والرجوع إلى الله، واستمرار الدعوة رغم الظواهر القاسية.'
+      }
+    ];
+
+    const state = {
+      screen: 'intro',
+      currentStage: 0,
+      completed: new Set()
+    };
+
+    const app = document.getElementById('app');
+
+    function render() {
+      if (state.screen === 'intro') return renderIntro();
+      if (state.screen === 'map') return renderMap();
+      if (state.screen === 'stage') return renderStage();
+      if (state.screen === 'final') return renderFinal();
+    }
+
+    function renderIntro() {
+      app.innerHTML = `
+        <div class="screen">
+          <div class="topbar">
+            <div class="brand"><span class="dot"></span> PROPHETS' JOURNEY</div>
+            <div class="mission-pill">مركز أسرار الزمان</div>
+          </div>
+          <div class="content">
+            <div class="intro">
+              <div class="intro-copy">
+                <span class="eyebrow">رحلة تعليمية وتفاعلية</span>
+                <h1 class="title">رحلة الأنبياء<br>أسرار الزمان</h1>
+                <p class="subtitle">
+                  يفتح الطفل باباً زمنياً إلى عوالم الماضي عبر <strong style="color: var(--gold-soft);">مخطوطة غامضة</strong> تحمل 25 ختمًا معرفيًا، وكل ختم يقوده إلى قصة من قصص الأنبياء في القرآن الكريم. رفيقك هو <strong style="color: var(--gold-soft);">نور</strong>، الذي يشرح المهمة، يوجّه الألغاز، ويعيد للطفل المعنى العميق من الصبر، والإيمان، والشجاعة، والتوكل.
+                </p>
+                <div class="button-group">
+                  <button class="btn primary" id="startBtn">ابدأ الرحلة</button>
+                  <button class="btn ghost" id="mapBtn">خريطة الختمات</button>
+                </div>
+              </div>
+              <div class="hero-panel">
+                <div class="time-portal">
+                  <div class="portal-ring">
+                    <div class="portal-core"></div>
+                  </div>
+                  <div class="portal-label">بوابة الزمن</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('startBtn').onclick = () => { state.screen = 'map'; render(); };
+      document.getElementById('mapBtn').onclick = () => { state.screen = 'map'; render(); };
+    }
+
+    function renderMap() {
+      const progress = state.completed.size;
+      const grids = prophets.map((prophet, index) => {
+        const isUnlocked = prophet.unlocked || index === 0 || state.completed.has('yunus');
+        const isActive = index === state.currentStage && state.screen === 'stage';
+        const isDone = state.completed.has(prophet.id);
+
+        return `
+          <button class="seal ${isUnlocked ? '' : 'locked'} ${isActive ? 'active' : ''}" data-index="${index}" ${isUnlocked ? '' : 'disabled'}>
+            <span class="status"></span>
+            <div class="num">ختم ${index + 1}</div>
+            <span class="mark">${prophet.mark}</span>
+            <div class="name">${prophet.name}</div>
+            <div class="meta">${prophet.title}</div>
+          </button>
+        `;
+      }).join('');
+
+      app.innerHTML = `
+        <div class="screen">
+          <div class="topbar">
+            <div class="brand"><span class="dot"></span> مركز أسرار الزمان</div>
+            <div class="mission-pill">التقدم: ${progress} / ${prophets.length} خُتم</div>
+          </div>
+          <div class="content">
+            <div class="stage-header">
+              <div class="eyebrow">لوحة الرحلة</div>
+              <h2 class="stage-title">اختر الختم المعرفي</h2>
+            </div>
+            <div class="card-grid">${grids}</div>
+            <div class="footer-actions" style="margin-top: 18px;">
+              <button class="btn ghost" id="backIntro">العودة</button>
+              <div class="progress">تظهر الرحلة الأولى كاملة كـ نموذج أساسي، بينما البقية تُبنى على نفس المنهج</div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.querySelectorAll('.seal').forEach(button => {
+        button.addEventListener('click', () => {
+          if (button.disabled) return;
+          const index = Number(button.dataset.index);
+          state.currentStage = index;
+          state.screen = 'stage';
+          render();
+        });
+      });
+
+      document.getElementById('backIntro').onclick = () => { state.screen = 'intro'; render(); };
+    }
+
+    function renderStage() {
+      const stage = defaultMap[0];
+      const completed = state.completed.has('yunus');
+
+      app.innerHTML = `
+        <div class="screen">
+          <div class="topbar">
+            <div class="brand"><span class="dot"></span> رحلة الأنبياء</div>
+            <div class="mission-pill">${stage.subtitle}</div>
+          </div>
+          <div class="content">
+            <div class="stage-layout">
+              <div class="story-panel">
+                <div class="stage-header">
+                  <div class="eyebrow">المرحلة الأولى</div>
+                  <h2 class="stage-title">${stage.title}</h2>
+                </div>
+                <div class="scene">
+                  <div class="scene-content">
+                    <div class="scene-copy">${stage.story}</div>
+                    <div class="scene-figure">${stage.icon}</div>
+                  </div>
+                </div>
+                <p class="story-text">
+                  <strong>نور:</strong> هذا البحر لا يروي فقط قصةً ماضية، بل يعلّم أن الطريق إلى الفهم قد يمرّ بالضيق، والعودة إلى الله هي بداية النور بعد العتمة. لا تُختَرع حكايات، بل تُستعاد القيم من مصدرها الصحيح، مع احترام المعلومة الإسلامية.
+                </p>
+                <div class="chip-row">
+                  <div class="chip">التقوى</div>
+                  <div class="chip">الرجوع إلى الله</div>
+                  <div class="chip">الصبر في الشدة</div>
+                  <div class="chip">الرحمة</div>
+                </div>
+              </div>
+
+              <div class="game-panel">
+                <div class="stage-header">
+                  <div class="eyebrow">اختبار الفهم</div>
+                  <h2 class="stage-title">أعمال الاستكشاف</h2>
+                </div>
+
+                <div class="quiz-box">
+                  <div class="question">${stage.question}</div>
+                  <div class="options">
+                    ${stage.options.map((option, index) => `
+                      <button class="option" data-index="${index}">${option}</button>
+                    `).join('')}
+                  </div>
+                  <div class="result" id="result"></div>
+                </div>
+
+                <div class="fact-box ${completed ? 'visible' : ''}" id="factBox">
+                  <div class="fact-label">${stage.badge}</div>
+                  <div class="fact-text">${stage.fact}</div>
+                </div>
+
+                <div class="footer-actions">
+                  <button class="btn ghost" id="mapAgain">خريطة الرحلة</button>
+                  <button class="btn primary" id="continueBtn" ${completed ? '' : 'style="display:none;"'}>متابعة</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      const optionButtons = [...document.querySelectorAll('.option')];
+      const result = document.getElementById('result');
+      const factBox = document.getElementById('factBox');
+      const continueBtn = document.getElementById('continueBtn');
+
+      optionButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          if (completed) return;
+          const index = Number(button.dataset.index);
+          optionButtons.forEach(btn => btn.disabled = true);
+
+          if (index === stage.correctIndex) {
+            button.classList.add('correct');
+            result.className = 'result good';
+            result.textContent = 'إجابة صحيحة! هذه القطعة من القصة تُثبت أن المؤمن يدرك أنّ الرجوع إلى الله هو طريق الخروج من الضيق.';
+            state.completed.add('yunus');
+            factBox.classList.add('visible');
+            continueBtn.style.display = 'inline-block';
+          } else {
+            button.classList.add('wrong');
+            const correct = optionButtons[stage.correctIndex];
+            correct.classList.add('correct');
+            result.className = 'result bad';
+            result.textContent = 'قريب جدًا… فالقصة تتعلق بالعودة إلى الله بعد الشدة وليس بالرحلة المادية وحدها.';
+            setTimeout(() => {
+              optionButtons.forEach(btn => btn.disabled = false);
+              button.classList.remove('wrong');
+              correct.classList.remove('correct');
+              result.textContent = '';
+            }, 1200);
+          }
+        });
+      });
+
+      document.getElementById('mapAgain').onclick = () => { state.screen = 'map'; render(); };
+      continueBtn.onclick = () => { state.screen = 'final'; render(); };
+    }
+
+    function renderFinal() {
+      app.innerHTML = `
+        <div class="screen">
+          <div class="topbar">
+            <div class="brand"><span class="dot"></span> ختام المرحلة</div>
+            <div class="mission-pill">إكمال أول ختم معرفي</div>
+          </div>
+          <div class="content">
+            <div class="final-box">
+              <div class="seal-badges">✦ ✧ ⟡ ✹ ❖ ✶</div>
+              <h2 class="title">تم اكتشاف أول سر</h2>
+              <p class="message">
+                نجح الطفل في فك أول ختم من مخطوطة <strong style="color: var(--gold-soft);">أسرار الزمان</strong>، وتعلّم أنه حتى في أعماق الضياع، لا يودع الإنسان ربه، بل يذكره بالرجوع، والصبر، والتوكل، والرحمة.
+                <br><br>
+                هذه المرحلة تمثل نموذجًا أوليًا لتطوير باقي قصص الأنبياء، مع الالتزام التام باحترامهم، والابتعاد عن التجسيد، مع إبقاء القصة تعليمية، آمنة، ومهيأة للأطفال.
+              </p>
+              <div class="button-group" style="justify-content: center; margin-top: 26px;">
+                <button class="btn primary" id="replayBtn">إعادة الرحلة</button>
+                <button class="btn ghost" id="backMapBtn">الخريطة</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('replayBtn').onclick = () => {
+        state.completed.clear();
+        state.screen = 'intro';
+        render();
+      };
+
+      document.getElementById('backMapBtn').onclick = () => { state.screen = 'map'; render(); };
+    }
+
+    render();
+  </script>
+</body>
+</html>
