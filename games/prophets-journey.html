@@ -620,12 +620,14 @@
       { id: 'muhammad', name: 'محمد ﷺ', title: 'الخاتمة والرحمة', mark: '✦', tag: 'الرحمة', unlocked: false }
     ];
 
-    const defaultMap = [
+    const stageCatalog = [
       {
         id: 'yunus',
+        name: 'يونس',
         title: 'أسرار أعماق البحار',
         subtitle: 'يونس عليه السلام',
         icon: '🐚',
+        sceneLabel: 'ممر المحيط العميق',
         story: 'في الطريق الصعب عبر البحر العميق، تتسلل رياح الشكّ إلى قلب السفينة، لكن «نور» يذكر الطفل أن الصبر والخضوع لله قد يفتح أبواب الفهم حين ينتهي الاضطراب. في هذه المرحلة، يقترب الاستكشاف من جوف الماء، حيث تُرعى الحكاية عبر الآية والبحث والرحلة المعنوية.',
         question: 'ما الذي كان سبب المهلة العظيمة التي مرّ بها يونس عليه السلام في أعماق البحر؟',
         options: [
@@ -638,16 +640,133 @@
         fact: 'في القصة المقررة في القرآن، يذكر يونس عليه السلام في مواقف العبودية والرجوع إلى الله، ويُستفاد منها معنى التوبة، والرحمة، والاعتماد على الله في أوقات الضيق.',
         badge: 'المعلومة الأساسية:',
         lesson: 'التوازن بين الحزن والرجوع إلى الله، واستمرار الدعوة رغم الظواهر القاسية.'
+      },
+      {
+        id: 'adam',
+        name: 'آدم',
+        title: 'أسرار البدايات',
+        subtitle: 'آدم عليه السلام',
+        icon: '🌿',
+        sceneLabel: 'حدائق البداية',
+        story: 'تفتح بوابة البداية في جنة هادئة من الأنهار، والأشجار، والهواء النقي. وهنا يشرح «نور» أن أول خطوة في الرحلة ليست في الكمال، بل في معرفة أصل الإنسان، وفضل الله عليه، ومعنى التوبة والرجوع إلى الحق.',
+        question: 'ما السلوك الذي يدل على التوبة الصحيحة عند الإنسان؟',
+        options: [
+          'الإصرار على الخطأ مع تبريره',
+          'الاعتراف بالخطأ والرجوع إلى الله والتوبة',
+          'نسيان الخطأ وعدم التفكير فيه',
+          'الترك لغير الله وحسب'
+        ],
+        correctIndex: 1,
+        fact: 'التوبة هي رجوع الإنسان إلى الله بقلبه وندمه، مع العزم على ترك المعصية، وهي سبب للرحمة ومنهج للعودة إلى الطاعة.',
+        badge: 'تعليم القلوب:',
+        lesson: 'التواضع، والاعتراف بالخطأ، والرجوع إلى الله في كل بداية.'
+      },
+      {
+        id: 'idris',
+        name: 'إدريس',
+        title: 'أسرار المعرفة',
+        subtitle: 'إدريس عليه السلام',
+        icon: '📚',
+        sceneLabel: 'مكتبة السماء',
+        story: 'في ممر من المخطوطات الضخمة والخرائط المضيئة، يشرح «نور» أن إدريس عليه السلام كان من المكرمين بفضل العلم، والرحلة إلى المعرفة تحتاج إلى الصبر والاهتمام، لا إلى التسارع أو التهويل.',
+        question: 'ما الصفة الواردة عن إدريس عليه السلام في القرآن الكريم؟',
+        options: [
+          'هو صاحب الخيل العظيمة',
+          'هو الصديق النبي',
+          'هو باني السد العظيم',
+          'هو أول من طلب القتال'
+        ],
+        correctIndex: 1,
+        fact: 'ورد في القرآن أن إدريس عليه السلام هو «الصديق» و«النبي»، ويُستفاد منه أهمية العلم والأمانة في طلب المعرفة.',
+        badge: 'رؤية معرفية:',
+        lesson: 'العلم يقود إلى التواضع، والمعرفة تُزرع بالصبر والاستفادة من ما أنزل الله.'
+      },
+      {
+        id: 'nuh',
+        name: 'نوح',
+        title: 'السفينة العظيمة',
+        subtitle: 'نوح عليه السلام',
+        icon: '⛵',
+        sceneLabel: 'سفينة الصبر',
+        story: 'يظهر في الأفق عالَم واسع من الرياح، والمطر، والسحب الداكنة، حيث تُبنى السفينة ببطء، ويُعلّم «نور» أن الصبر ليس غياب الألم بل استقامة القلب أثناء العناء.',
+        question: 'ما الذي كان سبب نجاح من stayed على الحق مع نوح عليه السلام؟',
+        options: [
+          'الاستعداد والتوكل على الله',
+          'الاستقواء بالقوة فقط',
+          'الابتعاد عن الدعوة',
+          'القلق على الرأي العام'
+        ],
+        correctIndex: 0,
+        fact: 'دعا نوح عليه السلام قومه إلى التوحيد، وصبر على البلاء، وفي النهاية نجى من آمن معه، وتعلّمنا أن الاستعداد مع الإيمان يفتح باب النجاة.',
+        badge: 'درس الصبر:',
+        lesson: 'النجاة تبدأ بالاستعداد، والثبات، والالتزام بالحق رغم قلة المنصورين.'
+      },
+      {
+        id: 'hud',
+        name: 'هود',
+        title: 'أسرار مدينة عاد',
+        subtitle: 'هود عليه السلام',
+        icon: '🏜️',
+        sceneLabel: 'مدينة عاد',
+        story: 'تتجول عيون الطفل في أعمدة قديمة، وأزقة واسعة، وصحراء عارية، وبين الركام تتضح رسالة هود عليه السلام: لا يغرّ الإنسان بقوته إذا لم يطعه الله.',
+        question: 'ما الخطر الأكبر الذي يواجه الإنسان عندما يفتخر بالقوة؟',
+        options: [
+          'يُنسى أصدقاءه بسهولة',
+          'يُغترّ ويترك الحق',
+          'يُصبح بارد القلب',
+          'يبدأ في بناء مدينة جديدة'
+        ],
+        correctIndex: 1,
+        fact: 'قصة عاد تُعلّم أن القوة الحقيقية في الاختبار هي التواضع والرحمة، لا الفخر والشطط، لأن العزّ الحقيقي عند الله.',
+        badge: 'معلومة العبرة:',
+        lesson: 'التواضع، وعدم الاغترار، والالتزام بالحق حتى عند قلة المقتفين.'
+      },
+      {
+        id: 'saleh',
+        name: 'صالح',
+        title: 'آية في ديار ثمود',
+        subtitle: 'صالح عليه السلام',
+        icon: '🪨',
+        sceneLabel: 'ديار ثمود',
+        story: 'في الجبال الصخرية والبيوت المنحوتة، تُستدعى صورة الناقة، آية من آيات الله، لتذكّر الطفل أن العبرة ليست في الظاهر فقط بل في التزام العهد وحق الله في الخلق.',
+        question: 'ما الدرس الأساسي من آية الناقة في قصة صالح عليه السلام؟',
+        options: [
+          'أن القوة تفرض القيم',
+          'أن العهد مع الله والعدل أهم من التمرد',
+          'أن الحيوانات تُعتبر بديلًا عن البشر',
+          'أن التغيير يكون فقط بالدمار'
+        ],
+        correctIndex: 1,
+        fact: 'كانت الناقة آيةً من آيات الله، وأُمر الناس بالاعتدال والرحمة، كما تُعلّم القصة أن الاعتداء على ما أُعطي بقدر لا يرحم الإنسان.',
+        badge: 'درس العدل:',
+        lesson: 'الحق لا يختلط بالظلم، والعدل في المعاملة يُنقذ الأمة من الخسران.'
       }
     ];
 
     const state = {
       screen: 'intro',
       currentStage: 0,
-      completed: new Set()
+      completed: new Set(loadProgress())
     };
 
     const app = document.getElementById('app');
+
+    function loadProgress() {
+      try {
+        const raw = localStorage.getItem('prophets-journey-progress');
+        return raw ? JSON.parse(raw) : [];
+      } catch (err) {
+        return [];
+      }
+    }
+
+    function saveProgress() {
+      try {
+        localStorage.setItem('prophets-journey-progress', JSON.stringify([...state.completed]));
+      } catch (err) {
+        // Ignore storage failures in restrictive browsers.
+      }
+    }
 
     function render() {
       if (state.screen === 'intro') return renderIntro();
@@ -695,18 +814,19 @@
 
     function renderMap() {
       const progress = state.completed.size;
-      const grids = prophets.map((prophet, index) => {
-        const isUnlocked = prophet.unlocked || index === 0 || state.completed.has('yunus');
-        const isActive = index === state.currentStage && state.screen === 'stage';
-        const isDone = state.completed.has(prophet.id);
+      const grids = stageCatalog.map((stage, index) => {
+        const previousStage = index === 0 ? null : stageCatalog[index - 1];
+        const isUnlocked = index === 0 || state.completed.has(previousStage.id);
+        const isActive = state.currentStage === index && state.screen === 'stage';
+        const isDone = state.completed.has(stage.id);
 
         return `
           <button class="seal ${isUnlocked ? '' : 'locked'} ${isActive ? 'active' : ''}" data-index="${index}" ${isUnlocked ? '' : 'disabled'}>
-            <span class="status"></span>
+            <span class="status" style="background:${isDone ? 'rgba(121, 207, 153, 0.7)' : 'rgba(229,141,125,0.7)'};"></span>
             <div class="num">ختم ${index + 1}</div>
-            <span class="mark">${prophet.mark}</span>
-            <div class="name">${prophet.name}</div>
-            <div class="meta">${prophet.title}</div>
+            <span class="mark">${stage.icon}</span>
+            <div class="name">${stage.name}</div>
+            <div class="meta">${stage.title}</div>
           </button>
         `;
       }).join('');
@@ -715,7 +835,7 @@
         <div class="screen">
           <div class="topbar">
             <div class="brand"><span class="dot"></span> مركز أسرار الزمان</div>
-            <div class="mission-pill">التقدم: ${progress} / ${prophets.length} خُتم</div>
+            <div class="mission-pill">التقدم: ${progress} / ${stageCatalog.length} خُتم</div>
           </div>
           <div class="content">
             <div class="stage-header">
@@ -725,7 +845,7 @@
             <div class="card-grid">${grids}</div>
             <div class="footer-actions" style="margin-top: 18px;">
               <button class="btn ghost" id="backIntro">العودة</button>
-              <div class="progress">تظهر الرحلة الأولى كاملة كـ نموذج أساسي، بينما البقية تُبنى على نفس المنهج</div>
+              <div class="progress">تتفتح المراحل بالتسلسل: بعد إكمال كل مرحلة، تفتح المرحلة التالية.</div>
             </div>
           </div>
         </div>
@@ -745,8 +865,8 @@
     }
 
     function renderStage() {
-      const stage = defaultMap[0];
-      const completed = state.completed.has('yunus');
+      const stage = stageCatalog[state.currentStage] || stageCatalog[0];
+      const completed = state.completed.has(stage.id);
 
       app.innerHTML = `
         <div class="screen">
@@ -758,7 +878,7 @@
             <div class="stage-layout">
               <div class="story-panel">
                 <div class="stage-header">
-                  <div class="eyebrow">المرحلة الأولى</div>
+                  <div class="eyebrow">المرحلة ${state.currentStage + 1}</div>
                   <h2 class="stage-title">${stage.title}</h2>
                 </div>
                 <div class="scene">
@@ -768,13 +888,13 @@
                   </div>
                 </div>
                 <p class="story-text">
-                  <strong>نور:</strong> هذا البحر لا يروي فقط قصةً ماضية، بل يعلّم أن الطريق إلى الفهم قد يمرّ بالضيق، والعودة إلى الله هي بداية النور بعد العتمة. لا تُختَرع حكايات، بل تُستعاد القيم من مصدرها الصحيح، مع احترام المعلومة الإسلامية.
+                  <strong>نور:</strong> هذا المشهد يذكّرنا أن كل رحلة تعليمية تبدأ من القيم: الصبر، والرحمة، والرجوع إلى الله، واحترام الدرس في كل قصة من قصص الأنبياء عليهم السلام.
                 </p>
                 <div class="chip-row">
-                  <div class="chip">التقوى</div>
-                  <div class="chip">الرجوع إلى الله</div>
-                  <div class="chip">الصبر في الشدة</div>
+                  <div class="chip">التواضع</div>
+                  <div class="chip">التوكل</div>
                   <div class="chip">الرحمة</div>
+                  <div class="chip">العبرة</div>
                 </div>
               </div>
 
@@ -823,8 +943,9 @@
           if (index === stage.correctIndex) {
             button.classList.add('correct');
             result.className = 'result good';
-            result.textContent = 'إجابة صحيحة! هذه القطعة من القصة تُثبت أن المؤمن يدرك أنّ الرجوع إلى الله هو طريق الخروج من الضيق.';
-            state.completed.add('yunus');
+            result.textContent = `إجابة صحيحة! ${stage.lesson}`;
+            state.completed.add(stage.id);
+            saveProgress();
             factBox.classList.add('visible');
             continueBtn.style.display = 'inline-block';
           } else {
@@ -832,7 +953,7 @@
             const correct = optionButtons[stage.correctIndex];
             correct.classList.add('correct');
             result.className = 'result bad';
-            result.textContent = 'قريب جدًا… فالقصة تتعلق بالعودة إلى الله بعد الشدة وليس بالرحلة المادية وحدها.';
+            result.textContent = 'قريب جدًا… راجع القصة وركز على الفكرة الأساسية في الدرس.';
             setTimeout(() => {
               optionButtons.forEach(btn => btn.disabled = false);
               button.classList.remove('wrong');
@@ -844,7 +965,7 @@
       });
 
       document.getElementById('mapAgain').onclick = () => { state.screen = 'map'; render(); };
-      continueBtn.onclick = () => { state.screen = 'final'; render(); };
+      continueBtn.onclick = () => { state.screen = 'map'; render(); };
     }
 
     function renderFinal() {
