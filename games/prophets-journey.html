@@ -45,6 +45,7 @@ button{font-family:inherit}
   <div class="top">
     <div class="prog"><small id="pt"></small><div class="pb"><b id="pf"></b></div></div>
     <span class="btn" style="display:inline-flex;gap:8px;align-items:center;padding:4px 12px"><button id="mute" aria-label="كتم" style="background:none;border:0;color:#fff;font-size:20px;cursor:pointer">🔊</button><input id="vol" type="range" min="0" max="100" value="40" aria-label="مستوى الصوت" style="width:90px"></span>
+    <button class="btn" id="bn" style="display:none">🎙 إنشاد</button>
     <button class="btn" id="ba">🏆 الإنجازات</button>
     <button class="btn" id="br">إعادة ضبط التقدم</button>
   </div>
@@ -101,6 +102,7 @@ $('ac').onclick=function(){$('ov').className='ov'};
 $('br').onclick=function(){if(confirm('هل تريد مسح كل تقدمك في رحلة الأنبياء؟')){if(PJ.reset()){S=PJ.load();render();toast('تمت إعادة ضبط التقدم')}else toast('تعذّر مسح التقدم')}};
 PJ.audio.bindUI($('mute'),$('vol'));
 document.addEventListener('pointerdown',function(){PJ.audio.init('hub')},{once:true});
+PJ.audio.probe('prophets-journey/audio/nasheed.mp3',function(ok){if(!ok)return;var b=$('bn');b.style.display='';b.onclick=function(){if(PJ.audio.playing()){PJ.audio.stop();b.textContent='🎙 إنشاد'}else{PJ.audio.init('hub');PJ.audio.play('prophets-journey/audio/nasheed.mp3',true);b.textContent='⏸ إيقاف الإنشاد'}}});
 render();
 })();
 </script>

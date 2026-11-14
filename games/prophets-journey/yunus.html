@@ -67,7 +67,7 @@ kbd{display:inline-block;min-width:22px;padding:0 6px;margin:0 2px;border:1px so
     <button id="go">ابدأ الاستكشاف</button><button class="alt" id="fresh" style="display:none">ابدأ من جديد</button>
   </div></div>
   <div class="ov hidden" id="card"><div class="card">
-    <h2 id="ct"></h2><p id="cb"></p><div class="dua" id="cd"></div><div class="ref" id="cr"></div><button id="cok">متابعة</button>
+    <h2 id="ct"></h2><p id="cb"></p><div class="dua" id="cd"></div><div class="ref" id="cr"></div><button class="alt" id="cs" style="display:none">🔊 استمع إلى التلاوة</button><button id="cok">متابعة</button>
   </div></div>
   <div class="ov hidden" id="nogl"><div class="card"><h2>تعذّر تشغيل العرض ثلاثي الأبعاد</h2><p>هذا المتصفح أو الجهاز لا يدعم WebGL. جرّب متصفحًا آخر.</p></div></div>
 </div>
@@ -138,7 +138,9 @@ const sub=new THREE.Group();
   const body=new THREE.Mesh(new THREE.CapsuleGeometry(1.3,3,6,16),hull);body.rotation.x=Math.PI/2;sub.add(body);
   const dome=new THREE.Mesh(new THREE.SphereGeometry(.95,16,12),glass);dome.position.set(0,.7,-.8);sub.add(dome);
   const fin=new THREE.Mesh(new THREE.BoxGeometry(.2,1.6,1.3),hull);fin.position.set(0,.9,2.1);sub.add(fin);
-  const prop=new THREE.Mesh(new THREE.BoxGeometry(1.8,.14,.1),new THREE.MeshStandardMaterial({color:0x444}));prop.position.z=3.1;sub.add(prop);sub.userData.prop=prop;
+  const wing=new THREE.Mesh(new THREE.BoxGeometry(4.2,.16,1.3),new THREE.MeshStandardMaterial({color:0xe2574c,roughness:.5}));wing.position.set(0,-.1,1);sub.add(wing);
+  const band=new THREE.Mesh(new THREE.TorusGeometry(1.32,.12,8,24),new THREE.MeshStandardMaterial({color:0xe2574c}));band.position.z=-.5;sub.add(band);
+  const prop=new THREE.Mesh(new THREE.BoxGeometry(1.3,.1,.1),new THREE.MeshStandardMaterial({color:0x444}));prop.position.z=3.1;sub.add(prop);sub.userData.prop=prop;
   const lamp=new THREE.Mesh(new THREE.SphereGeometry(.28,10,8),new THREE.MeshStandardMaterial({color:0xffffff,emissive:0xfff0c0,emissiveIntensity:0}));lamp.position.set(0,-.3,-2.5);sub.add(lamp);sub.userData.lamp=lamp;
   const spot=new THREE.SpotLight(0xfff0c0,0,90,.55,.6,1.1);spot.position.set(0,-.3,-2.3);const tg=new THREE.Object3D();tg.position.set(0,-1,-25);sub.add(spot,tg);spot.target=tg;sub.userData.spot=spot;
   const beam=new THREE.Mesh(new THREE.ConeGeometry(4,18,16,1,true),new THREE.MeshBasicMaterial({color:0xfff0c0,transparent:true,opacity:.1,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));
@@ -185,8 +187,9 @@ function setStep(n,spawn){step=n;ringHit=[false,false,false];rings.forEach((r,i)
   pearls.forEach((p,i)=>p.visible=n===1&&i===pr);beacon.userData.light.intensity=lit?60:0;
   if(n!==1)pr=n>1?5:0;if(n===1)pearls.forEach((p,i)=>p.visible=i===pr);
   save.yunus.step=n;save.yunus.pearls=pr;store();if(spawn){const s=STEPS[n].spawn;sub.position.set(...s);yaw=0;vel.set(0,0,0)}hud()}
-function card(o){$('ct').textContent=o.t;$('cb').textContent=o.b||'';$('cd').textContent=o.d||'';$('cr').textContent=o.r||'';$('cok').textContent=o.btn||'متابعة';
-  $('card').classList.remove('hidden');paused=true;$('cok').onclick=()=>{$('card').classList.add('hidden');paused=false;o.done&&o.done()}}
+let duaOK=false;PJ.audio.probe('audio/dua-yunus.mp3',ok=>{duaOK=ok});
+function card(o){$('cs').style.display=(o.audio&&duaOK)?'':'none';$('cs').onclick=()=>PJ.audio.play(o.audio);$('ct').textContent=o.t;$('cb').textContent=o.b||'';$('cd').textContent=o.d||'';$('cr').textContent=o.r||'';$('cok').textContent=o.btn||'متابعة';
+  $('card').classList.remove('hidden');paused=true;$('cok').onclick=()=>{PJ.audio.stop();$('card').classList.add('hidden');paused=false;o.done&&o.done()}}
 
 /* ---- الصوت (وحدة مشتركة) ---- */
 const tone=(f,d,t,v)=>PJ.audio.tone(f,d,t,v);
@@ -219,7 +222,7 @@ function startWhale(){cineDone=true;whale.visible=true;whale.userData={t:0,z:sub
 function nextPearl(){tone(520+pr*90,.3,'triangle');const f=FACTS[pr];pearls[pr].visible=false;pr++;save.yunus.pearls=pr;store();
   card({t:'لؤلؤة من القصة',b:f[0],r:'['+f[1]+']',btn:'متابعة',done:()=>{if(pr>=5){setStep(2)}else{pearls[pr].visible=true}hud()}});hud()}
 function lightBeacon(){lit=true;beacon.userData.light.intensity=60;beacon.userData.crystal.material.emissiveIntensity=2.5;tone(440,.5,'triangle');tone(660,.7,'sine');$('bar').style.display='none';
-  card({t:'دعاء يونس عليه السلام',b:'أضاءت المنارة، وهذا دعاءٌ ورد في القرآن الكريم عن يونس عليه السلام حين كان في الظلمات:',d:'لَا إِلَٰهَ إِلَّا أَنتَ سُبْحَانَكَ إِنِّي كُنتُ مِنَ الظَّالِمِينَ',r:'سورة الأنبياء، الآية 87',btn:'متابعة',
+  card({t:'دعاء يونس عليه السلام',b:'أضاءت المنارة، وهذا دعاءٌ ورد في القرآن الكريم عن يونس عليه السلام حين كان في الظلمات:',d:'لَا إِلَٰهَ إِلَّا أَنتَ سُبْحَانَكَ إِنِّي كُنتُ مِنَ الظَّالِمِينَ',r:'سورة الأنبياء، الآية 87',audio:'audio/dua-yunus.mp3',btn:'متابعة',
     done:()=>{toast('ثم قال الله تعالى: ﴿فَاسْتَجَبْنَا لَهُ وَنَجَّيْنَاهُ مِنَ الْغَمِّ﴾ — الأنبياء: 88',8000);setStep(4)}})}
 function finish(){save.yunus.done=true;save.yunus.step=5;store();tone(660,.5,'triangle');
   card({t:'تمت الرحلة',b:'ورد في القرآن أن الله نجّى يونس عليه السلام ونبذه بالعراء وهو سقيم وأنبت عليه شجرة من يقطين (الصافات: 145–146)، وأنه أُرسل إلى مئة ألفٍ أو يزيدون فآمنوا (الصافات: 147–148). ومما نتعلمه: أن نلجأ إلى الله بالدعاء والتسبيح في الشدة، وأن لا ننسى شكر نعمة النجاة.',r:'ختم «أسرار الزمان» لمغامرة يونس',btn:'العودة إلى المركز',done:()=>{location.href='../prophets-journey.html'}})}
@@ -255,13 +258,13 @@ function update(dt,t){
   /* حركة العالم */
   kelp.forEach(k=>{k.rotation.z=Math.sin(t*.9+k.userData.p)*.1;k.rotation.x=Math.cos(t*.7+k.userData.p)*.07});
   fish.forEach(f=>{const d=f.userData,a=t*d.s+d.ph;f.position.set(d.cx+Math.cos(a)*d.r,d.y+Math.sin(a*2)*.8,d.cz+Math.sin(a)*d.r);f.rotation.y=-a-Math.PI/2+Math.PI;f.children[1].rotation.y=Math.sin(t*8+d.ph)*.4});
-  rings.forEach((m,i)=>{m.rotation.y=t*.5+i;if(!ringHit[i])m.material.emissiveIntensity=.7+Math.sin(t*3)*.25});
+  rings.forEach((m,i)=>{m.rotation.z=t*.5+i;if(!ringHit[i])m.material.emissiveIntensity=.7+Math.sin(t*3)*.25});
   pearls.forEach(p=>{if(p.visible){p.position.y+=Math.sin(t*2.5)*.01;p.scale.setScalar(1+Math.sin(t*3)*.08)}});
   beacon.userData.crystal.rotation.y=t;
   const p=snow.geometry.attributes.position;for(let i=0;i<SN;i++){let x=p.getX(i),y=p.getY(i)-dt*.3,z=p.getZ(i);if(y-sp.y<-30)y+=60;else if(y-sp.y>30)y-=60;if(x-sp.x>30)x-=60;else if(x-sp.x<-30)x+=60;if(z-sp.z>30)z-=60;else if(z-sp.z<-30)z+=60;p.setXYZ(i,x,y,z)}p.needsUpdate=true;
   /* الكاميرا */
   if(cine){const k=cine.t/cine.dur;cam.position.lerp(new THREE.Vector3(sp.x-9,sp.y+3,sp.z+8),1-Math.exp(-3*dt));cam.lookAt(whale.position.x*(.4+k*.6)+sp.x*(1-.4-k*.6),whale.position.y,whale.position.z)}
-  else{const off=new THREE.Vector3(0,3.2-pitch*4,10.5).applyAxisAngle(new THREE.Vector3(0,1,0),yaw),tg=sp.clone().add(off);tg.y=clamp(tg.y,H(tg.x,tg.z)+1,SURF-.3);cam.position.lerp(tg,1-Math.exp(-7*dt));
+  else{const off=new THREE.Vector3(0,4.8-pitch*4,13).applyAxisAngle(new THREE.Vector3(0,1,0),yaw),tg=sp.clone().add(off);tg.y=clamp(tg.y,H(tg.x,tg.z)+1,SURF-.3);cam.position.lerp(tg,1-Math.exp(-7*dt));
     cam.lookAt(sp.x-Math.sin(yaw)*12,sp.y+1.5+pitch*6,sp.z-Math.cos(yaw)*12)}
 }
 
