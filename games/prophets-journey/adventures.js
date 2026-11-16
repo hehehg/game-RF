@@ -1,12 +1,12 @@
 /* سجل المغامرات الخمس والعشرين بترتيب القائمة المعتمدة. أضف file عند اكتمال المغامرة. */
 window.ADVENTURES = [
-  { id: 'adam', name: 'آدم عليه السلام' },
-  { id: 'idris', name: 'إدريس عليه السلام' },
+  { id: 'adam', name: 'آدم عليه السلام', file: 'prophets-journey/play.html?id=adam', steps: 2 },
+  { id: 'idris', name: 'إدريس عليه السلام', file: 'prophets-journey/play.html?id=idris', steps: 2 },
   { id: 'nuh', name: 'نوح عليه السلام', file: 'prophets-journey/play.html?id=nuh', steps: 4 },
-  { id: 'hud', name: 'هود عليه السلام' },
-  { id: 'salih', name: 'صالح عليه السلام' },
+  { id: 'hud', name: 'هود عليه السلام', file: 'prophets-journey/play.html?id=hud', steps: 3 },
+  { id: 'salih', name: 'صالح عليه السلام', file: 'prophets-journey/play.html?id=salih', steps: 2 },
   { id: 'ibrahim', name: 'إبراهيم عليه السلام', file: 'prophets-journey/play.html?id=ibrahim', steps: 2 },
-  { id: 'lut', name: 'لوط عليه السلام' },
+  { id: 'lut', name: 'لوط عليه السلام', file: 'prophets-journey/play.html?id=lut', steps: 2 },
   { id: 'ismail', name: 'إسماعيل عليه السلام' },
   { id: 'ishaq', name: 'إسحاق عليه السلام' },
   { id: 'yaqub', name: 'يعقوب عليه السلام' },

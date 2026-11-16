@@ -22,8 +22,9 @@ function start(A) {
   var S = new THREE.Scene(), FOG = new THREE.Color(T.fog), STORM = new THREE.Color(T.storm || 0x45515c);
   S.background = FOG.clone(); S.fog = new THREE.Fog(FOG.clone(), 30, T.fogFar || 150);
   var cam = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, .1, 400);
-  var hemi = new THREE.HemisphereLight(T.sky || 0xdff3ff, T.ground[0], 1.5); S.add(hemi);
-  var sun = new THREE.DirectionalLight(0xfff4d6, 1.7); sun.position.set(40, 80, 20); S.add(sun);
+  var HB = T.hemi || 1.5, SB = T.sunI || 1.7, DAWN = new THREE.Color(T.dawn || 0xf3b98a);
+  var hemi = new THREE.HemisphereLight(T.sky || 0xdff3ff, T.ground[0], HB); S.add(hemi);
+  var sun = new THREE.DirectionalLight(0xfff4d6, SB); sun.position.set(40, 80, 20); S.add(sun);
   var seed = 11; function rnd() { seed |= 0; seed = seed + 0x6D2B79F5 | 0; var t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }
   function H(x, z) {
     var y = TR.kind === 'dunes' ? -4 + Math.sin(x * .04 + z * .02) * 4 + Math.sin(z * .05) * 3 + Math.sin(x * .11 - z * .07) * 1.2
@@ -72,12 +73,12 @@ function start(A) {
   var core = new THREE.Mesh(new THREE.SphereGeometry(.6, 16, 12), new THREE.MeshBasicMaterial({ color: 0xfff2b0 }));
   var ring = new THREE.Mesh(new THREE.TorusGeometry(2.1, .13, 10, 40), new THREE.MeshStandardMaterial({ color: 0xf4c95d, emissive: 0xf4c95d, emissiveIntensity: .7 })); ring.rotation.x = Math.PI / 2;
   var glow = new THREE.Mesh(new THREE.SphereGeometry(2.6, 16, 12), new THREE.MeshBasicMaterial({ color: 0xfff2b0, transparent: true, opacity: .12, blending: THREE.AdditiveBlending, depthWrite: false }));
-  orb.add(shell, core, ring, glow); S.add(orb);
+  orb.add(shell, core, ring, glow); S.add(orb); if (T.night) orb.add(new THREE.PointLight(0xfff2b0, 90, 50, 1.3));
   var guide = new THREE.Mesh(new THREE.CylinderGeometry(.35, .35, 30, 8, 1, true), new THREE.MeshBasicMaterial({ color: 0xffe08a, transparent: true, opacity: .18, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide })); guide.visible = false; S.add(guide);
   /* مطر */
   var RN = 320, rg = new THREE.BufferGeometry(), rp = new Float32Array(RN * 3); for (var i = 0; i < RN * 3; i++) rp[i] = (rnd() - .5) * 60;
   rg.setAttribute('position', new THREE.BufferAttribute(rp, 3));
-  var rain = new THREE.Points(rg, new THREE.PointsMaterial({ color: 0xcfe8ff, size: .22, transparent: true, opacity: .6, depthWrite: false })); rain.visible = false; rain.frustumCulled = false; S.add(rain);
+  var rain = new THREE.Points(rg, new THREE.PointsMaterial({ color: T.dust || 0xcfe8ff, size: T.dust ? .5 : .22, transparent: true, opacity: .6, depthWrite: false })); rain.visible = false; rain.frustumCulled = false; S.add(rain);
 
   /* المنشآت التي تُبنى بالتقدم */
   var STR = A.structure, strG = null, strParts = [], strExtra = null, animalSlots = [], animalN = 0;
@@ -107,7 +108,7 @@ function start(A) {
   function hud() {
     var s = STEPS[Math.min(step, STEPS.length - 1)]; $('mt').textContent = s.t; $('mx').textContent = s.m;
     Array.prototype.forEach.call(pips.children, function (p, i) { p.className = i < step ? 'on' : i === step ? 'cur' : ''; });
-    var c = ''; if (M) { if (M.type === 'rings') c = 'الحلقات: ' + M.hit.filter(Boolean).length + '/' + M.pts.length; else if (M.type === 'carry') c = (s.count || 'المنقول') + ': ' + M.delivered + '/' + M.items.length; } $('cnt').textContent = c;
+    var c = ''; if (M) { if (M.type === 'rings') c = 'الحلقات: ' + M.hit.filter(Boolean).length + '/' + M.pts.length; else if (M.type === 'carry' || M.type === 'discover') c = (s.count || 'المنقول') + ': ' + M.delivered + '/' + M.items.length; } $('cnt').textContent = c;
   }
   function clearObjs() { objs.forEach(function (o) { S.remove(o); if (o.parent && o.parent !== S) o.parent.remove(o); }); objs = []; }
   function makeAnimal(col) { var g = new THREE.Group(), mt = new THREE.MeshStandardMaterial({ color: col, roughness: .8 });
@@ -122,6 +123,22 @@ function start(A) {
     g.add(mesh); return g;
   }
   function addGlow(g, r) { var h = new THREE.Mesh(new THREE.SphereGeometry(r, 12, 10), new THREE.MeshBasicMaterial({ color: 0xffe08a, transparent: true, opacity: .2, blending: THREE.AdditiveBlending, depthWrite: false })); g.add(h); }
+  function label(text) { var c = document.createElement('canvas'); c.width = 320; c.height = 80; var x = c.getContext('2d'); x.font = '700 44px Tajawal, Tahoma, sans-serif'; x.textAlign = 'center'; x.fillStyle = 'rgba(6,22,31,.7)'; x.fillRect(0, 8, 320, 64); x.fillStyle = '#f4e6b4'; x.fillText(text, 160, 56);
+    var sp2 = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), depthTest: false, transparent: true })); sp2.scale.set(7, 1.75, 1); sp2.renderOrder = 9; return sp2; }
+  function lm(kind) {
+    var g = new THREE.Group(), mat = function (c, e) { return new THREE.MeshStandardMaterial({ color: c, emissive: e || 0, emissiveIntensity: e ? .6 : 0, roughness: .8 }); };
+    if (kind === 'earth') g.add(new THREE.Mesh(new THREE.SphereGeometry(2.2, 14, 8, 0, 6.283, 0, 1.57), mat(0x8a5a2b, 0x3a2000)));
+    else if (kind === 'light' || kind === 'star') { var o = new THREE.Mesh(new THREE.OctahedronGeometry(1.6), mat(kind === 'star' ? 0xbfe8ff : 0xfff2b0, kind === 'star' ? 0x4aa0ff : 0xffd34a)); o.position.y = 2; g.add(o); g.userData.spin = o; }
+    else if (kind === 'book') [-1, 1].forEach(function (k) { var b = new THREE.Mesh(new THREE.BoxGeometry(1.6, .2, 2.2), mat(0xfff4d6, 0x806a30)); b.position.set(k * .85, 1.2, 0); b.rotation.z = -k * .25; g.add(b); });
+    else if (kind === 'gate') { [-2, 2].forEach(function (x) { var c = new THREE.Mesh(new THREE.CylinderGeometry(.35, .35, 5, 8), mat(0xf4e6b4, 0x806a30)); c.position.set(x, 2.5, 0); g.add(c); }); var a = new THREE.Mesh(new THREE.TorusGeometry(2, .3, 8, 20, Math.PI), mat(0xf4c95d, 0xb08a20)); a.position.y = 5; g.add(a); }
+    else if (kind === 'tree') { var t = new THREE.Mesh(new THREE.CylinderGeometry(.35, .5, 3, 7), mat(0x6b4a2b)); t.position.y = 1.5; var cn = new THREE.Mesh(new THREE.ConeGeometry(2.2, 4.5, 8), mat(0x3f9d4a, 0x0a4a1a)); cn.position.y = 5; g.add(t, cn); }
+    else if (kind === 'fountain') { var b2 = new THREE.Mesh(new THREE.CylinderGeometry(2, 2.4, .8, 16), mat(0xcfd8dc)); b2.position.y = .4; var w = new THREE.Mesh(new THREE.CylinderGeometry(1.7, 1.7, .9, 16), mat(0x4fc3f7, 0x0277bd)); w.position.y = .55; g.add(b2, w); }
+    else if (kind === 'tower') for (var i = 0; i < 4; i++) { var tb = new THREE.Mesh(new THREE.BoxGeometry(3 - i * .5, 3.2, 3 - i * .5), mat(0xc9a870)); tb.position.y = 1.6 + i * 3.2; g.add(tb); }
+    else if (kind === 'rockhouse') { var r = new THREE.Mesh(new THREE.BoxGeometry(6, 5, 3), mat(0xa0694a)); r.position.y = 2.5; var d1 = new THREE.Mesh(new THREE.BoxGeometry(1.6, 2.6, .5), mat(0x2a1a10)); d1.position.set(0, 1.4, 1.6); var d2 = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.4, .5), mat(0x2a1a10)); d2.position.set(-2, 3.4, 1.6); g.add(r, d1, d2); }
+    else if (kind === 'camel') { var a2 = makeAnimal(0xc8a56a); a2.scale.setScalar(1.8); a2.position.y = 2.2; var nk = new THREE.Mesh(new THREE.CylinderGeometry(.25, .35, 1.8, 6), new THREE.MeshStandardMaterial({ color: 0xc8a56a })); nk.position.set(1.8, .9, 0); nk.rotation.z = -.5; a2.add(nk); g.add(a2); }
+    else if (kind === 'lamp') { var pl = new THREE.Mesh(new THREE.CylinderGeometry(.12, .15, 4, 6), mat(0x3a3a3a)); pl.position.y = 2; var sb = new THREE.Mesh(new THREE.SphereGeometry(.6, 10, 8), mat(0xffe08a, 0xffc040)); sb.position.y = 4.3; g.add(pl, sb); }
+    return g;
+  }
   function buildStep(n) {
     clearObjs(); var s = STEPS[n]; M = { type: s.type };
     if (s.type === 'rings') { M.pts = s.pts.map(function (a) { return new THREE.Vector3(a[0], a[1], a[2]); }); M.hit = M.pts.map(function () { return false; });
@@ -131,6 +148,10 @@ function start(A) {
       M.items = s.items.map(function (it, ix) { var g = makeItem(s.kind, it.color); var y = H(it[0] === undefined ? it.x : it[0], it.z) ; g.position.set(it.x, H(it.x, it.z) + 1.2, it.z); addGlow(g, 1.8); g.visible = ix === 0; S.add(g); objs.push(g); return { g: g, done: false, fact: it.fact, color: it.color }; });
       var pad = new THREE.Mesh(new THREE.TorusGeometry(6, .25, 8, 40), new THREE.MeshBasicMaterial({ color: 0xffe08a, transparent: true, opacity: .8 })); pad.rotation.x = Math.PI / 2; pad.position.set(s.to[0], M.to.y - 1, s.to[1]); S.add(pad); objs.push(pad); M.pad = pad;
     }
+    if (s.type === 'discover') {
+      M.delivered = 0; M.items = s.items.map(function (it, ix) { var g = lm(it.kind), y = it.y !== undefined ? it.y : H(it.x, it.z); g.position.set(it.x, y, it.z); addGlow(g, 3); var lb = label(it.name); lb.position.y = 7; g.add(lb); g.visible = ix === 0; S.add(g); objs.push(g); return { g: g, fact: it.fact }; });
+    }
+    if (s.type === 'storm') { M.pos = new THREE.Vector3(s.pos[0], H(s.pos[0], s.pos[1]) + 3, s.pos[1]); M.t = 0; M.wind = s.wind || [1, 0]; M.force = s.force || 7; var bm = new THREE.Mesh(new THREE.OctahedronGeometry(2), new THREE.MeshBasicMaterial({ color: 0xfff2b0 })); bm.position.copy(M.pos); S.add(bm); objs.push(bm); }
     if (s.type === 'flood') { M.pos = new THREE.Vector3(s.pos[0], H(s.pos[0], s.pos[1]) + 3, s.pos[1]); }
     hud();
   }
@@ -142,15 +163,20 @@ function start(A) {
   }
   function nextStep() { if (step + 1 >= STEPS.length) return finish(); var n = step + 1; setStep(n, false); var s = STEPS[n]; if (s.intro) toast(s.intro, 7000); if (s.type === 'flood') startFlood(); }
   function startFlood() { flood = { t: 0, phase: 'rise', r: 0 }; rain.visible = true; PJ.audio.tone(140, 1, 'sine', .05); }
+  var FXS = null;
   function finish() {
     SV.done = true; SV.step = STEPS.length; store(); ending = true; flood = flood || null;
+    if (A.ending.fx) { FXS = { t: 0, k: A.ending.fx, shown: false }; paused = true; } else showEnding();
+  }
+  function showEnding() {
     card({ t: A.ending.t, b: A.ending.b, r: A.ending.r, btn: 'العودة إلى المركز', done: function () { location.href = '../prophets-journey.html'; } });
   }
   function target() {
     if (!M || ending) return null;
     if (M.type === 'rings') { var i = M.hit.indexOf(false); return i < 0 ? null : M.pts[i]; }
     if (M.type === 'carry') { if (M.carry) return M.to; var cur = M.items[M.delivered]; return cur ? cur.g.position : null; }
-    if (M.type === 'flood') return M.pos; return null;
+    if (M.type === 'discover') { var cd = M.items[M.delivered]; return cd ? cd.g.position : null; }
+    if (M.type === 'flood' || M.type === 'storm') return M.pos; return null;
   }
   /* الإدخال */
   addEventListener('keydown', function (e) { if (/^(Space|Arrow)/.test(e.code)) e.preventDefault(); keys[e.code] = true; });
@@ -170,12 +196,14 @@ function start(A) {
 
   var up = new THREE.Vector3(0, 1, 0), WL0 = -200, WHI = (A.flood && A.flood.level) || 14;
   function update(dt, t) {
-    var sp = orb.position;
+    var sp = orb.position, storm = 0;
+    if (M && M.type === 'storm') { M.t += dt; storm = Math.min(1, M.t / 4); rain.visible = true; }
     if (!paused) {
       var f = (keys.KeyW || keys.ArrowUp ? 1 : 0) - (keys.KeyS || keys.ArrowDown ? 1 : 0) - joy.y, r = (keys.KeyD ? 1 : 0) - (keys.KeyA ? 1 : 0) + joy.x, u = (keys.Space || tUp ? 1 : 0) - (keys.KeyC || keys.ShiftLeft || tDn ? 1 : 0);
       if (keys.ArrowLeft) yaw += 1.6 * dt; if (keys.ArrowRight) yaw -= 1.6 * dt;
       var want = new THREE.Vector3(-Math.sin(yaw) * f + Math.cos(yaw) * r, u * .8, -Math.cos(yaw) * f - Math.sin(yaw) * r); if (want.lengthSq() > 1) want.normalize(); want.multiplyScalar(16);
       vel.lerp(want, 1 - Math.exp(-4 * dt)); sp.addScaledVector(vel, dt);
+      if (M && M.type === 'storm') { sp.x += M.wind[0] * M.force * storm * dt; sp.z += M.wind[1] * M.force * storm * dt; }
     } else vel.multiplyScalar(.95);
     sp.x = clamp(sp.x, -XM, XM); sp.z = clamp(sp.z, ZB, ZA); sp.y = clamp(sp.y, H(sp.x, sp.z) + 2.2, A.ceiling || 48);
     orb.rotation.y += dt * .8; ring.rotation.z += dt * 1.5; core.scale.setScalar(1 + Math.sin(t * 3) * .08);
@@ -191,10 +219,16 @@ function start(A) {
           if (M.delivered >= M.items.length) { var mm = M; M = { type: 'wait' }; setTimeout(function () { if (!ending) nextStep(); }, 1600); }
         }
       }
+      else if (M.type === 'discover') {
+        var cur = M.items[M.delivered];
+        if (cur && cur.g.position.distanceTo(sp) < 7) { M.delivered++; PJ.audio.tone(560 + M.delivered * 60, .3, 'triangle', .05); toast(cur.fact[0] + '  [' + cur.fact[1] + ']', 9500);
+          if (M.items[M.delivered]) M.items[M.delivered].g.visible = true; hud();
+          if (M.delivered >= M.items.length) { M = { type: 'wait' }; setTimeout(function () { if (!ending) nextStep(); }, 2600); } }
+      }
+      else if (M.type === 'storm' && sp.distanceTo(M.pos) < 8) { toast(STEPS[step].settle, 9500); rain.visible = false; M = { type: 'wait' }; setTimeout(function () { if (!ending) nextStep(); }, 3800); }
       else if (M.type === 'flood' && flood && flood.phase === 'rise' && sp.distanceTo(M.pos) < 8) { flood.phase = 'recede'; flood.r = 0; toast(A.flood.settle, 9000); }
     }
     /* الطوفان: ارتفاع الماء، والسفينة تطفو وتتجه نحو الجبل ثم تستقر */
-    var storm = 0;
     if (flood) {
       flood.t += dt; var dest = A.flood.dest, dy = H(dest[0], dest[1]) + .4;
       if (flood.phase === 'rise') { var k2 = ss(flood.t / A.flood.dur); water.position.y = WL0 + (WHI - WL0) * k2 * k2 * k2 * 0 + (WHI - (-60)) * 0; water.position.y = -30 + (WHI + 30) * k2; storm = Math.min(1, flood.t / 6);
@@ -204,8 +238,8 @@ function start(A) {
         if (flood.r > 10 && !ending) { rain.visible = false; finish(); } }
       water.geometry.attributes.position.needsUpdate = false;
     }
-    if (rain.visible) { var rp2 = rain.geometry.attributes.position; for (var q = 0; q < RN; q++) { var x = rp2.getX(q), y = rp2.getY(q) - dt * 38, z = rp2.getZ(q); if (y - sp.y < -25) y += 50; if (x - sp.x > 30) x -= 60; else if (x - sp.x < -30) x += 60; if (z - sp.z > 30) z -= 60; else if (z - sp.z < -30) z += 60; rp2.setXYZ(q, x, y, z); } rp2.needsUpdate = true; rain.material.opacity = .6 * storm; }
-    S.fog.color.copy(FOG).lerp(STORM, storm * .85); S.background.copy(S.fog.color); S.fog.far = (T.fogFar || 150) - storm * 60; hemi.intensity = 1.5 - storm * .7; sun.intensity = 1.7 - storm * 1.1;
+    if (rain.visible) { var rp2 = rain.geometry.attributes.position; for (var q = 0; q < RN; q++) { var x = rp2.getX(q), y = rp2.getY(q) - dt * (T.dust ? 3 : 38), z = rp2.getZ(q); if (T.dust && M && M.wind) { x += dt * 40 * M.wind[0]; z += dt * 40 * M.wind[1]; } if (y - sp.y < -25) y += 50; else if (y - sp.y > 25) y -= 50; if (x - sp.x > 30) x -= 60; else if (x - sp.x < -30) x += 60; if (z - sp.z > 30) z -= 60; else if (z - sp.z < -30) z += 60; rp2.setXYZ(q, x, y, z); } rp2.needsUpdate = true; rain.material.opacity = (T.dust ? .8 : .6) * storm; }
+    S.fog.color.copy(FOG).lerp(STORM, storm * .85); S.background.copy(S.fog.color); S.fog.far = (T.fogFar || 150) - storm * 60; hemi.intensity = HB * (1 - storm * .45); sun.intensity = SB * (1 - storm * .65);
     /* الحلقات وهدف المهمة */
     if (M && M.type === 'rings') M.meshes.forEach(function (m, i) { m.rotation.z = t * .5 + i; if (!M.hit[i]) m.material.emissiveIntensity = .7 + Math.sin(t * 3) * .25; });
     var tg = target();
@@ -213,9 +247,13 @@ function start(A) {
       $('na').style.transform = 'rotate(' + ang + 'rad)'; $('nd').textContent = Math.round(d) + ' م' + (Math.abs(tg.y - sp.y) > 5 ? (tg.y > sp.y ? ' ⬆' : ' ⬇') : ''); $('nav').style.display = 'flex'; guide.visible = true; guide.position.set(tg.x, tg.y + 14, tg.z); guide.material.opacity = .16 + Math.sin(t * 3) * .05; }
     else { $('nav').style.display = 'none'; guide.visible = false; }
     if (M && M.pad) M.pad.rotation.z = t;
+    if (M && M.items) M.items.forEach(function (it) { if (it.g.userData.spin) it.g.userData.spin.rotation.y = t; });
     /* الكاميرا */
     if (introOn) { var a = t * .15; cam.position.set(sp.x + Math.sin(a) * 16, sp.y + 5, sp.z + Math.cos(a) * 16); cam.lookAt(sp.x, sp.y, sp.z); }
     else { var off = new THREE.Vector3(0, 4.4 - pitch * 4, 12).applyAxisAngle(up, yaw), tgt = sp.clone().add(off); tgt.y = Math.max(tgt.y, H(tgt.x, tgt.z) + 1); cam.position.lerp(tgt, 1 - Math.exp(-7 * dt)); cam.lookAt(sp.x - Math.sin(yaw) * 12, sp.y + 1 + pitch * 6, sp.z - Math.cos(yaw) * 12); }
+    if (FXS) { FXS.t += dt; var amp = Math.min(1, FXS.t / 1.2) * (FXS.t < 4 ? 1 : Math.max(0, 5 - FXS.t)); cam.position.x += (Math.random() - .5) * .9 * amp; cam.position.y += (Math.random() - .5) * .9 * amp;
+      if (FXS.k === 'dawn') { var kd = ss(FXS.t / 4); S.fog.color.lerp(DAWN, kd); S.background.copy(S.fog.color); hemi.intensity = HB + kd * 1.2; sun.intensity = SB + kd * 1.2; }
+      if (FXS.t > 4.8 && !FXS.shown) { FXS.shown = true; showEnding(); } }
   }
   var last = performance.now();
   function loop(now) { var dt = Math.min((now - last) / 1000, .05); last = now; update(dt, now / 1000); R.render(S, cam); requestAnimationFrame(loop); }
@@ -227,7 +265,7 @@ function start(A) {
   function begin(fresh) {
     introOn = false; PJ.audio.init(A.ambient || 'wind'); try { window.focus(); } catch (e) { }
     if (fresh) { SV.step = 0; SV.done = false; }
-    var s = SV.done && !fresh ? 0 : clamp(SV.step || 0, 0, STEPS.length - 1); ending = false; flood = null; water.position.y = -200; rain.visible = false;
+    var s = SV.done && !fresh ? 0 : clamp(SV.step || 0, 0, STEPS.length - 1); ending = false; FXS = null; flood = null; water.position.y = -200; rain.visible = false;
     setStep(s, true); if (STEPS[s].type === 'flood') startFlood(); $('intro').classList.add('hidden'); paused = false;
   }
   if (SV.step > 0 && !SV.done) { $('go').textContent = 'متابعة المغامرة'; $('fresh').style.display = ''; } else if (SV.done) $('go').textContent = 'العب المغامرة مرة أخرى';
