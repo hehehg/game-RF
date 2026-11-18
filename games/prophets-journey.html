@@ -74,7 +74,7 @@ function render(){
   var done=A.filter(function(a){return S[a.id]&&S[a.id].done}).length;
   $('pt').textContent='المغامرات المكتملة: '+done+' من '+A.length;
   $('pf').style.width=(done/A.length*100)+'%';
-  $('nt').textContent=done?'أحسنت! أكملتَ '+done+' من المغامرات. اختر عالمًا جديدًا أو أعد زيارة عالم تحبه.':'مرحبًا! أنا نور، مرشدك في مركز أسرار الزمان. اختر عالمًا لتبدأ رحلتك. المغامرة المتاحة الآن هي مغامرة يونس عليه السلام.';
+  $('nt').textContent=done?'أحسنت! أكملتَ '+done+' من المغامرات. اختر عالمًا جديدًا أو أعد زيارة عالم تحبه.':'مرحبًا! أنا نور، مرشدك في مركز أسرار الزمان. اختر مغامرة من المغامرات المتاحة لتبدأ رحلتك.';
   var g=$('g');g.innerHTML='';
   A.forEach(function(a,i){
     var s=st(a),b=document.createElement('button');

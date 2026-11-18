@@ -34,6 +34,14 @@ function start(A) {
     return y;
   }
   var W = TR.w || 160, L = TR.l || 220, CZ = TR.cz || -60, XM = W / 2 - 4, ZA = CZ + L / 2 - 4, ZB = CZ - L / 2 + 4;
+  /* صور حقيقية اختيارية: ضع ملفات PNG في مجلد assets وتُستخدم تلقائيًا بدل المجسمات البسيطة */
+  var texLoader = new THREE.TextureLoader();
+  function loadTex(n, cb) { texLoader.load('assets/' + n + '.png', function (t) { t.colorSpace = THREE.SRGBColorSpace; cb(t); }, undefined, function () { cb(null); }); }
+  function spriteSwap(names, pts, w, h, hide) {
+    var texs = [], left = names.length; if (!pts.length) return;
+    names.forEach(function (n) { loadTex(n, function (t) { if (t) texs.push(t); if (--left === 0 && texs.length) { hide.forEach(function (m) { m.visible = false; });
+      pts.forEach(function (q, i) { var sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: texs[i % texs.length] })); sp.center.set(.5, 0); sp.position.set(q.x, q.y - .2, q.z); sp.scale.set(w * q.s, h * q.s, 1); S.add(sp); }); } }); });
+  }
   /* التضاريس */
   (function () {
     var g = new THREE.PlaneGeometry(W, L, 130, 180); g.rotateX(-Math.PI / 2); g.translate(0, 0, CZ);
@@ -54,19 +62,21 @@ function start(A) {
   /* زينة العالم */
   function nearFlat(x, z) { return (TR.flat || []).some(function (f) { return Math.hypot(x - f.x, z - f.z) < f.r + 4; }); }
   var rockM = [0x7a7468, 0x6a645a, 0x8a8478].map(function (c) { return new THREE.MeshStandardMaterial({ color: c, roughness: .95, flatShading: true }); });
-  function rock(x, z, s) { var m = new THREE.Mesh(new THREE.DodecahedronGeometry(1, 0), rockM[(rnd() * 3) | 0]); m.scale.set(s, s * (.6 + rnd() * .6), s); m.position.set(x, H(x, z) + s * .3, z); m.rotation.set(rnd() * 3, rnd() * 3, rnd() * 3); S.add(m); }
+  function rock(x, z, s) { var m = new THREE.Mesh(new THREE.DodecahedronGeometry(1, 0), rockM[(rnd() * 3) | 0]); m.scale.set(s, s * (.6 + rnd() * .6), s); m.position.set(x, H(x, z) + s * .3, z); m.rotation.set(rnd() * 3, rnd() * 3, rnd() * 3); S.add(m); rockM2.push(m); rockPts.push({ x: x, y: H(x, z), z: z, s: s }); }
+  var rockM2 = [], rockPts = [];
   var dummy = new THREE.Object3D();
   (A.decor || []).forEach(function (d) {
     if (d.type === 'rocks') { for (var i = 0; i < d.n; i++) { var x = (rnd() - .5) * W * .9, z = CZ + (rnd() - .5) * L * .9; if (!nearFlat(x, z)) rock(x, z, 1 + rnd() * 2.6); } }
     if (d.type === 'trees') {
       var tr = new THREE.InstancedMesh(new THREE.CylinderGeometry(.25, .4, 3, 6).translate(0, 1.5, 0), new THREE.MeshStandardMaterial({ color: 0x6b4a2b }), d.n);
       var cn = new THREE.InstancedMesh(new THREE.ConeGeometry(1.8, 4.2, 7).translate(0, 5, 0), new THREE.MeshStandardMaterial({ roughness: .9 }), d.n), k = 0;
-      var cols = (d.colors || [0x3f7d3a, 0x56903f, 0x2f6b3a]).map(function (c) { return new THREE.Color(c); });
+      var tp = [], cols = (d.colors || [0x3f7d3a, 0x56903f, 0x2f6b3a]).map(function (c) { return new THREE.Color(c); });
       for (var i = 0; i < d.n; i++) { var x = (rnd() - .5) * W * .92, z = CZ + (rnd() - .5) * L * .92, y = H(x, z); if (nearFlat(x, z) || y > (d.maxY || 6)) continue;
-        var s = .8 + rnd() * .8; dummy.position.set(x, y, z); dummy.scale.set(s, s, s); dummy.rotation.set(0, rnd() * 6, 0); dummy.updateMatrix(); tr.setMatrixAt(k, dummy.matrix); cn.setMatrixAt(k, dummy.matrix); cn.setColorAt(k, cols[(rnd() * cols.length) | 0]); k++; }
-      tr.count = cn.count = k; S.add(tr, cn);
+        var s = .8 + rnd() * .8; tp.push({ x: x, y: y, z: z, s: s }); dummy.position.set(x, y, z); dummy.scale.set(s, s, s); dummy.rotation.set(0, rnd() * 6, 0); dummy.updateMatrix(); tr.setMatrixAt(k, dummy.matrix); cn.setMatrixAt(k, dummy.matrix); cn.setColorAt(k, cols[(rnd() * cols.length) | 0]); k++; }
+      tr.count = cn.count = k; S.add(tr, cn); spriteSwap(d.sprites || ['tree-1', 'tree-2', 'tree-3'], tp, d.sw || 7, d.sh || 9, [tr, cn]);
     }
   });
+  spriteSwap(['rock-1', 'rock-2', 'rock-3'], rockPts, 3.6, 2.8, rockM2);
   /* مركبة الاستكشاف (كرة نور) — خيالية وليست جزءًا من القصة */
   var orb = new THREE.Group();
   var shell = new THREE.Mesh(new THREE.SphereGeometry(1.5, 24, 16), new THREE.MeshStandardMaterial({ color: 0xbff3ff, emissive: 0x2aa6c8, emissiveIntensity: .5, transparent: true, opacity: .4, roughness: .1 }));
@@ -106,6 +116,9 @@ function start(A) {
   var START = A.start || [0, 8, 30];
   orb.position.set(START[0], START[1], START[2]);
   function toast(t, ms) { var e = $('toast'); e.textContent = t; e.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(function () { e.classList.remove('on'); }, ms || 6500); }
+  var avail = {}, storyT = 0;
+  function story(text, ref, ms, cls) { var e = $('story'); $('sx').textContent = text; $('sr').textContent = ref || ''; e.className = 'on' + (cls ? ' ' + cls : ''); clearTimeout(storyT); storyT = setTimeout(function () { e.classList.remove('on'); }, ms || Math.max(6500, text.length * 85)); }
+  function say(key, text, ref) { var u = 'audio/' + id + '/' + key + '.mp3', d = avail[u]; if (d) { PJ.audio.play(u); story(text, ref, d * 1000 + 1500); } else story(text, ref); }
   function card(o) { $('ct').textContent = o.t; $('cb').textContent = o.b || ''; $('cd').textContent = o.d || ''; $('cr').textContent = o.r || ''; $('cs').style.display = 'none'; $('cok').textContent = o.btn || 'متابعة'; $('card').classList.remove('hidden'); paused = true; $('cok').onclick = function () { $('card').classList.add('hidden'); paused = false; if (o.done) o.done(); }; }
   var pips = $('pips'); STEPS.forEach(function () { pips.appendChild(document.createElement('i')); });
   function hud() {
@@ -122,6 +135,7 @@ function start(A) {
   function makeItem(kind, col) {
     if (kind === 'animal') return makeAnimal(col);
     if (kind === 'sack') { var sg = new THREE.Group(); sg.add(new THREE.Mesh(new THREE.BoxGeometry(1.8, 1.4, 1.2), new THREE.MeshStandardMaterial({ color: 0xd9c28f, roughness: .95 }))); var tie = new THREE.Mesh(new THREE.BoxGeometry(1.9, .2, 1.3), new THREE.MeshStandardMaterial({ color: 0x6b4a2b })); tie.position.y = .5; sg.add(tie); return sg; }
+    if (kind === 'ironring') { var ig = new THREE.Group(); ig.add(new THREE.Mesh(new THREE.TorusGeometry(.9, .25, 8, 18), new THREE.MeshStandardMaterial({ color: 0x8a9096, metalness: .6, roughness: .4 }))); return ig; }
     if (kind === 'robe') { var rg = new THREE.Group(); rg.add(new THREE.Mesh(new THREE.BoxGeometry(2.4, .12, 3), new THREE.MeshStandardMaterial({ color: 0xb83a3a, emissive: 0x501010, emissiveIntensity: .5, roughness: .8 }))); return rg; }
     var g = new THREE.Group(), mesh = kind === 'stone' ? new THREE.Mesh(new THREE.BoxGeometry(1.8, 1.1, 1.8), new THREE.MeshStandardMaterial({ color: 0x9a8a72, roughness: .95, flatShading: true }))
       : new THREE.Mesh(new THREE.BoxGeometry(3.2, .35, 1), new THREE.MeshStandardMaterial({ color: 0xb07a3c, roughness: .9 }));
@@ -141,6 +155,8 @@ function start(A) {
     else if (kind === 'tower') for (var i = 0; i < 4; i++) { var tb = new THREE.Mesh(new THREE.BoxGeometry(3 - i * .5, 3.2, 3 - i * .5), mat(0xc9a870)); tb.position.y = 1.6 + i * 3.2; g.add(tb); }
     else if (kind === 'rockhouse') { var r = new THREE.Mesh(new THREE.BoxGeometry(6, 5, 3), mat(0xa0694a)); r.position.y = 2.5; var d1 = new THREE.Mesh(new THREE.BoxGeometry(1.6, 2.6, .5), mat(0x2a1a10)); d1.position.set(0, 1.4, 1.6); var d2 = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.4, .5), mat(0x2a1a10)); d2.position.set(-2, 3.4, 1.6); g.add(r, d1, d2); }
     else if (kind === 'camel') { var a2 = makeAnimal(0xc8a56a); a2.scale.setScalar(1.8); a2.position.y = 2.2; var nk = new THREE.Mesh(new THREE.CylinderGeometry(.25, .35, 1.8, 6), new THREE.MeshStandardMaterial({ color: 0xc8a56a })); nk.position.set(1.8, .9, 0); nk.rotation.z = -.5; a2.add(nk); g.add(a2); }
+    else if (kind === 'anvil') { var an = new THREE.Mesh(new THREE.BoxGeometry(3, 1.4, 1.6), mat(0x4a4f55)); an.position.y = 1.4; var ab = new THREE.Mesh(new THREE.BoxGeometry(1.6, 1.4, 1.2), mat(0x3a3f45)); ab.position.y = .7; g.add(an, ab); }
+    else if (kind === 'bird') { var bb = new THREE.Mesh(new THREE.SphereGeometry(.9, 10, 8), mat(0xc88a3a)); bb.scale.set(1.4, 1, 1); bb.position.y = 3; var bh = new THREE.Mesh(new THREE.SphereGeometry(.5, 8, 6), mat(0xc88a3a)); bh.position.set(1.2, 3.5, 0); var bw = new THREE.Mesh(new THREE.BoxGeometry(.2, .1, 2.6), mat(0x8a5a2a)); bw.position.y = 3.2; g.add(bb, bh, bw); }
     else if (kind === 'well') { var wr = new THREE.Mesh(new THREE.TorusGeometry(1.6, .5, 8, 20), mat(0x9a8a72)); wr.rotation.x = Math.PI / 2; wr.position.y = .6; var wd = new THREE.Mesh(new THREE.CylinderGeometry(1.3, 1.3, .3, 16), mat(0x1a2a3a)); wd.position.y = .4; g.add(wr, wd); }
     else if (kind === 'tent') { var tt = new THREE.Mesh(new THREE.ConeGeometry(3, 3.6, 4), mat(0xb89a6a)); tt.position.y = 1.8; tt.rotation.y = Math.PI / 4; g.add(tt); }
     else if (kind === 'lamp') { var pl = new THREE.Mesh(new THREE.CylinderGeometry(.12, .15, 4, 6), mat(0x3a3a3a)); pl.position.y = 2; var sb = new THREE.Mesh(new THREE.SphereGeometry(.6, 10, 8), mat(0xffe08a, 0xffc040)); sb.position.y = 4.3; g.add(pl, sb); }
@@ -156,7 +172,7 @@ function start(A) {
       var pad = new THREE.Mesh(new THREE.TorusGeometry(6, .25, 8, 40), new THREE.MeshBasicMaterial({ color: 0xffe08a, transparent: true, opacity: .8 })); pad.rotation.x = Math.PI / 2; pad.position.set(s.to[0], M.to.y - 1, s.to[1]); S.add(pad); objs.push(pad); M.pad = pad;
     }
     if (s.type === 'discover') {
-      M.delivered = 0; M.items = s.items.map(function (it, ix) { var g = lm(it.kind), y = it.y !== undefined ? it.y : H(it.x, it.z); g.position.set(it.x, y, it.z); addGlow(g, 3); var lb = label(it.name); lb.position.y = 7; g.add(lb); g.visible = ix === 0; S.add(g); objs.push(g); return { g: g, fact: it.fact }; });
+      M.delivered = 0; M.items = s.items.map(function (it, ix) { var core = lm(it.kind), g = new THREE.Group(), y = it.y !== undefined ? it.y : H(it.x, it.z); g.add(core); g.userData.spin = core.userData.spin; loadTex('lm-' + it.kind, function (t) { if (t) { core.visible = false; var sp3 = new THREE.Sprite(new THREE.SpriteMaterial({ map: t })); sp3.center.set(.5, 0); sp3.scale.set(8, 8, 1); g.add(sp3); } }); g.position.set(it.x, y, it.z); addGlow(g, 3); var lb = label(it.name); lb.position.y = 7; g.add(lb); g.visible = ix === 0; S.add(g); objs.push(g); return { g: g, fact: it.fact }; });
     }
     if (s.type === 'reach') { M.pos = new THREE.Vector3(s.pos[0], H(s.pos[0], s.pos[1]) + 3, s.pos[1]);
       if (s.walls) { var w = s.walls, len = Math.abs(w.z1 - w.z0), zc = (w.z0 + w.z1) / 2; [-1, 1].forEach(function (sd) { var wm = new THREE.Mesh(new THREE.BoxGeometry(50, w.h, len), new THREE.MeshStandardMaterial({ color: 0x2a8fbf, transparent: true, opacity: .5, emissive: 0x0a4a6a, emissiveIntensity: .5, roughness: .1 })); wm.position.set(sd * (w.gap / 2 + 25), w.h / 2 - 6, zc); S.add(wm); objs.push(wm); }); }
@@ -171,7 +187,7 @@ function start(A) {
     if (n >= 0 && STEPS[n].type === 'flood') {}
     buildStep(n); if (spawn) { var p = STEPS[n].spawn || START; orb.position.set(p[0], p[1], p[2]); yaw = STEPS[n].yaw || 0; vel.set(0, 0, 0); }
   }
-  function nextStep() { if (step + 1 >= STEPS.length) return finish(); var n = step + 1; setStep(n, false); var s = STEPS[n]; if (s.intro) toast(s.intro, 7000); if (s.type === 'flood') startFlood(); }
+  function nextStep() { if (step + 1 >= STEPS.length) return finish(); var n = step + 1; setStep(n, false); var s = STEPS[n]; if (s.intro) say('s' + n + 'n', s.intro, ''); if (s.type === 'flood') startFlood(); }
   function startFlood() { flood = { t: 0, phase: 'rise', r: 0 }; rain.visible = true; PJ.audio.tone(140, 1, 'sine', .05); }
   var FXS = null;
   function finish() {
@@ -179,7 +195,8 @@ function start(A) {
     if (A.ending.fx) { FXS = { t: 0, k: A.ending.fx, shown: false }; paused = true; } else showEnding();
   }
   function showEnding() {
-    card({ t: A.ending.t, b: A.ending.b, r: A.ending.r, btn: 'العودة إلى المركز', done: function () { location.href = '../prophets-journey.html'; } });
+    var eu = 'audio/' + id + '/end.mp3'; if (avail[eu]) PJ.audio.play(eu);
+    card({ t: A.ending.t, b: A.ending.b, r: A.ending.r, btn: 'العودة إلى المركز', done: function () { PJ.audio.stop(); location.href = '../prophets-journey.html'; } });
   }
   function target() {
     if (!M || ending) return null;
@@ -219,25 +236,25 @@ function start(A) {
     orb.rotation.y += dt * .8; ring.rotation.z += dt * 1.5; core.scale.setScalar(1 + Math.sin(t * 3) * .08);
     /* المهام */
     if (!paused && M && !ending) {
-      if (M.type === 'rings') { M.meshes.forEach(function (m, i) { if (!M.hit[i] && sp.distanceTo(M.pts[i]) < 4.4) { M.hit[i] = true; m.material.emissiveIntensity = 2; PJ.audio.tone(480 + i * 120, .25, 'triangle', .05); hud(); if (M.hit.every(Boolean)) { toast('أحسنت! ' + (STEPS[step].done || 'تعلّمتَ قيادة المركبة.'), 4000); setTimeout(nextStep, 900); M.type = 'wait'; } } }); }
+      if (M.type === 'rings') { M.meshes.forEach(function (m, i) { if (!M.hit[i] && sp.distanceTo(M.pts[i]) < 4.4) { M.hit[i] = true; m.material.emissiveIntensity = 2; PJ.audio.tone(480 + i * 120, .25, 'triangle', .05); hud(); if (M.hit.every(Boolean)) { story('أحسنت! ' + (STEPS[step].done || 'تعلّمتَ قيادة المركبة.'), '', 4500); setTimeout(nextStep, 900); M.type = 'wait'; } } }); }
       else if (M.type === 'carry') {
         if (!M.carry) { for (var i = 0; i < M.items.length; i++) { var it = M.items[i]; if (i === M.delivered && !it.done && it.g.position.distanceTo(sp) < 5.2) { M.carry = it; S.remove(it.g); orb.add(it.g); it.g.position.set(0, -2.6, 0); it.g.scale.setScalar(.8); PJ.audio.tone(520, .2, 'triangle', .05); toast('تم الالتقاط. أوصله إلى الدائرة المضيئة.', 3500); break; } } }
         else if (Math.hypot(sp.x - M.to.x, sp.z - M.to.z) < 6.5 && Math.abs(sp.y - M.to.y) < 9) {
           var it2 = M.carry; M.carry = null; orb.remove(it2.g); it2.done = true; var k = M.delivered++; var st = STEPS[step]; if (M.items[M.delivered]) M.items[M.delivered].g.visible = true;
           if (st.reveals === 'parts') reveal(k + (st.offset || 0)); else if (st.reveals === 'animals' && animalSlots[k]) { var a = makeAnimal(it2.color); a.scale.setScalar(.55); a.position.set.apply(a.position, animalSlots[k]); strG.add(a); }
-          PJ.audio.tone(660, .3, 'triangle', .05); if (it2.fact) toast(it2.fact[0] + '  [' + it2.fact[1] + ']', 8000); hud();
+          PJ.audio.tone(660, .3, 'triangle', .05); if (it2.fact) say('s' + step + 'i' + k, it2.fact[0], it2.fact[1]); hud();
           if (M.delivered >= M.items.length) { var mm = M; M = { type: 'wait' }; setTimeout(function () { if (!ending) nextStep(); }, 1600); }
         }
       }
       else if (M.type === 'discover') {
         var cur = M.items[M.delivered];
-        if (cur && cur.g.position.distanceTo(sp) < 7) { M.delivered++; PJ.audio.tone(560 + M.delivered * 60, .3, 'triangle', .05); toast(cur.fact[0] + '  [' + cur.fact[1] + ']', 9500);
+        if (cur && cur.g.position.distanceTo(sp) < 7) { M.delivered++; PJ.audio.tone(560 + M.delivered * 60, .3, 'triangle', .05); say('s' + step + 'i' + (M.delivered - 1), cur.fact[0], cur.fact[1]);
           if (M.items[M.delivered]) M.items[M.delivered].g.visible = true; hud();
           if (M.delivered >= M.items.length) { M = { type: 'wait' }; setTimeout(function () { if (!ending) nextStep(); }, 2600); } }
       }
-      else if (M.type === 'reach' && sp.distanceTo(M.pos) < 8) { toast(STEPS[step].settle, 9500); M = { type: 'wait' }; setTimeout(function () { if (!ending) nextStep(); }, 3500); }
-      else if (M.type === 'storm' && sp.distanceTo(M.pos) < 8) { toast(STEPS[step].settle, 9500); rain.visible = false; M = { type: 'wait' }; setTimeout(function () { if (!ending) nextStep(); }, 3800); }
-      else if (M.type === 'flood' && flood && flood.phase === 'rise' && sp.distanceTo(M.pos) < 8) { flood.phase = 'recede'; flood.r = 0; toast(A.flood.settle, 9000); }
+      else if (M.type === 'reach' && sp.distanceTo(M.pos) < 8) { say('s' + step + 'z', STEPS[step].settle, ''); M = { type: 'wait' }; setTimeout(function () { if (!ending) nextStep(); }, 3500); }
+      else if (M.type === 'storm' && sp.distanceTo(M.pos) < 8) { say('s' + step + 'z', STEPS[step].settle, ''); rain.visible = false; M = { type: 'wait' }; setTimeout(function () { if (!ending) nextStep(); }, 3800); }
+      else if (M.type === 'flood' && flood && flood.phase === 'rise' && sp.distanceTo(M.pos) < 8) { flood.phase = 'recede'; flood.r = 0; story(A.flood.settle, '', 9000); }
     }
     /* الطوفان: ارتفاع الماء، والسفينة تطفو وتتجه نحو الجبل ثم تستقر */
     if (flood) {
@@ -269,7 +286,10 @@ function start(A) {
   var last = performance.now();
   function loop(now) { var dt = Math.min((now - last) / 1000, .05); last = now; update(dt, now / 1000); R.render(S, cam); requestAnimationFrame(loop); }
   /* البدء */
-  $('intro').querySelector('h2').textContent = A.title; $('intro').querySelector('p').textContent = A.intro;
+  $('intro').querySelector('h2').textContent = A.title; $('intro').querySelector('p').textContent = A.intro; $('intro').classList.remove('hidden');
+  function pk(k) { var u = 'audio/' + id + '/' + k + '.mp3'; PJ.audio.probe(u, function (ok, d) { if (ok) avail[u] = d; }); }
+  pk('intro'); pk('end'); PJ.audio.probe('audio/instructions-general.mp3', function (ok) { if (ok) avail.general = true; });
+  STEPS.forEach(function (st, si) { if (st.items) st.items.forEach(function (_, ii) { pk('s' + si + 'i' + ii); }); if (st.intro) pk('s' + si + 'n'); if (st.settle) pk('s' + si + 'z'); });
   ['ai', 'as'].forEach(function (k) { if ($(k)) $(k).remove(); });
   $('mute').onclick = null; PJ.audio.bindUI($('mute'), $('vol'));
   document.title = 'رحلة الأنبياء — ' + A.title;
@@ -278,6 +298,7 @@ function start(A) {
     if (fresh) { SV.step = 0; SV.done = false; }
     var s = SV.done && !fresh ? 0 : clamp(SV.step || 0, 0, STEPS.length - 1); ending = false; FXS = null; flood = null; water.position.y = -200; rain.visible = false;
     setStep(s, true); if (STEPS[s].type === 'flood') startFlood(); $('intro').classList.add('hidden'); paused = false;
+    var iu = 'audio/' + id + '/intro.mp3'; if (s === 0 && avail[iu]) PJ.audio.play(iu); else if (s === 0 && avail.general) PJ.audio.play('audio/instructions-general.mp3');
   }
   if (SV.step > 0 && !SV.done) { $('go').textContent = 'متابعة المغامرة'; $('fresh').style.display = ''; } else if (SV.done) $('go').textContent = 'العب المغامرة مرة أخرى';
   $('go').onclick = function () { begin(false); }; $('fresh').onclick = function () { begin(true); };

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>رحلة الأنبياء — مغامرة يونس عليه السلام</title>
+<title>رحلة الأنبياء</title>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
 <style>
 :root{--gold:#f4e6b4;--txt:#edf8ff;--line:rgba(200,229,238,.28);--pn:rgba(4,15,22,.78)}
@@ -51,6 +51,15 @@ kbd{display:inline-block;min-width:22px;padding:0 6px;margin:0 2px;border:1px so
 .hud,.audio,.help,.back,.nav,#toast{backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 #intro{background:linear-gradient(rgba(2,10,16,.3),rgba(2,10,16,.8))}
 #bLamp,#bAct{display:none}
+#story{position:absolute;left:50%;bottom:24%;transform:translateX(-50%) translateY(16px);width:min(780px,92vw);padding:18px 26px 14px;text-align:center;border-radius:20px;background:linear-gradient(180deg,rgba(6,22,31,.35),rgba(6,22,31,.82));border:1px solid rgba(244,230,180,.25);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);opacity:0;transition:opacity 1s ease,transform 1s ease;pointer-events:none;z-index:5}
+#story.on{opacity:1;transform:translateX(-50%) translateY(0)}
+#sx{font:700 clamp(18px,3.4vw,27px)/1.9 Amiri,serif;color:#fff}
+#sr{margin-top:6px;font:700 clamp(12px,2vw,15px) Tajawal,sans-serif;color:#f4e6b4}
+#story.dua{bottom:50%;transform:translateX(-50%) translateY(50%) scale(.96);padding:30px 34px}
+#story.dua.on{transform:translateX(-50%) translateY(50%) scale(1)}
+#story.dua #sx{font-size:clamp(26px,5.5vw,44px);color:#f4e6b4;line-height:2.1}
+#sub{bottom:9%}
+.cinema #story{opacity:0}
 </style>
 </head>
 <body>
@@ -63,13 +72,13 @@ kbd{display:inline-block;min-width:22px;padding:0 6px;margin:0 2px;border:1px so
   <div class="help"><div><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> حركة</div><div><kbd>Space</kbd> صعود <kbd>C</kbd> هبوط</div><div>اقترب من العنصر ليلتقطه تلقائيًا</div><div><kbd>←</kbd><kbd>→</kbd> أو اسحب بالفأرة: الكاميرا</div></div>
   <div class="nav" id="nav"><span id="na">▲</span><span id="nd"></span></div>
   <div class="bar" id="bar"><b id="barf"></b></div>
-  <div id="toast"></div><div id="sub"></div>
+  <div id="toast"></div><div id="story"><div id="sx"></div><div id="sr"></div></div><div id="sub"></div>
   <div class="touch"><div id="joy"><div id="knob"></div></div>
     <button class="tb" id="bUp" aria-label="صعود">⬆</button><button class="tb" id="bDn" aria-label="هبوط">⬇</button>
     <button class="tb" id="bLamp" aria-label="المصباح">💡</button><button class="tb" id="bAct" aria-label="تفاعل">✋</button></div>
-  <div class="ov" id="intro"><div class="card">
-    <h2>مغامرة يونس عليه السلام</h2>
-    <p>أنت مستكشف صغير في غواصة بحثية، ومعك المرشد الخيالي «نور». ستتعلم قصة نبي الله يونس عليه السلام كما وردت في القرآن الكريم.</p>
+  <div class="ov hidden" id="intro"><div class="card">
+    <h2>جارٍ التحميل…</h2>
+    <p></p>
     <p class="note">لا يظهر النبي في اللعبة بأي صورة. المركبة والمرشد والعالم من الخيال التعليمي، أما المعلومات فمأخوذة من القرآن الكريم مع ذكر السورة والآية.</p>
     <div style="margin-bottom:6px"><button class="alt" id="ai" style="display:none">🔊 استمع إلى التعليمات</button><button class="alt" id="as" style="display:none">🎧 استمع إلى القصة</button></div>
     <button id="go">ابدأ الاستكشاف</button><button class="alt" id="fresh" style="display:none">ابدأ من جديد</button>

@@ -50,6 +50,15 @@ kbd{display:inline-block;min-width:22px;padding:0 6px;margin:0 2px;border:1px so
 #na{display:inline-block;font-size:20px;color:#f4c95d;transition:transform .1s}
 .hud,.audio,.help,.back,.nav,#toast{backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 #intro{background:linear-gradient(rgba(2,10,16,.3),rgba(2,10,16,.8))}
+#story{position:absolute;left:50%;bottom:24%;transform:translateX(-50%) translateY(16px);width:min(780px,92vw);padding:18px 26px 14px;text-align:center;border-radius:20px;background:linear-gradient(180deg,rgba(6,22,31,.35),rgba(6,22,31,.82));border:1px solid rgba(244,230,180,.25);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);opacity:0;transition:opacity 1s ease,transform 1s ease;pointer-events:none;z-index:5}
+#story.on{opacity:1;transform:translateX(-50%) translateY(0)}
+#sx{font:700 clamp(18px,3.4vw,27px)/1.9 Amiri,serif;color:#fff}
+#sr{margin-top:6px;font:700 clamp(12px,2vw,15px) Tajawal,sans-serif;color:#f4e6b4}
+#story.dua{bottom:50%;transform:translateX(-50%) translateY(50%) scale(.96);padding:30px 34px}
+#story.dua.on{transform:translateX(-50%) translateY(50%) scale(1)}
+#story.dua #sx{font-size:clamp(26px,5.5vw,44px);color:#f4e6b4;line-height:2.1}
+#sub{bottom:9%}
+.cinema #story{opacity:0}
 </style>
 </head>
 <body>
@@ -62,7 +71,7 @@ kbd{display:inline-block;min-width:22px;padding:0 6px;margin:0 2px;border:1px so
   <div class="help"><div><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> حركة</div><div><kbd>Space</kbd> صعود <kbd>C</kbd> هبوط</div><div><kbd>L</kbd> المصباح <kbd>F</kbd> تفاعل (اضغط مطولًا)</div><div><kbd>←</kbd><kbd>→</kbd> أو اسحب بالفأرة: الكاميرا</div></div>
   <div class="nav" id="nav"><span id="na">▲</span><span id="nd"></span></div>
   <div class="bar" id="bar"><b id="barf"></b></div>
-  <div id="toast"></div><div id="sub"></div>
+  <div id="toast"></div><div id="story"><div id="sx"></div><div id="sr"></div></div><div id="sub"></div>
   <div class="touch"><div id="joy"><div id="knob"></div></div>
     <button class="tb" id="bUp" aria-label="صعود">⬆</button><button class="tb" id="bDn" aria-label="هبوط">⬇</button>
     <button class="tb" id="bLamp" aria-label="المصباح">💡</button><button class="tb" id="bAct" aria-label="تفاعل">✋</button></div>
@@ -70,7 +79,6 @@ kbd{display:inline-block;min-width:22px;padding:0 6px;margin:0 2px;border:1px so
     <h2>مغامرة يونس عليه السلام</h2>
     <p>أنت مستكشف صغير في غواصة بحثية، ومعك المرشد الخيالي «نور». ستتعلم قصة نبي الله يونس عليه السلام كما وردت في القرآن الكريم.</p>
     <p class="note">لا يظهر النبي في اللعبة بأي صورة. الغواصة والمرشد والعالم من الخيال التعليمي، أما المعلومات فمأخوذة من القرآن الكريم مع ذكر السورة والآية.</p>
-    <div style="margin-bottom:6px"><button class="alt" id="ai" style="display:none">🔊 استمع إلى التعليمات</button><button class="alt" id="as" style="display:none">🎧 استمع إلى القصة</button></div>
     <button id="go">ابدأ الاستكشاف</button><button class="alt" id="fresh" style="display:none">ابدأ من جديد</button>
   </div></div>
   <div class="ov hidden" id="card"><div class="card">
@@ -210,6 +218,7 @@ const beacon=new THREE.Group();{const t=new THREE.Mesh(new THREE.CylinderGeometr
 const whale=new THREE.Group();{const m=new THREE.MeshStandardMaterial({color:0x4a6f86,emissive:0x0e2d40,emissiveIntensity:.9,roughness:.8,fog:false});
   const b=new THREE.Mesh(new THREE.SphereGeometry(1,24,16),m);b.scale.set(9,3.2,3.4);const tl=new THREE.Mesh(new THREE.ConeGeometry(1.6,5,12),m);tl.rotation.z=-Math.PI/2;tl.position.x=10.5;
   const fl=new THREE.Mesh(new THREE.BoxGeometry(1.6,.3,6),m);fl.position.x=12.6;whale.add(b,tl,fl);whale.visible=false;S.add(whale)}
+new THREE.TextureLoader().load('assets/whale.png',t=>{t.colorSpace=THREE.SRGBColorSpace;whale.children.forEach(c=>c.visible=false);const ws=new THREE.Sprite(new THREE.SpriteMaterial({map:t,fog:false}));ws.scale.set(34,14,1);whale.add(ws)},undefined,()=>{});
 
 /* ---- الحالة ---- */
 const STEPS=[
@@ -237,10 +246,11 @@ function setStep(n,spawn){step=n;ringHit=[false,false,false];rings.forEach((r,i)
   pearls.forEach((p,i)=>p.visible=n===1&&i===pr);beacon.userData.light.intensity=lit?60:0;
   if(n!==1)pr=n>1?5:0;if(n===1)pearls.forEach((p,i)=>p.visible=i===pr);
   save.yunus.step=n;save.yunus.pearls=pr;store();if(spawn){const s=STEPS[n].spawn;sub.position.set(...s);yaw=0;vel.set(0,0,0)}hud()}
-const VI={ai:['🔊 استمع إلى التعليمات',['audio/instructions.mp3']],as:['🎧 استمع إلى القصة',['audio/story-yunus-1.mp3','audio/dua-yunus.mp3','audio/story-yunus-2.mp3']]};
-function vReset(){for(const k in VI){$(k).dataset.on='0';$(k).textContent=VI[k][0]}}
-for(const k in VI){let n=0;VI[k][1].forEach(u=>PJ.audio.probe(u,ok=>{if(ok&&++n===VI[k][1].length)$(k).style.display=''}));
-  $(k).onclick=()=>{const was=$(k).dataset.on==='1';PJ.audio.stop();vReset();if(was)return;$(k).dataset.on='1';$(k).textContent='⏸ إيقاف';PJ.audio.seq(VI[k][1],vReset)}}
+let storyT=0,subT=[];const avail={},PART1='قصةُ نبيِّ اللهِ يونسَ عليهِ السلام، كما وردَتْ في القرآنِ الكريم. أرسلَ اللهُ يونسَ عليهِ السلامُ إلى قومٍ كثيرين، عددُهم مئةُ ألفٍ أو يزيدون. ثمَّ غادرَ قومَهُ غاضبًا. وجاءَ بعدَ ذلكَ أنَّ الحوتَ التقمَهُ. وفي ظلماتِ البحرِ والليلِ والحوت، نادى يونسُ ربَّهُ بدعاءٍ عظيم. فلنستمعْ إلى هذا الدعاءِ كما وردَ في سورةِ الأنبياء، الآيةِ سبعٍ وثمانين.',PART2='فاستجابَ اللهُ لهُ ونجّاهُ منَ الغمّ، وكانَ يونسُ عليهِ السلامُ منَ المسبّحين. ثمَّ نبذَهُ اللهُ بالعراءِ وهو مريض، وأنبتَ عليهِ شجرةً من يقطين. وأرسلَهُ اللهُ إلى مئةِ ألفٍ أو يزيدون، فآمنوا، ومتّعَهُمُ اللهُ إلى حين. ومما نتعلّمُهُ منَ القصة: أن نلجأَ إلى اللهِ بالدعاءِ والتسبيحِ في الشدّة، وألّا ننسى شكرَ نعمةِ النجاة.';
+function story(text,ref,ms,cls){const e=$('story');$('sx').textContent=text;$('sr').textContent=ref||'';e.className='on'+(cls?' '+cls:'');clearTimeout(storyT);storyT=setTimeout(()=>e.classList.remove('on'),ms||Math.max(6500,text.length*85))}
+function subs(text,dur){subT.forEach(clearTimeout);subT=[];const ps=text.match(/[^.]+\.?/g)||[text],tot=ps.join('').length;let t=0;ps.forEach(p=>{const d=dur*p.length/tot;subT.push(setTimeout(()=>{$('sub').textContent=p.trim();$('sub').classList.add('on')},t*1000));t+=d});subT.push(setTimeout(()=>$('sub').classList.remove('on'),dur*1000+600))}
+['instructions','story-yunus-1','dua-yunus','story-yunus-2'].forEach(n=>PJ.audio.probe('audio/'+n+'.mp3',(ok,d)=>{if(ok)avail[n]=d}));
+function narrate(n,text){if(!avail[n])return;PJ.audio.play('audio/'+n+'.mp3');if(text)subs(text,avail[n])}
 let duaOK=false;PJ.audio.probe('audio/dua-yunus.mp3',ok=>{duaOK=ok});
 function card(o){$('cs').style.display=(o.audio&&duaOK)?'':'none';$('cs').onclick=()=>PJ.audio.play(o.audio);$('ct').textContent=o.t;$('cb').textContent=o.b||'';$('cd').textContent=o.d||'';$('cr').textContent=o.r||'';$('cok').textContent=o.btn||'متابعة';
   $('card').classList.remove('hidden');paused=true;$('cok').onclick=()=>{PJ.audio.stop();$('card').classList.add('hidden');paused=false;o.done&&o.done()}}
@@ -274,12 +284,13 @@ function startWhale(){cineDone=true;whale.visible=true;whale.userData={t:0,z:sub
   cine={t:0,dur:7};document.getElementById('root').classList.add('cinema');
   subtitle('يظهر في الأعماق حوتٌ عظيم. وقد ورد في القرآن الكريم أن الحوت التقم يونس عليه السلام (الصافات: 142).',7000);tone(120,1.2,'sine',.08)}
 function nextPearl(){tone(520+pr*90,.3,'triangle');const f=FACTS[pr];pearls[pr].visible=false;pr++;save.yunus.pearls=pr;store();
-  card({t:'لؤلؤة من القصة',b:f[0],r:'['+f[1]+']',btn:'متابعة',done:()=>{if(pr>=5){setStep(2)}else{pearls[pr].visible=true}hud()}});hud()}
+  story(f[0],f[1],7000);if(pr>=5){setStep(2)}else{pearls[pr].visible=true}hud()}
 function lightBeacon(){lit=true;beacon.userData.light.intensity=60;beacon.userData.crystal.material.emissiveIntensity=2.5;tone(440,.5,'triangle');tone(660,.7,'sine');$('bar').style.display='none';
-  card({t:'دعاء يونس عليه السلام',b:'أضاءت المنارة، وهذا دعاءٌ ورد في القرآن الكريم عن يونس عليه السلام حين كان في الظلمات:',d:'لَا إِلَٰهَ إِلَّا أَنتَ سُبْحَانَكَ إِنِّي كُنتُ مِنَ الظَّالِمِينَ',r:'سورة الأنبياء، الآية 87',audio:'audio/dua-yunus.mp3',btn:'متابعة',
-    done:()=>{toast('ثم قال الله تعالى: ﴿فَاسْتَجَبْنَا لَهُ وَنَجَّيْنَاهُ مِنَ الْغَمِّ﴾ — الأنبياء: 88',8000);setStep(4)}})}
+  const dd=avail['dua-yunus'],T=dd?dd*1000:9000;if(dd)PJ.audio.play('audio/dua-yunus.mp3');
+  story('لَا إِلَٰهَ إِلَّا أَنتَ سُبْحَانَكَ إِنِّي كُنتُ مِنَ الظَّالِمِينَ','دعاء يونس عليه السلام — سورة الأنبياء، الآية 87',T+1500,'dua');
+  setTimeout(()=>story('ثم قال الله تعالى: ﴿فَاسْتَجَبْنَا لَهُ وَنَجَّيْنَاهُ مِنَ الْغَمِّ﴾','الأنبياء: 88',7500),T+3000);setStep(4)}
 function finish(){save.yunus.done=true;save.yunus.step=5;store();tone(660,.5,'triangle');
-  card({t:'تمت الرحلة',b:'ورد في القرآن أن الله نجّى يونس عليه السلام ونبذه بالعراء وهو سقيم وأنبت عليه شجرة من يقطين (الصافات: 145–146)، وأنه أُرسل إلى مئة ألفٍ أو يزيدون فآمنوا (الصافات: 147–148). ومما نتعلمه: أن نلجأ إلى الله بالدعاء والتسبيح في الشدة، وأن لا ننسى شكر نعمة النجاة.',r:'ختم «أسرار الزمان» لمغامرة يونس',btn:'العودة إلى المركز',done:()=>{location.href='../prophets-journey.html'}})}
+  card({t:'تمت الرحلة',b:'ورد في القرآن أن الله نجّى يونس عليه السلام ونبذه بالعراء وهو سقيم وأنبت عليه شجرة من يقطين (الصافات: 145–146)، وأنه أُرسل إلى مئة ألفٍ أو يزيدون فآمنوا (الصافات: 147–148). ومما نتعلمه: أن نلجأ إلى الله بالدعاء والتسبيح في الشدة، وأن لا ننسى شكر نعمة النجاة.',r:'ختم «أسرار الزمان» لمغامرة يونس',btn:'العودة إلى المركز',done:()=>{PJ.audio.stop();location.href='../prophets-journey.html'}});narrate('story-yunus-2','')}
 
 const CAVE=new THREE.Vector3(0,-3,-150),TRENCH=new THREE.Vector3(0,-8,-205);
 function target(){if(step===0){const i=ringHit.findIndex(h=>!h);return i<0?null:ringPos[i]}if(step===1)return pearlPos[pr]||null;if(step===2)return CAVE;if(step===3)return cineDone?BP:TRENCH;return null}
@@ -295,7 +306,7 @@ function update(dt,t){
   sub.rotation.set(vel.y*.02,yaw,-vel.x*.012*Math.cos(yaw)+Math.sin(t*2)*.03);sub.userData.prop.rotation.z+=dt*(8+vel.length());
   /* المهام */
   if(!paused&&!cine){
-    if(step===0){rings.forEach((m,i)=>{if(!ringHit[i]&&sp.distanceTo(ringPos[i])<3.4){ringHit[i]=true;m.material.emissiveIntensity=2;tone(480+i*120,.25,'triangle');hud();if(ringHit.every(Boolean)){toast('أحسنت! أنت الآن جاهز لاستكشاف الشعاب.');card({t:'أحسنت يا مستكشف',b:'تعلّمتَ قيادة الغواصة. هيا إلى شعاب المرجان.',done:()=>setStep(1)})}}})}
+    if(step===0){rings.forEach((m,i)=>{if(!ringHit[i]&&sp.distanceTo(ringPos[i])<3.4){ringHit[i]=true;m.material.emissiveIntensity=2;tone(480+i*120,.25,'triangle');hud();if(ringHit.every(Boolean)){story('أحسنت! تعلّمتَ قيادة الغواصة. هيا إلى شعاب المرجان.','',4500);setTimeout(()=>{if(step===0){setStep(1);narrate('story-yunus-1',PART1)}},1500)}}})}
     else if(step===1&&pearls[pr]&&sp.distanceTo(pearlPos[pr])<3.6)nextPearl();
     else if(step===2){const inCave=sp.z<-138&&sp.z>-168&&Math.abs(sp.x)<10;
       if(inCave){if(lamp){caveT+=dt;if(caveT>1.5){caveT=0;toast('أضاء المصباح الطريق. تابع إلى الأعماق.');tone(560,.3,'triangle');setStep(3)}}else{caveT=0;if(!tTimer||!$('toast').classList.contains('on'))toast('الظلام شديد. شغّل مصباح الغواصة.',3000)}}else caveT=0}
@@ -338,10 +349,10 @@ function loop(now){const dt=Math.min((now-last)/1000,.05);last=now;update(dt,now
 
 /* ---- البدء ---- */
 function begin(fresh){
-  introOn=false;PJ.audio.stop();vReset();audio();try{window.focus()}catch(e){}
+  introOn=false;PJ.audio.stop();audio();try{window.focus()}catch(e){}
   if(fresh)save.yunus={step:0,pearls:0,done:false};
   pr=clamp(save.yunus.pearls||0,0,5);let s=clamp(save.yunus.step||0,0,4);if(save.yunus.done&&!fresh)s=0;
-  lit=false;cineDone=false;setStep(s,true);$('intro').classList.add('hidden');paused=false;
+  lit=false;cineDone=false;setStep(s,true);$('intro').classList.add('hidden');paused=false;if(s===0)narrate('instructions','');
 }
 if(save.yunus.step>0&&!save.yunus.done){$('go').textContent='متابعة المغامرة';$('fresh').style.display=''}else if(save.yunus.done){$('go').textContent='العب المغامرة مرة أخرى'}
 $('go').onclick=()=>begin(false);$('fresh').onclick=()=>begin(true);

@@ -50,7 +50,7 @@
     probe: function (url, cb) {
       try {
         var a = new Audio(); a.preload = 'metadata';
-        a.addEventListener('loadedmetadata', function () { cb(true); });
+        a.addEventListener('loadedmetadata', function () { cb(true, a.duration); });
         a.addEventListener('error', function () { cb(false); });
         a.src = url;
       } catch (e) { cb(false); }
