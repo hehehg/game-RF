@@ -21,8 +21,8 @@ window.ADVENTURES = [
   { id: 'ilyas', name: 'إلياس عليه السلام', file: 'prophets-journey/play.html?id=ilyas', steps: 2 },
   { id: 'alyasa', name: 'اليسع عليه السلام', file: 'prophets-journey/play.html?id=alyasa', steps: 2 },
   { id: 'yunus', name: 'يونس عليه السلام', file: 'prophets-journey/yunus.html', steps: 5 },
-  { id: 'zakariya', name: 'زكريا عليه السلام' },
-  { id: 'yahya', name: 'يحيى عليه السلام' },
-  { id: 'isa', name: 'عيسى عليه السلام' },
-  { id: 'muhammad', name: 'محمد ﷺ' }
+  { id: 'zakariya', name: 'زكريا عليه السلام', file: 'prophets-journey/play.html?id=zakariya', steps: 2 },
+  { id: 'yahya', name: 'يحيى عليه السلام', file: 'prophets-journey/play.html?id=yahya', steps: 2 },
+  { id: 'isa', name: 'عيسى عليه السلام', file: 'prophets-journey/play.html?id=isa', steps: 2 },
+  { id: 'muhammad', name: 'محمد ﷺ', file: 'prophets-journey/play.html?id=muhammad', steps: 2 }
 ];
