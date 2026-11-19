@@ -15,26 +15,28 @@
       nose.rotation.x = -Math.PI / 2; nose.position.set(0, .5, -2.1); g.add(nose);
       var cockpit = new T.Mesh(new T.SphereGeometry(.62, 16, 10), mat(0xbff4ff, 0x4b91aa));
       cockpit.scale.set(1.15, .55, .75);       cockpit.position.set(0, 1.15, -.45); g.add(cockpit);
-      var leftWing = new T.Mesh(new T.ConeGeometry(1.25, 3.2, 3), wingMat);
-      leftWing.rotation.set(0, 0, Math.PI / 2); leftWing.position.set(1.75, .25, .15); g.add(leftWing);
-      var rightWing = leftWing.clone(); rightWing.position.x = -1.75; g.add(rightWing);
-      [-.7, .7].forEach(function (z) {
-        var tail = new T.Mesh(new T.ConeGeometry(.48, 1.5, 3), goldMat);
-        tail.rotation.z = Math.PI / 2; tail.position.set(1.45, .85, z); g.add(tail);
+      var leftWing = new T.Mesh(new T.BoxGeometry(3.2, .16, 1.05), wingMat);
+      leftWing.position.set(1.55, .25, .1); g.add(leftWing);
+      var rightWing = leftWing.clone(); rightWing.position.x = -1.55; g.add(rightWing);
+      var tailWing = new T.Mesh(new T.BoxGeometry(1.7, .14, .65), goldMat);
+      tailWing.position.set(0, .6, 1.45); g.add(tailWing);
+      [-.62, .62].forEach(function (x) {
+        var tail = new T.Mesh(new T.BoxGeometry(.14, .8, .75), goldMat);
+        tail.position.set(x, .92, 1.5); g.add(tail);
       });
       var thrusterL = new T.Mesh(new T.CylinderGeometry(.34, .48, .55, 12), darkMat);
-      thrusterL.rotation.z = Math.PI / 2; thrusterL.position.set(1.7, .18, .72); g.add(thrusterL);
-      var thrusterR = thrusterL.clone(); thrusterR.position.z = -.72; g.add(thrusterR);
+      thrusterL.rotation.x = Math.PI / 2; thrusterL.position.set(.72, .18, 1.7); g.add(thrusterL);
+      var thrusterR = thrusterL.clone(); thrusterR.position.x = -.72; g.add(thrusterR);
       var flameMat = new T.MeshBasicMaterial({ color: 0xffd56a, transparent: true, opacity: .85, blending: T.AdditiveBlending, depthWrite: false });
       var leftFlame = new T.Mesh(new T.ConeGeometry(.22, 1.15, 12), flameMat);
-      leftFlame.rotation.z = Math.PI / 2; leftFlame.position.set(2.28, .18, .72); g.add(leftFlame);
-      var rightFlame = leftFlame.clone(); rightFlame.position.z = -.72; g.add(rightFlame);
+      leftFlame.rotation.x = Math.PI / 2; leftFlame.position.set(.72, .18, 2.28); g.add(leftFlame);
+      var rightFlame = leftFlame.clone(); rightFlame.position.x = -.72; g.add(rightFlame);
       var ring = new T.Mesh(new T.TorusGeometry(1.15, .045, 8, 28), new T.MeshBasicMaterial({ color: 0xffdf73, transparent: true, opacity: .35 }));
       ring.rotation.x = Math.PI / 2; ring.position.y = -.7; g.add(ring);
       var glow = new T.Mesh(new T.SphereGeometry(1.45, 12, 8), new T.MeshBasicMaterial({ color: 0x71efff, transparent: true, opacity: .07, blending: T.AdditiveBlending, depthWrite: false }));
       g.add(glow);
       var core = new T.Mesh(new T.SphereGeometry(.12, 10, 8), new T.MeshBasicMaterial({ color: 0xfff1a8 }));
-      core.position.set(2.1, .5, 0); g.add(core);
+      core.position.set(0, .5, -2.1); g.add(core);
       var state = 'idle';
       function setState(next) { state = next; }
       function update(t, dt, motion) {

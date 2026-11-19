@@ -63,19 +63,35 @@ function start(A) {
   function loadTex(n, cb) { texLoader.load('assets/' + n + '.png', function (t) { t.colorSpace = THREE.SRGBColorSpace; cb(t); }, undefined, function () { cb(null); }); }
   function spriteSwap(names, pts, w, h, hide) {
     var texs = [], left = names.length; if (!pts.length) return;
-    function bottomPadding(tex) {
+    function trimSpriteTexture(tex) {
       var image = tex.image, canvas = document.createElement('canvas');
-      canvas.width = image.naturalWidth || image.width; canvas.height = image.naturalHeight || image.height;
-      var ctx = canvas.getContext('2d', { willReadFrequently: true });
-      ctx.drawImage(image, 0, 0);
-      var pixels = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-      for (var y = canvas.height - 1; y >= 0; y--) {
-        for (var x = 0; x < canvas.width; x++) if (pixels[(y * canvas.width + x) * 4 + 3] > 8) return (canvas.height - 1 - y) / canvas.height;
+      var width = image.naturalWidth || image.width, height = image.naturalHeight || image.height;
+      var scan = document.createElement('canvas');
+      scan.width = width; scan.height = height;
+      var scanCtx = scan.getContext('2d', { willReadFrequently: true });
+      scanCtx.drawImage(image, 0, 0);
+      var pixels = scanCtx.getImageData(0, 0, width, height).data;
+      var minX = width, minY = height, maxX = -1, maxY = -1, contactY = -1;
+      for (var y = 0; y < height; y++) for (var x = 0; x < width; x++) {
+        var alpha = pixels[(y * width + x) * 4 + 3];
+        if (alpha > 8) { minX = Math.min(minX, x); minY = Math.min(minY, y); maxX = Math.max(maxX, x); maxY = Math.max(maxY, y); }
+        if (alpha > 80 && x >= width * .25 && x <= width * .75) contactY = Math.max(contactY, y);
       }
-      return 0;
+      if (maxX < minX || maxY < minY) return { texture: tex, width: 1, height: 1, offsetX: 0, bottomGap: 0 };
+      canvas.width = maxX - minX + 1; canvas.height = maxY - minY + 1;
+      canvas.getContext('2d').drawImage(image, minX, minY, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
+      var trimmed = new THREE.CanvasTexture(canvas);
+      trimmed.colorSpace = THREE.SRGBColorSpace;
+      return {
+        texture: trimmed,
+        width: canvas.width / width,
+        height: canvas.height / height,
+        offsetX: ((minX + maxX + 1) / 2 / width) - .5,
+        bottomGap: contactY < 0 ? 0 : Math.max(0, maxY - contactY) / height
+      };
     }
-    names.forEach(function (n) { loadTex(n, function (t) { if (t) texs.push(t); if (--left === 0 && texs.length) { hide.forEach(function (m) { m.visible = false; });
-      pts.forEach(function (q, i) { var tex = texs[i % texs.length], sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex })); sp.center.set(.5, 0); sp.scale.set(w * q.s, h * q.s, 1); sp.position.set(q.x, q.y - bottomPadding(tex) * h * q.s, q.z); S.add(sp); }); } }); });
+    names.forEach(function (n) { loadTex(n, function (t) { if (t) texs.push(trimSpriteTexture(t)); if (--left === 0 && texs.length) { hide.forEach(function (m) { m.visible = false; });
+      pts.forEach(function (q, i) { var asset = texs[i % texs.length], sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: asset.texture })); sp.center.set(.5, 0); sp.scale.set(w * q.s * asset.width, h * q.s * asset.height, 1); sp.position.set(q.x + asset.offsetX * w * q.s, q.y - asset.bottomGap * h * q.s, q.z); S.add(sp); }); } }); });
   }
   /* التضاريس */
   (function () {
