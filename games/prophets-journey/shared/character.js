@@ -112,7 +112,33 @@
 
       g.scale.setScalar(.9);
       g.userData.playerCharacter = true;
-      return { group: g, body: body, head: head, legs: legs, arms: arms, ring: ring, core: core, glow: glow, shadow: shadow, setState: setState, update: update, getState: function () { return state; } };
+
+      var characterSprite = null;
+      var texLoader = new T.TextureLoader();
+      texLoader.load('assets/maincharcter.png', function (texture) {
+        texture.colorSpace = T.SRGBColorSpace;
+        characterSprite = new T.Sprite(new T.SpriteMaterial({ map: texture, transparent: true, alphaTest: .05 }));
+        characterSprite.center.set(.5, 0);
+        characterSprite.scale.set(4.8, 5.2, 1);
+        characterSprite.position.y = 0;
+        characterSprite.renderOrder = 2;
+        g.add(characterSprite);
+        g.children.forEach(function (child) {
+          if (child !== characterSprite && child !== shadow && child !== ring && child !== glow) child.visible = false;
+        });
+      });
+
+      var originalUpdate = update;
+      update = function (t, dt, motion) {
+        originalUpdate(t, dt, motion);
+        if (characterSprite) {
+          characterSprite.position.y = Math.sin(t * 2.2) * (motion.speed > .5 ? .035 : .018);
+          var breathe = 1 + Math.sin(t * 2.2) * .012;
+          characterSprite.scale.set(4.8 * (1 + Math.abs(motion.turn || 0) * .018), 5.2 * breathe, 1);
+        }
+      };
+
+      return { group: g, body: body, head: head, legs: legs, arms: arms, ring: ring, core: core, glow: glow, shadow: shadow, setState: setState, update: update, getState: function () { return state; }, sprite: function () { return characterSprite; } };
     }
   };
 })();
