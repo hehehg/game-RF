@@ -77,13 +77,14 @@ function start(A) {
     }
   });
   spriteSwap(['rock-1', 'rock-2', 'rock-3'], rockPts, 3.6, 2.8, rockM2);
-  /* مركبة الاستكشاف (كرة نور) — خيالية وليست جزءًا من القصة */
-  var orb = new THREE.Group();
-  var shell = new THREE.Mesh(new THREE.SphereGeometry(1.5, 24, 16), new THREE.MeshStandardMaterial({ color: 0xbff3ff, emissive: 0x2aa6c8, emissiveIntensity: .5, transparent: true, opacity: .4, roughness: .1 }));
-  var core = new THREE.Mesh(new THREE.SphereGeometry(.6, 16, 12), new THREE.MeshBasicMaterial({ color: 0xfff2b0 }));
-  var ring = new THREE.Mesh(new THREE.TorusGeometry(2.1, .13, 10, 40), new THREE.MeshStandardMaterial({ color: 0xf4c95d, emissive: 0xf4c95d, emissiveIntensity: .7 })); ring.rotation.x = Math.PI / 2;
-  var glow = new THREE.Mesh(new THREE.SphereGeometry(2.6, 16, 12), new THREE.MeshBasicMaterial({ color: 0xfff2b0, transparent: true, opacity: .12, blending: THREE.AdditiveBlending, depthWrite: false }));
-  orb.add(shell, core, ring, glow); S.add(orb); if (T.night) orb.add(new THREE.PointLight(0xfff2b0, 90, 50, 1.3));
+  /* شخصية مغامر محايدة؛ الأنبياء لا يظهرون في أي مظهر */
+  var playerCharacter = PJCharacter.create({ clothes: 0x287fb5, accent: 0xf4c95d, backpack: 0xe8a44a });
+  var orb = playerCharacter.group;
+  var shell = playerCharacter.glow;
+  var core = playerCharacter.core;
+  var ring = playerCharacter.ring;
+  var glow = playerCharacter.glow;
+  S.add(orb); if (T.night) orb.add(new THREE.PointLight(0xfff2b0, 90, 50, 1.3));
   var guide = new THREE.Mesh(new THREE.CylinderGeometry(.35, .35, 30, 8, 1, true), new THREE.MeshBasicMaterial({ color: 0xffe08a, transparent: true, opacity: .18, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide })); guide.visible = false; S.add(guide);
   /* مطر */
   var RN = 320, rg = new THREE.BufferGeometry(), rp = new Float32Array(RN * 3); for (var i = 0; i < RN * 3; i++) rp[i] = (rnd() - .5) * 60;
@@ -113,6 +114,7 @@ function start(A) {
 
   /* الحالة */
   var step = 0, paused = true, introOn = true, M = null, flood = null, ending = false, yaw = 0, pitch = -.12, vel = new THREE.Vector3(), keys = {}, joy = { x: 0, y: 0 }, tUp = false, tDn = false, objs = [];
+  var verticalVelocity = 0, grounded = true, coyoteLeft = 0, jumpBufferLeft = 0, prevJump = false, landingImpact = 0, turnInput = 0;
   var hints = 0, mistakes = 0, orbsGot = 0, hintUntil = 0, ORBS = [];
   var START = A.start || [0, 8, 30];
   orb.position.set(START[0], START[1], START[2]);
@@ -186,7 +188,7 @@ function start(A) {
     step = n; SV.step = n; store();
     for (var i = 0; i < n; i++) if (STEPS[i].type === 'carry') STEPS[i].items.forEach(function (_, k) { if (STEPS[i].reveals === 'parts') reveal(k + (STEPS[i].offset || 0)); });
     if (n >= 0 && STEPS[n].type === 'flood') {}
-    buildStep(n); if (M && M.type === 'discover') startClue(); if (spawn) { var p = STEPS[n].spawn || START; orb.position.set(p[0], p[1], p[2]); yaw = STEPS[n].yaw || 0; vel.set(0, 0, 0); }
+    buildStep(n); if (M && M.type === 'discover') startClue(); if (spawn) { var p = STEPS[n].spawn || START; orb.position.set(p[0], p[1], p[2]); yaw = STEPS[n].yaw || 0; vel.set(0, 0, 0); verticalVelocity = 0; grounded = false; coyoteLeft = 0; jumpBufferLeft = 0; }
   }
   function startClue() { var it = M && M.items && M.items[M.delivered]; if (!it) return; M.warned = {}; hud(); say('s' + step + 'i' + M.delivered, it.fact[0], ''); }
   function hint() { if (paused || ending || introOn || !M || M.type === 'flood' || M.type === 'storm' || M.type === 'reach' || M.type === 'wait') return; var now = performance.now() / 1000; if (now >= hintUntil) hints++; hintUntil = now + 14; toast('تلميح: اتبع السهم الذهبي', 2500); }
@@ -229,16 +231,62 @@ function start(A) {
   var up = new THREE.Vector3(0, 1, 0), WL0 = -200, WHI = (A.flood && A.flood.level) || 14;
   function update(dt, t) {
     var sp = orb.position, storm = 0;
+    var cfg = window.PJ_CONFIG.player;
     if (M && M.type === 'storm') { M.t += dt; storm = Math.min(1, M.t / 4); rain.visible = true; }
     if (!paused) {
-      var f = (keys.KeyW || keys.ArrowUp ? 1 : 0) - (keys.KeyS || keys.ArrowDown ? 1 : 0) - joy.y, r = (keys.KeyD ? 1 : 0) - (keys.KeyA ? 1 : 0) + joy.x, u = (keys.Space || tUp ? 1 : 0) - (keys.KeyC || keys.ShiftLeft || tDn ? 1 : 0);
+      var f = (keys.KeyW || keys.ArrowUp ? 1 : 0) - (keys.KeyS || keys.ArrowDown ? 1 : 0) - joy.y, r = (keys.KeyD ? 1 : 0) - (keys.KeyA ? 1 : 0) + joy.x, u = (tUp || keys.KeyE ? 1 : 0) - (keys.KeyC || tDn ? 1 : 0);
       if (keys.ArrowLeft) yaw += 1.6 * dt; if (keys.ArrowRight) yaw -= 1.6 * dt;
-      var want = new THREE.Vector3(-Math.sin(yaw) * f + Math.cos(yaw) * r, u * .8, -Math.cos(yaw) * f - Math.sin(yaw) * r); if (want.lengthSq() > 1) want.normalize(); want.multiplyScalar(16);
-      vel.lerp(want, 1 - Math.exp(-4 * dt)); sp.addScaledVector(vel, dt);
+      var cfg = window.PJ_CONFIG.player;
+      var input = new THREE.Vector2(-Math.sin(yaw) * f + Math.cos(yaw) * r, -Math.cos(yaw) * f - Math.sin(yaw) * r);
+      if (input.lengthSq() > 1) input.normalize();
+      turnInput = input.x;
+      var run = keys.ShiftRight || keys.ShiftLeft;
+      var targetSpeed = (run ? cfg.runSpeed : cfg.walkSpeed) * input.length();
+      var dir = input.clone().normalize();
+      var hx = dir.x * targetSpeed, hz = dir.y * targetSpeed;
+      var accel = grounded ? cfg.groundAcceleration : cfg.airAcceleration;
+      if (targetSpeed < .05) accel = grounded ? cfg.groundDeceleration : cfg.airAcceleration;
+      vel.x += (hx - vel.x) * Math.min(1, accel * dt);
+      vel.z += (hz - vel.z) * Math.min(1, accel * dt);
+      sp.x += vel.x * dt; sp.z += vel.z * dt;
+
+      var jumpPressed = !!(keys.Space || tUp);
+      if (jumpPressed && !prevJump) jumpBufferLeft = cfg.jumpBuffer;
+      jumpBufferLeft = Math.max(0, jumpBufferLeft - dt);
+      prevJump = jumpPressed;
+      var groundY = H(sp.x, sp.z);
+      if (sp.y <= groundY + .12) grounded = true, coyoteLeft = cfg.coyoteTime;
+      else grounded = false, coyoteLeft = Math.max(0, coyoteLeft - dt);
+      if (jumpBufferLeft > 0 && coyoteLeft > 0) {
+        verticalVelocity = cfg.jumpSpeed;
+        grounded = false;
+        coyoteLeft = 0;
+        jumpBufferLeft = 0;
+        PJ.audio.tone(520, .12, 'triangle', .04);
+      }
+      var isFlying = u > 0 && sp.y > groundY + 1;
+      if (isFlying) verticalVelocity = Math.min(cfg.flightMaxRise, verticalVelocity + cfg.flightLift * dt);
+      else verticalVelocity -= cfg.gravity * dt;
+      verticalVelocity = Math.max(-cfg.maxFallSpeed, Math.min(cfg.jumpSpeed * 1.25, verticalVelocity));
+      sp.y += verticalVelocity * dt;
+
+      groundY = H(sp.x, sp.z);
+      if (sp.y <= groundY) {
+        if (!grounded && verticalVelocity < -4) landingImpact = .28;
+        sp.y = groundY;
+        verticalVelocity = 0;
+        grounded = true;
+        coyoteLeft = cfg.coyoteTime;
+      }
+      var ceiling = A.ceiling || 48;
+      if (sp.y >= ceiling - cfg.ceilingMargin) { sp.y = ceiling - cfg.ceilingMargin; verticalVelocity = Math.min(0, verticalVelocity); }
       if (M && M.type === 'storm') { sp.x += M.wind[0] * M.force * storm * dt; sp.z += M.wind[1] * M.force * storm * dt; }
-    } else vel.multiplyScalar(.95);
-    sp.x = clamp(sp.x, -XM, XM); sp.z = clamp(sp.z, ZB, ZA); sp.y = clamp(sp.y, H(sp.x, sp.z) + 2.2, A.ceiling || 48);
-    orb.rotation.y += dt * .8; ring.rotation.z += dt * 1.5; core.scale.setScalar(1 + Math.sin(t * 3) * .08);
+      landingImpact = Math.max(0, landingImpact - dt);
+    } else { vel.multiplyScalar(Math.max(0, 1 - cfg.groundDeceleration * dt)); jumpBufferLeft = 0; }
+    sp.x = clamp(sp.x, -XM, XM); sp.z = clamp(sp.z, ZB, ZA); sp.y = clamp(sp.y, H(sp.x, sp.z), A.ceiling || 48);
+    orb.rotation.y = yaw;
+    ring.rotation.z += dt * 1.5; core.scale.setScalar(1 + Math.sin(t * 3) * .08);
+    playerCharacter.update(t, dt, { speed: new THREE.Vector2(vel.x, vel.z).length(), grounded: grounded, vertical: verticalVelocity, turn: turnInput });
     /* المهام */
     if (!paused && M && !ending) {
       if (M.type === 'rings') { M.meshes.forEach(function (m, i) { if (!M.hit[i] && sp.distanceTo(M.pts[i]) < 4.4) { M.hit[i] = true; m.material.emissiveIntensity = 2; PJ.audio.tone(480 + i * 120, .25, 'triangle', .05); hud(); if (M.hit.every(Boolean)) { story('أحسنت! ' + (STEPS[step].done || 'تعلّمتَ قيادة المركبة.'), '', 4500); setTimeout(nextStep, 900); M.type = 'wait'; } } }); }

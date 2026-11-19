@@ -1,0 +1,28 @@
+/* سجل المغامرات الخمس والعشرين بترتيب القائمة المعتمدة. أضف file عند اكتمال المغامرة. */
+window.ADVENTURES = [
+  { id: 'adam', name: 'آدم عليه السلام', file: 'prophets-journey/play.html?id=adam', steps: 2 },
+  { id: 'idris', name: 'إدريس عليه السلام', file: 'prophets-journey/play.html?id=idris', steps: 2 },
+  { id: 'nuh', name: 'نوح عليه السلام', file: 'prophets-journey/play.html?id=nuh', steps: 4 },
+  { id: 'hud', name: 'هود عليه السلام', file: 'prophets-journey/play.html?id=hud', steps: 3 },
+  { id: 'salih', name: 'صالح عليه السلام', file: 'prophets-journey/play.html?id=salih', steps: 2 },
+  { id: 'ibrahim', name: 'إبراهيم عليه السلام', file: 'prophets-journey/play.html?id=ibrahim', steps: 2 },
+  { id: 'lut', name: 'لوط عليه السلام', file: 'prophets-journey/play.html?id=lut', steps: 2 },
+  { id: 'ismail', name: 'إسماعيل عليه السلام', file: 'prophets-journey/play.html?id=ismail', steps: 2 },
+  { id: 'ishaq', name: 'إسحاق عليه السلام', file: 'prophets-journey/play.html?id=ishaq', steps: 2 },
+  { id: 'yaqub', name: 'يعقوب عليه السلام', file: 'prophets-journey/play.html?id=yaqub', steps: 3 },
+  { id: 'yusuf', name: 'يوسف عليه السلام', file: 'prophets-journey/play.html?id=yusuf', steps: 4 },
+  { id: 'ayyub', name: 'أيوب عليه السلام', file: 'prophets-journey/play.html?id=ayyub', steps: 2 },
+  { id: 'shuayb', name: 'شعيب عليه السلام', file: 'prophets-journey/play.html?id=shuayb', steps: 2 },
+  { id: 'musa', name: 'موسى عليه السلام', file: 'prophets-journey/play.html?id=musa', steps: 4 },
+  { id: 'harun', name: 'هارون عليه السلام', file: 'prophets-journey/play.html?id=harun', steps: 2 },
+  { id: 'dhulkifl', name: 'ذو الكفل عليه السلام', file: 'prophets-journey/play.html?id=dhulkifl', steps: 2 },
+  { id: 'dawud', name: 'داود عليه السلام', file: 'prophets-journey/play.html?id=dawud', steps: 4 },
+  { id: 'sulayman', name: 'سليمان عليه السلام', file: 'prophets-journey/play.html?id=sulayman', steps: 2 },
+  { id: 'ilyas', name: 'إلياس عليه السلام', file: 'prophets-journey/play.html?id=ilyas', steps: 2 },
+  { id: 'alyasa', name: 'اليسع عليه السلام', file: 'prophets-journey/play.html?id=alyasa', steps: 2 },
+  { id: 'yunus', name: 'يونس عليه السلام', file: 'prophets-journey/yunus.html', steps: 5 },
+  { id: 'zakariya', name: 'زكريا عليه السلام', file: 'prophets-journey/play.html?id=zakariya', steps: 2 },
+  { id: 'yahya', name: 'يحيى عليه السلام', file: 'prophets-journey/play.html?id=yahya', steps: 2 },
+  { id: 'isa', name: 'عيسى عليه السلام', file: 'prophets-journey/play.html?id=isa', steps: 2 },
+  { id: 'muhammad', name: 'محمد ﷺ', file: 'prophets-journey/play.html?id=muhammad', steps: 2 }
+];
