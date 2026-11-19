@@ -32,9 +32,9 @@ kbd{display:inline-block;min-width:22px;padding:0 6px;margin:0 2px;border:1px so
 .touch{display:none}.istouch .touch{display:block}.istouch .help{display:none}
 #joy{position:absolute;left:18px;bottom:22px;width:130px;height:130px;border-radius:50%;background:rgba(255,255,255,.1);border:2px solid var(--line);touch-action:none}
 #knob{position:absolute;left:35px;top:35px;width:60px;height:60px;border-radius:50%;background:rgba(244,201,93,.55);pointer-events:none}
-.tb{position:absolute;width:62px;height:62px;border-radius:50%;border:2px solid var(--line);background:rgba(4,15,22,.6);color:#fff;font-size:24px;touch-action:none}
+.tb{position:absolute;width:72px;height:72px;border-radius:50%;border:2px solid var(--line);background:rgba(4,15,22,.72);color:#fff;font-size:27px;touch-action:none;box-shadow:0 3px 12px rgba(0,0,0,.25)}
 .tb.act{background:rgba(244,201,93,.55)}
-#bUp{right:18px;bottom:150px}#bDn{right:18px;bottom:82px}#bLamp{right:90px;bottom:116px}#bAct{right:90px;bottom:34px;width:72px;height:72px}
+#bUp{right:18px;bottom:160px}#bDn{right:18px;bottom:78px}#bLamp{right:90px;bottom:116px}#bAct{right:90px;bottom:34px;width:72px;height:72px}
 .ov{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(2,10,16,.72);z-index:30}
 .ov.hidden{display:none}
 .card{width:min(620px,100%);max-height:92vh;overflow:auto;padding:24px 22px;border:1px solid var(--line);border-radius:22px;background:rgba(6,22,31,.95);text-align:center}
@@ -70,13 +70,13 @@ kbd{display:inline-block;min-width:22px;padding:0 6px;margin:0 2px;border:1px so
   <div class="hud"><h1 id="mt"></h1><p id="mx"></p><div class="pips" id="pips"></div><div id="cnt"></div></div>
   <a class="back" href="../prophets-journey.html">↩ مركز أسرار الزمان</a>
   <div class="audio"><button id="mute" aria-label="كتم">🔊</button><input id="vol" type="range" min="0" max="100" value="40" aria-label="مستوى الصوت"></div>
-  <div class="help"><div><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> حركة</div><div><kbd>Space</kbd> قفز <kbd>E</kbd> صعود <kbd>C</kbd> هبوط</div><div>اقترب من الحلقات لالتقاطها تلقائيًا</div><div><kbd>←</kbd><kbd>→</kbd> أو اسحب بالفأرة: الكاميرا</div></div>
+  <div class="help"><div><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> حركة</div><div><kbd>Space</kbd> قفز <kbd>E</kbd> طيران وصعود <kbd>C</kbd> هبوط</div><div>اقترب من الحلقات لالتقاطها تلقائيًا</div><div><kbd>←</kbd><kbd>→</kbd> أو اسحب بالفأرة: الكاميرا</div></div>
   <button class="hintb" id="hintBtn">💡 تلميح (H)</button>
   <div class="nav" id="nav"><span id="na">▲</span><span id="nd"></span></div>
   <div class="bar" id="bar"><b id="barf"></b></div>
-  <div id="toast"></div><div id="story"><div id="sx"></div><div id="sr"></div></div><div id="sub"></div>
-  <div class="touch"><div id="joy"><div id="knob"></div></div>
-    <button class="tb" id="bUp" aria-label="صعود">⬆</button><button class="tb" id="bDn" aria-label="هبوط">⬇</button>
+  <div id="toast" role="status" aria-live="polite"></div><div id="story"><div id="sx"></div><div id="sr"></div></div><div id="sub" aria-live="polite"></div>
+  <div class="touch"><div id="joy" role="application" aria-label="عصا الحركة الافتراضية"><div id="knob"></div></div>
+    <button class="tb" id="bUp" aria-label="قفز وصعود وطيران">⬆</button><button class="tb" id="bDn" aria-label="هبوط">⬇</button>
     <button class="tb" id="bLamp" aria-label="المصباح">💡</button><button class="tb" id="bAct" aria-label="تفاعل">✋</button></div>
   <div class="ov hidden" id="intro"><div class="card">
     <h2>جارٍ التحميل…</h2>
@@ -92,9 +92,10 @@ kbd{display:inline-block;min-width:22px;padding:0 6px;margin:0 2px;border:1px so
 </div>
 <script src="shared/save.js"></script>
 <script src="shared/audio.js"></script>
-<script src="shared/config.js?v=20261119-vehicle"></script>
+<script src="shared/config.js?v=release-readiness-1"></script>
 <script src="vendor/three.min.js"></script>
-<script src="shared/character.js?v=20261119-forward-axis"></script>
-<script src="shared/engine.js?v=20261119-world3d"></script>
+<script src="shared/physics.js?v=release-readiness-1"></script>
+<script src="shared/character.js?v=release-readiness-1"></script>
+<script src="shared/engine.js?v=release-readiness-1"></script>
 </body>
 </html>

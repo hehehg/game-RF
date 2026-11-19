@@ -14,6 +14,9 @@
       maxFallSpeed: 18,
       coyoteTime: .12,
       jumpBuffer: .14,
+      hoverHeight: 1.5,
+      collisionRadius: 1.8,
+      collisionHalfHeight: 1.15,
       ceilingMargin: 2.2
     },
     camera: {
@@ -22,6 +25,7 @@
       height: 4.4
     },
     autoHelp: {
+      enabled: true,
       hintDelay: 14,
       mistakeLimit: 3
     }

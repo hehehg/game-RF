@@ -15,9 +15,15 @@ function start(A) {
   if (typeof THREE === 'undefined') return fail('تعذّر تحميل مكتبة العرض');
   var T = A.theme, TR = A.terrain, PK = TR.peak, STEPS = A.steps;
   var save = PJ.load(); save[id] = save[id] || { step: 0, done: false }; var SV = save[id];
-  function store() { PJ.store(save); }
+  var storageWarningShown = false;
+  function store() {
+    if (!PJ.store(save) && !storageWarningShown) {
+      storageWarningShown = true;
+      toast('تعذر حفظ تقدمك في هذا المتصفح. قد لا يُستعاد التقدم بعد إغلاق اللعبة.', 6500);
+    }
+  }
   var R; try { R = new THREE.WebGLRenderer({ canvas: $('c'), antialias: true }); } catch (e) { return fail('تعذّر تشغيل العرض ثلاثي الأبعاد'); }
-  R.setPixelRatio(Math.min(devicePixelRatio, isTouch ? 1.5 : 2)); R.setSize(innerWidth, innerHeight);
+  R.setPixelRatio(Math.min(devicePixelRatio || 1, isTouch ? 1.5 : 2)); R.setSize(innerWidth, innerHeight);
   R.toneMapping = THREE.ACESFilmicToneMapping; R.toneMappingExposure = 1.1;
   var S = new THREE.Scene(), FOG = new THREE.Color(T.fog), STORM = new THREE.Color(T.storm || 0x45515c);
   S.background = FOG.clone(); S.fog = new THREE.Fog(FOG.clone(), 30, T.fogFar || 150);
@@ -34,29 +40,23 @@ function start(A) {
     return y;
   }
   var W = TR.w || 160, L = TR.l || 220, CZ = TR.cz || -60, XM = W / 2 - 4, ZA = CZ + L / 2 - 4, ZB = CZ - L / 2 + 4;
-  var collisionObstacles = [];
-  function addCircularObstacle(x, z, radius) { collisionObstacles.push({ kind: 'circle', x: x, z: z, r: radius }); }
-  function resolvePlayerMovement(previousX, previousZ, sp) {
-    var vehicleRadius = 1.35;
-    for (var i = 0; i < collisionObstacles.length; i++) {
-      var o = collisionObstacles[i];
-      if (o.kind === 'circle') {
-        var dx = sp.x - o.x, dz = sp.z - o.z, distance = Math.hypot(dx, dz);
-        var min = o.r + vehicleRadius;
-        if (distance < min) {
-          if (distance < .001) { sp.x = previousX; sp.z = previousZ; }
-          else { sp.x = o.x + dx / distance * min; sp.z = o.z + dz / distance * min; }
-          vel.x *= -.12; vel.z *= -.12;
-        }
-      } else {
-        var ix = Math.max(o.x - o.hx, Math.min(sp.x, o.x + o.hx));
-        var iz = Math.max(o.z - o.hz, Math.min(sp.z, o.z + o.hz));
-        if ((sp.x - ix) * (sp.x - ix) + (sp.z - iz) * (sp.z - iz) < vehicleRadius * vehicleRadius) {
-          sp.x = previousX; sp.z = previousZ;
-          vel.x *= -.12; vel.z *= -.12;
-        }
-      }
-    }
+  var collisionObstacles = [], stepCollisionObstacles = [];
+  function addCircularObstacle(x, z, radius, top) {
+    collisionObstacles.push({ kind: 'circle', x: x, z: z, r: radius, top: top });
+  }
+  function resolvePlayerMovement(previousX, previousZ, sp, cfg) {
+    var previous = { x: previousX, z: previousZ };
+    collisionObstacles.forEach(syncObstacle);
+    stepCollisionObstacles.forEach(syncObstacle);
+    PJPhysics.resolve(sp, previous, vel, collisionObstacles, cfg.collisionRadius, cfg.collisionHalfHeight);
+    if (stepCollisionObstacles.length) PJPhysics.resolve(sp, previous, vel, stepCollisionObstacles, cfg.collisionRadius, cfg.collisionHalfHeight);
+  }
+  function syncObstacle(obstacle) {
+    if (!obstacle.group) return;
+    obstacle.x = obstacle.group.position.x + obstacle.localX;
+    obstacle.z = obstacle.group.position.z + obstacle.localZ;
+    if (obstacle.localBottom !== undefined) obstacle.bottom = obstacle.group.position.y + obstacle.localBottom;
+    if (obstacle.localTop !== undefined) obstacle.top = obstacle.group.position.y + obstacle.localTop;
   }
   /* التضاريس */
   (function () {
@@ -96,13 +96,13 @@ function start(A) {
   }
   var dummy = new THREE.Object3D();
   (A.decor || []).forEach(function (d) {
-    if (d.type === 'rocks') { for (var i = 0; i < d.n; i++) { var x = (rnd() - .5) * W * .9, z = CZ + (rnd() - .5) * L * .9; if (!nearFlat(x, z)) { var size = 1 + rnd() * 2.6; rock(x, z, size); addCircularObstacle(x, z, size * 1.1); } } }
+    if (d.type === 'rocks') { for (var i = 0; i < d.n; i++) { var x = (rnd() - .5) * W * .9, z = CZ + (rnd() - .5) * L * .9; if (!nearFlat(x, z)) { var size = 1 + rnd() * 2.6; rock(x, z, size); addCircularObstacle(x, z, size * 1.1, H(x, z) + size * 1.8); } } }
     if (d.type === 'trees') {
       var tr = new THREE.InstancedMesh(new THREE.CylinderGeometry(.24, .48, 4.2, 8).translate(0, 2.1, 0), new THREE.MeshStandardMaterial({ color: 0x6b4a2b, roughness: .92 }), d.n);
       var cn = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1.55, 1), new THREE.MeshStandardMaterial({ roughness: .88, flatShading: true }), d.n * 3), k = 0, leafCount = 0;
       var cols = (d.colors || [0x3f7d3a, 0x56903f, 0x2f6b3a]).map(function (c) { return new THREE.Color(c); });
       for (var i = 0; i < d.n; i++) { var x = (rnd() - .5) * W * .92, z = CZ + (rnd() - .5) * L * .92, y = H(x, z); if (nearFlat(x, z) || y > (d.maxY || 6)) continue;
-        var s = .8 + rnd() * .8; addCircularObstacle(x, z, 1.3 * s);
+        var s = .8 + rnd() * .8; addCircularObstacle(x, z, 1.8 * s, y + 6.5 * s);
         dummy.position.set(x, y, z); dummy.scale.set(s, s, s); dummy.rotation.set(0, rnd() * 6, 0); dummy.updateMatrix(); tr.setMatrixAt(k++, dummy.matrix);
         [[0, 4.5, 0, 1.25, 1.35, 1.2], [1, 3.8, .15, .95, 1.05, .95], [-1, 3.85, -.1, .95, 1.05, .95]].forEach(function (leaf) {
           dummy.position.set(x + leaf[0] * s, y + leaf[1] * s, z + leaf[2] * s);
@@ -135,20 +135,17 @@ function start(A) {
   if (STR) {
     strG = new THREE.Group(); var sy = H(STR.x, STR.z); strG.position.set(STR.x, sy, STR.z);
     if (STR.type === 'ark') {
-      collisionObstacles.push({ kind: 'box', x: STR.x, z: STR.z, hx: 5.5, hz: 10 });
       var m1 = new THREE.MeshStandardMaterial({ color: 0x8a5a2b, roughness: .9 }), m2 = new THREE.MeshStandardMaterial({ color: 0xa9733a, roughness: .9 });
-      for (var i = 0; i < 5; i++) { var sgm = new THREE.Mesh(new THREE.BoxGeometry(8, 2.8, 4), m1); sgm.position.set(0, 1.4, -8 + i * 4); sgm.visible = false; strG.add(sgm); strParts.push(sgm); }
+      for (var i = 0; i < 5; i++) { var sgm = new THREE.Mesh(new THREE.BoxGeometry(8, 2.8, 4), m1); sgm.position.set(0, 1.4, -8 + i * 4); sgm.visible = false; strG.add(sgm); strParts.push(sgm); collisionObstacles.push({ kind: 'box', x: STR.x, z: STR.z - 8 + i * 4, hx: 4, hz: 2, bottom: sy, top: sy + 2.8, source: sgm, group: strG, localX: 0, localZ: -8 + i * 4, localBottom: 0, localTop: 2.8 }); }
       var cab = new THREE.Mesh(new THREE.BoxGeometry(5.5, 2.6, 8), m2); cab.position.set(0, 4.1, 1); cab.visible = false; strG.add(cab); strExtra = cab;
       var bow = new THREE.Mesh(new THREE.ConeGeometry(4.2, 4, 4), m1); bow.rotation.set(Math.PI / 2, Math.PI / 4, 0); bow.position.set(0, 1.4, -12); bow.scale.set(1, 1, .7); bow.visible = false; strG.add(bow); strParts[0].userData.bow = bow;
       for (var a = 0; a < 3; a++) for (var b = -1; b <= 1; b += 2) animalSlots.push([b * 2.6, 3.3, -6 + a * 4]);
     } else if (STR.type === 'blocks') {
       var bk = function (q) { var b = new THREE.Mesh(new THREE.BoxGeometry(q[3], q[4], q[5]), new THREE.MeshStandardMaterial({ color: q[6] || STR.color || 0x9a8a72, roughness: .9, flatShading: true })); b.position.set(q[0], q[1], q[2]); return b; };
-      (STR.base || []).forEach(function (q) { strG.add(bk(q)); }); (STR.parts || []).forEach(function (q) { var b = bk(q); b.visible = false; strG.add(b); strParts.push(b); });
-      (STR.base || []).forEach(function (q) { collisionObstacles.push({ kind: 'box', x: STR.x + q[0], z: STR.z + q[2], hx: q[3] / 2, hz: q[5] / 2 }); });
+      (STR.base || []).forEach(function (q) { var b = bk(q); strG.add(b); collisionObstacles.push({ kind: 'box', x: STR.x + q[0], z: STR.z + q[2], hx: q[3] / 2, hz: q[5] / 2, bottom: sy + q[1] - q[4] / 2, top: sy + q[1] + q[4] / 2, source: b, group: strG, localX: q[0], localZ: q[2], localBottom: q[1] - q[4] / 2, localTop: q[1] + q[4] / 2 }); }); (STR.parts || []).forEach(function (q) { var b = bk(q); b.visible = false; strG.add(b); strParts.push(b); collisionObstacles.push({ kind: 'box', x: STR.x + q[0], z: STR.z + q[2], hx: q[3] / 2, hz: q[5] / 2, bottom: sy + q[1] - q[4] / 2, top: sy + q[1] + q[4] / 2, source: b, group: strG, localX: q[0], localZ: q[2], localBottom: q[1] - q[4] / 2, localTop: q[1] + q[4] / 2 }); });
     } else if (STR.type === 'house') {
       var sm = new THREE.MeshStandardMaterial({ color: 0x9a8a72, roughness: .95, flatShading: true });
-      [[-3.4, -3], [0, -3], [3.4, -3], [-3.4, 3], [0, 3], [3.4, 3]].forEach(function (q) { var bl = new THREE.Mesh(new THREE.BoxGeometry(3.2, 1.8, 3.2), sm); bl.position.set(q[0], .9, q[1]); bl.visible = false; strG.add(bl); strParts.push(bl); });
-      [[-3.4, -3], [0, -3], [3.4, -3], [-3.4, 3], [0, 3], [3.4, 3]].forEach(function (q) { collisionObstacles.push({ kind: 'box', x: STR.x + q[0], z: STR.z + q[1], hx: 1.6, hz: 1.6 }); });
+      [[-3.4, -3], [0, -3], [3.4, -3], [-3.4, 3], [0, 3], [3.4, 3]].forEach(function (q) { var bl = new THREE.Mesh(new THREE.BoxGeometry(3.2, 1.8, 3.2), sm); bl.position.set(q[0], .9, q[1]); bl.visible = false; strG.add(bl); strParts.push(bl); collisionObstacles.push({ kind: 'box', x: STR.x + q[0], z: STR.z + q[1], hx: 1.6, hz: 1.6, bottom: sy, top: sy + 1.8, source: bl, group: strG, localX: q[0], localZ: q[1], localBottom: 0, localTop: 1.8 }); });
     }
     S.add(strG);
   }
@@ -157,6 +154,7 @@ function start(A) {
   /* الحالة */
   var step = 0, paused = true, introOn = true, M = null, flood = null, ending = false, yaw = 0, pitch = -.12, vel = new THREE.Vector3(), keys = {}, joy = { x: 0, y: 0 }, tUp = false, tDn = false, objs = [];
   var verticalVelocity = 0, grounded = true, coyoteLeft = 0, jumpBufferLeft = 0, prevJump = false, landingImpact = 0, turnInput = 0;
+  var progressAt = performance.now() / 1000;
   var hints = 0, mistakes = 0, orbsGot = 0, hintUntil = 0, ORBS = [];
   var START = A.start || [0, 8, 30];
   orb.position.set(START[0], START[1], START[2]);
@@ -219,7 +217,7 @@ function start(A) {
     return g;
   }
   function buildStep(n) {
-    clearObjs(); var s = STEPS[n]; M = { type: s.type };
+    clearObjs(); stepCollisionObstacles.length = 0; progressAt = performance.now() / 1000; var s = STEPS[n]; M = { type: s.type };
     if (s.type === 'rings') { M.pts = s.pts.map(function (a) { return new THREE.Vector3(a[0], H(a[0], a[2]) + 2.8, a[2]); }); M.hit = M.pts.map(function () { return false; });
       M.meshes = M.pts.map(function (p) { var m = new THREE.Mesh(new THREE.TorusGeometry(3.2, .34, 16, 48), new THREE.MeshStandardMaterial({ color: 0xf4c95d, emissive: 0xffc040, emissiveIntensity: .9 })); m.add(new THREE.Mesh(new THREE.TorusGeometry(3.2, .8, 10, 48), new THREE.MeshBasicMaterial({ color: 0xffe08a, transparent: true, opacity: .18, blending: THREE.AdditiveBlending, depthWrite: false }))); m.position.copy(p); m.rotation.y = 0; S.add(m); objs.push(m); return m; }); toast('اقرب من الحلقة المضيئة؛ ستُلتقط تلقائيا عند الاقتراب منها.', 5000); }
     if (s.type === 'carry') {
@@ -228,10 +226,13 @@ function start(A) {
       var pad = new THREE.Mesh(new THREE.TorusGeometry(6, .25, 8, 40), new THREE.MeshBasicMaterial({ color: 0xffe08a, transparent: true, opacity: .8 })); pad.rotation.x = Math.PI / 2; pad.position.set(s.to[0], M.to.y - 1, s.to[1]); S.add(pad); objs.push(pad); M.pad = pad;
     }
     if (s.type === 'discover') {
-      M.delivered = 0; M.items = s.items.map(function (it, ix) { var core = lm(it.kind), g = new THREE.Group(), y = it.y !== undefined ? it.y : H(it.x, it.z); g.add(core); g.userData.spin = core.userData.spin; g.position.set(it.x, y, it.z); addGlow(g, 3); var lb = label(it.name); lb.position.y = 7; g.add(lb); var bm0 = new THREE.Mesh(new THREE.CylinderGeometry(.5, .5, 40, 8, 1, true), new THREE.MeshBasicMaterial({ color: 0xfff2b0, transparent: true, opacity: .16, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide })); bm0.position.y = 20; g.add(bm0); g.visible = ix < 3; S.add(g); objs.push(g); return { g: g, fact: it.fact, name: it.name }; });
+      M.delivered = 0; M.items = s.items.map(function (it, ix) { var core = lm(it.kind), g = new THREE.Group(), y = it.y !== undefined ? it.y : H(it.x, it.z); g.add(core); g.userData.spin = core.userData.spin; g.position.set(it.x, y, it.z); addGlow(g, 3); var lb = label(it.name); lb.position.y = 7; g.add(lb); var bm0 = new THREE.Mesh(new THREE.CylinderGeometry(.5, .5, 40, 8, 1, true), new THREE.MeshBasicMaterial({ color: 0xfff2b0, transparent: true, opacity: .16, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide })); bm0.position.y = 20; g.add(bm0); g.visible = ix < 3; S.add(g); objs.push(g);
+        var collision = { tree: [3, 10], tower: [2.4, 14], rockhouse: [3.6, 6], fountain: [2.5, 2], camel: [3.2, 7], anvil: [1.8, 3], well: [2.2, 3], tent: [3.2, 4], lamp: [1.5, 5] }[it.kind];
+        if (collision) stepCollisionObstacles.push({ kind: 'circle', x: it.x, z: it.z, r: collision[0], top: y + collision[1], source: g });
+        return { g: g, fact: it.fact, name: it.name }; });
     }
     if (s.type === 'reach') { M.pos = new THREE.Vector3(s.pos[0], H(s.pos[0], s.pos[1]) + 3, s.pos[1]);
-      if (s.walls) { var w = s.walls, len = Math.abs(w.z1 - w.z0), zc = (w.z0 + w.z1) / 2; [-1, 1].forEach(function (sd) { var wx = sd * (w.gap / 2 + 25); var wm = new THREE.Mesh(new THREE.BoxGeometry(50, w.h, len), new THREE.MeshStandardMaterial({ color: 0x2a8fbf, transparent: true, opacity: .5, emissive: 0x0a4a6a, emissiveIntensity: .5, roughness: .1 })); wm.position.set(wx, w.h / 2 - 6, zc); S.add(wm); objs.push(wm); collisionObstacles.push({ kind: 'box', x: wx, z: zc, hx: 25, hz: len / 2 }); }); }
+      if (s.walls) { var w = s.walls, len = Math.abs(w.z1 - w.z0), zc = (w.z0 + w.z1) / 2; [-1, 1].forEach(function (sd) { var wx = sd * (w.gap / 2 + 25); var wm = new THREE.Mesh(new THREE.BoxGeometry(50, w.h, len), new THREE.MeshStandardMaterial({ color: 0x2a8fbf, transparent: true, opacity: .5, emissive: 0x0a4a6a, emissiveIntensity: .5, roughness: .1 })); wm.position.set(wx, w.h / 2 - 6, zc); S.add(wm); objs.push(wm); stepCollisionObstacles.push({ kind: 'box', x: wx, z: zc, hx: 25, hz: len / 2, bottom: -6, top: w.h - 6 }); }); }
       var rm = new THREE.Mesh(new THREE.OctahedronGeometry(2), new THREE.MeshBasicMaterial({ color: 0xfff2b0 })); rm.position.copy(M.pos); S.add(rm); objs.push(rm); }
     if (s.type === 'storm') { M.pos = new THREE.Vector3(s.pos[0], H(s.pos[0], s.pos[1]) + 3, s.pos[1]); M.t = 0; M.wind = s.wind || [1, 0]; M.force = s.force || 7; var bm = new THREE.Mesh(new THREE.OctahedronGeometry(2), new THREE.MeshBasicMaterial({ color: 0xfff2b0 })); bm.position.copy(M.pos); S.add(bm); objs.push(bm); }
     if (s.type === 'flood') { M.pos = new THREE.Vector3(s.pos[0], H(s.pos[0], s.pos[1]) + 3, s.pos[1]); }
@@ -267,13 +268,16 @@ function start(A) {
   /* الإدخال */
   addEventListener('keydown', function (e) { if (/^(Space|Arrow)/.test(e.code)) e.preventDefault(); keys[e.code] = true; if (e.code === 'KeyH' && !e.repeat) hint(); });
   $('hintBtn').onclick = function () { hint(); };
-  addEventListener('keyup', function (e) { keys[e.code] = false; }); addEventListener('blur', function () { keys = {}; });
+  addEventListener('keyup', function (e) { keys[e.code] = false; });
+  function releaseInput() { keys = {}; joy.x = 0; joy.y = 0; tUp = false; tDn = false; prevJump = false; jid = null; knob.style.transform = ''; }
+  addEventListener('blur', releaseInput);
+  document.addEventListener('visibilitychange', function () { if (document.hidden) releaseInput(); });
   var pad = $('joy'), knob = $('knob'), jid = null;
   function jset(e) { var r = pad.getBoundingClientRect(), m = r.width * .4, dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2), l = Math.hypot(dx, dy); if (l > m) { dx *= m / l; dy *= m / l; } joy.x = dx / m; joy.y = dy / m; knob.style.transform = 'translate(' + dx + 'px,' + dy + 'px)'; }
   pad.addEventListener('pointerdown', function (e) { jid = e.pointerId; pad.setPointerCapture(jid); jset(e); });
   pad.addEventListener('pointermove', function (e) { if (e.pointerId === jid) jset(e); });
   function jend(e) { if (e.pointerId === jid) { jid = null; joy.x = joy.y = 0; knob.style.transform = ''; } } pad.addEventListener('pointerup', jend); pad.addEventListener('pointercancel', jend);
-  function hb(i, fn) { var b = $(i); b.addEventListener('pointerdown', function (e) { e.preventDefault(); b.setPointerCapture(e.pointerId); fn(true); }); var u = function () { fn(false); }; b.addEventListener('pointerup', u); b.addEventListener('pointercancel', u); }
+  function hb(i, fn) { var b = $(i); b.addEventListener('pointerdown', function (e) { e.preventDefault(); b.setPointerCapture(e.pointerId); fn(true); }); var u = function () { fn(false); }; b.addEventListener('pointerup', u); b.addEventListener('pointercancel', u); b.addEventListener('lostpointercapture', u); }
   hb('bUp', function (v) { tUp = v; }); hb('bDn', function (v) { tDn = v; });
   var cid = null, lx = 0, ly = 0, cv = $('c');
   cv.addEventListener('pointerdown', function (e) { cid = e.pointerId; lx = e.clientX; ly = e.clientY; cv.setPointerCapture(cid); });
@@ -283,13 +287,13 @@ function start(A) {
 
   var up = new THREE.Vector3(0, 1, 0), WL0 = -200, WHI = (A.flood && A.flood.level) || 14;
   function update(dt, t) {
-    var sp = orb.position, storm = 0;
+    var sp = orb.position, storm = 0, u = 0;
     var cfg = window.PJ_CONFIG.player;
     if (M && M.type === 'storm') { M.t += dt; storm = Math.min(1, M.t / 4); rain.visible = true; }
     if (!paused) {
-      var f = (keys.KeyW || keys.ArrowUp ? 1 : 0) - (keys.KeyS || keys.ArrowDown ? 1 : 0) - joy.y, r = (keys.KeyD ? 1 : 0) - (keys.KeyA ? 1 : 0) + joy.x, u = (tUp || keys.KeyE ? 1 : 0) - (keys.KeyC || tDn ? 1 : 0);
+      var f = (keys.KeyW || keys.ArrowUp ? 1 : 0) - (keys.KeyS || keys.ArrowDown ? 1 : 0) - joy.y, r = (keys.KeyD ? 1 : 0) - (keys.KeyA ? 1 : 0) + joy.x;
+      u = (tUp || keys.KeyE ? 1 : 0) - (keys.KeyC || tDn ? 1 : 0);
       if (keys.ArrowLeft) yaw += 1.6 * dt; if (keys.ArrowRight) yaw -= 1.6 * dt;
-      var cfg = window.PJ_CONFIG.player;
       var input = new THREE.Vector2(-Math.sin(yaw) * f + Math.cos(yaw) * r, -Math.cos(yaw) * f - Math.sin(yaw) * r);
       if (input.lengthSq() > 1) input.normalize();
       turnInput = input.x;
@@ -303,13 +307,13 @@ function start(A) {
       vel.z += (hz - vel.z) * Math.min(1, accel * dt);
       var previousX = sp.x, previousZ = sp.z;
       sp.x += vel.x * dt; sp.z += vel.z * dt;
-      resolvePlayerMovement(previousX, previousZ, sp);
+      resolvePlayerMovement(previousX, previousZ, sp, cfg);
 
       var jumpPressed = !!(keys.Space || tUp);
       if (jumpPressed && !prevJump) jumpBufferLeft = cfg.jumpBuffer;
       jumpBufferLeft = Math.max(0, jumpBufferLeft - dt);
       prevJump = jumpPressed;
-      var groundY = H(sp.x, sp.z);
+      var groundY = H(sp.x, sp.z) + cfg.hoverHeight;
       if (sp.y <= groundY + .12) grounded = true, coyoteLeft = cfg.coyoteTime;
       else grounded = false, coyoteLeft = Math.max(0, coyoteLeft - dt);
       if (jumpBufferLeft > 0 && coyoteLeft > 0) {
@@ -319,13 +323,13 @@ function start(A) {
         jumpBufferLeft = 0;
         PJ.audio.tone(520, .12, 'triangle', .04);
       }
-      var isFlying = u > 0 && sp.y > groundY + 1;
+      var isFlying = u > 0 && sp.y >= groundY - .1;
       if (isFlying) verticalVelocity = Math.min(cfg.flightMaxRise, verticalVelocity + cfg.flightLift * dt);
       else verticalVelocity -= cfg.gravity * dt;
       verticalVelocity = Math.max(-cfg.maxFallSpeed, Math.min(cfg.jumpSpeed * 1.25, verticalVelocity));
       sp.y += verticalVelocity * dt;
 
-      groundY = H(sp.x, sp.z);
+      groundY = H(sp.x, sp.z) + cfg.hoverHeight;
       if (sp.y <= groundY) {
         if (!grounded && verticalVelocity < -4) landingImpact = .28;
         sp.y = groundY;
@@ -338,26 +342,31 @@ function start(A) {
       if (M && M.type === 'storm') { sp.x += M.wind[0] * M.force * storm * dt; sp.z += M.wind[1] * M.force * storm * dt; }
       landingImpact = Math.max(0, landingImpact - dt);
     } else { vel.multiplyScalar(Math.max(0, 1 - cfg.groundDeceleration * dt)); jumpBufferLeft = 0; }
-    sp.x = clamp(sp.x, -XM, XM); sp.z = clamp(sp.z, ZB, ZA); sp.y = clamp(sp.y, H(sp.x, sp.z), A.ceiling || 48);
+    sp.x = clamp(sp.x, -XM, XM); sp.z = clamp(sp.z, ZB, ZA); sp.y = clamp(sp.y, H(sp.x, sp.z) + cfg.hoverHeight, (A.ceiling || 48) - cfg.ceilingMargin);
     orb.rotation.y = yaw;
     ring.rotation.z += dt * 1.5; core.scale.setScalar(1 + Math.sin(t * 3) * .08);
-    playerCharacter.update(t, dt, { speed: new THREE.Vector2(vel.x, vel.z).length(), grounded: grounded, vertical: verticalVelocity, turn: turnInput, flying: u > 0 });
+    playerCharacter.update(t, dt, { speed: new THREE.Vector2(vel.x, vel.z).length(), grounded: grounded, vertical: verticalVelocity, turn: turnInput, flying: !!u });
+    if (!paused && !introOn && M && M.type !== 'wait' && window.PJ_CONFIG.autoHelp.enabled && target() && t - progressAt >= window.PJ_CONFIG.autoHelp.hintDelay) {
+      progressAt = t;
+      hintUntil = t + 10;
+      toast('اتبع السهم المضيء للوصول إلى الهدف التالي.', 4000);
+    }
     /* المهام */
     if (!paused && M && !ending) {
-      if (M.type === 'rings') { M.meshes.forEach(function (m, i) { if (!M.hit[i] && sp.distanceTo(M.pts[i]) < 6.2) { M.hit[i] = true; m.visible = false; PJ.audio.tone(480 + i * 120, .25, 'triangle', .05); hud(); if (M.hit.every(Boolean)) { story('أحسنت! ' + (STEPS[step].done || 'تعلّمتَ قيادة المركبة.'), '', 4500); setTimeout(nextStep, 900); M.type = 'wait'; } } }); }
+      if (M.type === 'rings') { M.meshes.forEach(function (m, i) { if (!M.hit[i] && sp.distanceTo(M.pts[i]) < 6.2) { M.hit[i] = true; m.visible = false; progressAt = t; PJ.audio.tone(480 + i * 120, .25, 'triangle', .05); hud(); if (M.hit.every(Boolean)) { story('أحسنت! ' + (STEPS[step].done || 'تعلّمتَ قيادة المركبة.'), '', 4500); setTimeout(nextStep, 900); M.type = 'wait'; } } }); }
       else if (M.type === 'carry') {
         if (!M.carry) { for (var i = 0; i < M.items.length; i++) { var it = M.items[i]; if (i === M.delivered && !it.done && it.g.position.distanceTo(sp) < 5.2) { M.carry = it; S.remove(it.g); orb.add(it.g); it.g.position.set(0, -2.6, 0); it.g.scale.setScalar(.8); PJ.audio.tone(520, .2, 'triangle', .05); toast('تم الالتقاط. أوصله إلى الدائرة المضيئة.', 3500); break; } } }
         else if (Math.hypot(sp.x - M.to.x, sp.z - M.to.z) < 6.5 && Math.abs(sp.y - M.to.y) < 9) {
           var it2 = M.carry; M.carry = null; orb.remove(it2.g); it2.done = true; var k = M.delivered++; var st = STEPS[step]; if (M.items[M.delivered]) M.items[M.delivered].g.visible = true;
           if (st.reveals === 'parts') reveal(k + (st.offset || 0)); else if (st.reveals === 'animals' && animalSlots[k]) { var a = makeAnimal(it2.color); a.scale.setScalar(.55); a.position.set.apply(a.position, animalSlots[k]); strG.add(a); }
-          PJ.audio.tone(660, .3, 'triangle', .05); if (it2.fact) say('s' + step + 'i' + k, it2.fact[0], it2.fact[1]); hud();
+          progressAt = t; PJ.audio.tone(660, .3, 'triangle', .05); if (it2.fact) say('s' + step + 'i' + k, it2.fact[0], it2.fact[1]); hud();
           if (M.delivered >= M.items.length) { var mm = M; M = { type: 'wait' }; setTimeout(function () { if (!ending) nextStep(); }, 1600); }
         }
       }
       else if (M.type === 'discover') {
         var cur = M.items[M.delivered];
         if (cur && cur.g.position.distanceTo(sp) < 7) {
-          M.delivered++; PJ.audio.tone(560 + M.delivered * 60, .3, 'triangle', .05); story('✔ ' + cur.name + ' — ' + cur.fact[0], cur.fact[1], 6500);
+          M.delivered++; progressAt = t; PJ.audio.tone(560 + M.delivered * 60, .3, 'triangle', .05); story('✔ ' + cur.name + ' — ' + cur.fact[0], cur.fact[1], 6500);
           for (var vv = 0; vv < M.items.length; vv++) M.items[vv].g.visible = vv < M.delivered + 3;
           hud(); var sref = M;
           if (M.delivered >= M.items.length) { M = { type: 'wait' }; hud(); setTimeout(function () { if (!ending) nextStep(); }, 2800); }
@@ -397,8 +406,8 @@ function start(A) {
       cam.position.set(sp.x + Math.sin(yaw) * 16, sp.y + 5, sp.z + Math.cos(yaw) * 16);
       cam.lookAt(sp.x - Math.sin(yaw) * 8, sp.y + 1, sp.z - Math.cos(yaw) * 8);
     }
-    else { var off = new THREE.Vector3(0, 4.4 - pitch * 4, 12).applyAxisAngle(up, yaw), tgt = sp.clone().add(off); tgt.y = Math.max(tgt.y, H(tgt.x, tgt.z) + 1); cam.position.lerp(tgt, 1 - Math.exp(-7 * dt)); cam.lookAt(sp.x - Math.sin(yaw) * 12, sp.y + 1 + pitch * 6, sp.z - Math.cos(yaw) * 12); }
-    if (FXS) { FXS.t += dt; var amp = FXS.k === 'calm' ? 0 : Math.min(1, FXS.t / 1.2) * (FXS.t < 4 ? 1 : Math.max(0, 5 - FXS.t)); cam.position.x += (Math.random() - .5) * .9 * amp; cam.position.y += (Math.random() - .5) * .9 * amp;
+    else { var cameraConfig = window.PJ_CONFIG.camera, off = new THREE.Vector3(0, cameraConfig.height - pitch * 4, cameraConfig.distance).applyAxisAngle(up, yaw), tgt = sp.clone().add(off); tgt.y = Math.max(tgt.y, H(tgt.x, tgt.z) + 1); cam.position.lerp(tgt, 1 - Math.exp(-cameraConfig.smoothing * dt)); cam.lookAt(sp.x - Math.sin(yaw) * cameraConfig.distance, sp.y + 1 + pitch * 6, sp.z - Math.cos(yaw) * cameraConfig.distance); }
+    if (FXS) { FXS.t += dt; var amp = FXS.k === 'calm' ? 0 : Math.min(1, FXS.t / 1.2) * (FXS.t < 4 ? 1 : Math.max(0, 5 - FXS.t)); cam.position.x += Math.sin(FXS.t * 14) * .14 * amp; cam.position.y += Math.sin(FXS.t * 9) * .08 * amp;
       if (FXS.k === 'dawn' || FXS.k === 'calm') { var kd = ss(FXS.t / 4); S.fog.color.lerp(DAWN, kd); S.background.copy(S.fog.color); hemi.intensity = HB + kd * 1.2; sun.intensity = SB + kd * 1.2; }
       if (FXS.t > 4.8 && !FXS.shown) { FXS.shown = true; showEnding(); } }
   }
@@ -406,7 +415,7 @@ function start(A) {
     var og = new THREE.Group(); og.add(new THREE.Mesh(new THREE.SphereGeometry(.9, 12, 10), new THREE.MeshBasicMaterial({ color: 0x9fe8ff })), new THREE.Mesh(new THREE.SphereGeometry(2.6, 12, 10), new THREE.MeshBasicMaterial({ color: 0x7fd7ff, transparent: true, opacity: .22, blending: THREE.AdditiveBlending, depthWrite: false })));
     og.position.set(ox, H(ox, oz) + 3.5 + rnd() * 2, oz); S.add(og); ORBS.push({ g: og, got: false }); }
   var last = performance.now();
-  function loop(now) { var dt = Math.min((now - last) / 1000, .05); last = now; update(dt, now / 1000); R.render(S, cam); requestAnimationFrame(loop); }
+  function loop(now) { var dt = Math.min((now - last) / 1000, .05); last = now; if (!document.hidden) { update(dt, now / 1000); R.render(S, cam); } requestAnimationFrame(loop); }
   /* البدء */
   $('intro').querySelector('h2').textContent = A.title; $('intro').querySelector('p').textContent = A.intro; $('intro').classList.remove('hidden');
   function pk(k) { var u = 'audio/' + id + '/' + k + '.mp3'; PJ.audio.probe(u, function (ok, d) { if (ok) avail[u] = d; }); }

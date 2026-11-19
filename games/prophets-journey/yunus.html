@@ -32,9 +32,9 @@ kbd{display:inline-block;min-width:22px;padding:0 6px;margin:0 2px;border:1px so
 .touch{display:none}.istouch .touch{display:block}.istouch .help{display:none}
 #joy{position:absolute;left:18px;bottom:22px;width:130px;height:130px;border-radius:50%;background:rgba(255,255,255,.1);border:2px solid var(--line);touch-action:none}
 #knob{position:absolute;left:35px;top:35px;width:60px;height:60px;border-radius:50%;background:rgba(244,201,93,.55);pointer-events:none}
-.tb{position:absolute;width:62px;height:62px;border-radius:50%;border:2px solid var(--line);background:rgba(4,15,22,.6);color:#fff;font-size:24px;touch-action:none}
+.tb{position:absolute;width:72px;height:72px;border-radius:50%;border:2px solid var(--line);background:rgba(4,15,22,.72);color:#fff;font-size:27px;touch-action:none;box-shadow:0 3px 12px rgba(0,0,0,.25)}
 .tb.act{background:rgba(244,201,93,.55)}
-#bUp{right:18px;bottom:150px}#bDn{right:18px;bottom:82px}#bLamp{right:90px;bottom:116px}#bAct{right:90px;bottom:34px;width:72px;height:72px}
+#bUp{right:18px;bottom:160px}#bDn{right:18px;bottom:78px}#bLamp{right:90px;bottom:116px}#bAct{right:90px;bottom:34px;width:72px;height:72px}
 .ov{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(2,10,16,.72);z-index:30}
 .ov.hidden{display:none}
 .card{width:min(620px,100%);max-height:92vh;overflow:auto;padding:24px 22px;border:1px solid var(--line);border-radius:22px;background:rgba(6,22,31,.95);text-align:center}
@@ -71,9 +71,9 @@ kbd{display:inline-block;min-width:22px;padding:0 6px;margin:0 2px;border:1px so
   <div class="help"><div><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> حركة</div><div><kbd>Space</kbd> صعود <kbd>C</kbd> هبوط</div><div><kbd>L</kbd> المصباح <kbd>F</kbd> تفاعل (اضغط مطولًا)</div><div><kbd>←</kbd><kbd>→</kbd> أو اسحب بالفأرة: الكاميرا</div></div>
   <div class="nav" id="nav"><span id="na">▲</span><span id="nd"></span></div>
   <div class="bar" id="bar"><b id="barf"></b></div>
-  <div id="toast"></div><div id="story"><div id="sx"></div><div id="sr"></div></div><div id="sub"></div>
+  <div id="toast" role="status" aria-live="polite"></div><div id="story"><div id="sx"></div><div id="sr"></div></div><div id="sub" aria-live="polite"></div>
   <div class="touch"><div id="joy"><div id="knob"></div></div>
-    <button class="tb" id="bUp" aria-label="صعود">⬆</button><button class="tb" id="bDn" aria-label="هبوط">⬇</button>
+    <button class="tb" id="bUp" aria-label="صعود الغواصة">⬆</button><button class="tb" id="bDn" aria-label="هبوط الغواصة">⬇</button>
     <button class="tb" id="bLamp" aria-label="المصباح">💡</button><button class="tb" id="bAct" aria-label="تفاعل">✋</button></div>
   <div class="ov" id="intro"><div class="card">
     <h2>مغامرة يونس عليه السلام</h2>
@@ -100,11 +100,12 @@ if(isTouch)document.getElementById('root').classList.add('istouch');
 /* ---- حفظ التقدم ---- */
 const KEY='pj.save.v1';
 let save=PJ.load();
-function store(){PJ.store(save)}
+let storageWarningShown=false;
+function store(){if(!PJ.store(save)&&!storageWarningShown){storageWarningShown=true;toast('تعذر حفظ تقدمك في هذا المتصفح. قد لا يُستعاد التقدم بعد إغلاق اللعبة.',6500)}}
 
 /* ---- المشهد ---- */
 let R;try{R=new THREE.WebGLRenderer({canvas:$('c'),antialias:true})}catch(e){$('nogl').classList.remove('hidden');return}
-R.setPixelRatio(Math.min(devicePixelRatio,isTouch?1.5:2));R.setSize(innerWidth,innerHeight);
+R.setPixelRatio(Math.min(devicePixelRatio||1,isTouch?1.5:2));R.setSize(innerWidth,innerHeight);
 R.toneMapping=THREE.ACESFilmicToneMapping;R.toneMappingExposure=1.15;
 const S=new THREE.Scene(),FOG_A=new THREE.Color(0x1a9bc0),FOG_B=new THREE.Color(0x020a14);
 S.background=FOG_A.clone();S.fog=new THREE.Fog(FOG_A.clone(),4,110);
@@ -247,14 +248,14 @@ const FACTS=[
  ['نادى ربّه في الظلمات بدعاءٍ عظيم.','الأنبياء: 87'],
  ['استجاب الله له ونجّاه، وكان يونس من المسبّحين.','الأنبياء: 88 — الصافات: 143–144']
 ];
-let step=0,paused=true,cine=null,cineDone=false,lamp=false,lit=false,hold=0,pr=0,ringHit=[false,false,false],caveT=0,tTimer=0,sTimer=0;
+let step=0,paused=true,cine=null,cineDone=false,lamp=false,lit=false,hold=0,pr=0,ringHit=[false,false,false],caveT=0,tTimer=0,sTimer=0,progressAt=performance.now()/1000;
 const pips=$('pips');for(let i=0;i<5;i++)pips.appendChild(document.createElement('i'));
 
 function toast(t,ms){const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(tTimer);tTimer=setTimeout(()=>e.classList.remove('on'),ms||6000)}
 function subtitle(t,ms){const e=$('sub');e.textContent=t;e.classList.add('on');clearTimeout(sTimer);sTimer=setTimeout(()=>e.classList.remove('on'),ms||6000)}
 function hud(){const s=STEPS[step];if(!s)return;$('mt').textContent=s.t;$('mx').textContent=s.m();[...pips.children].forEach((p,i)=>p.className=i<step?'on':i===step?'cur':'');
   $('cnt').textContent=step===0?`الحلقات: ${ringHit.filter(Boolean).length}/3`:step===1?`اللآلئ: ${pr}/5`:''}
-function setStep(n,spawn){step=n;ringHit=[false,false,false];rings.forEach((r,i)=>r.visible=n===0);
+function setStep(n,spawn){step=n;progressAt=performance.now()/1000;ringHit=[false,false,false];rings.forEach((r,i)=>r.visible=n===0);
   pearls.forEach((p,i)=>p.visible=n===1&&i===pr);beacon.userData.light.intensity=lit?60:0;
   if(n!==1)pr=n>1?5:0;if(n===1)pearls.forEach((p,i)=>p.visible=i===pr);
   save.yunus.step=n;save.yunus.pearls=pr;store();if(spawn){const s=STEPS[n].spawn;sub.position.set(...s);yaw=0;vel.set(0,0,0)}hud()}
@@ -276,13 +277,15 @@ PJ.audio.bindUI($('mute'),$('vol'));
 let keys={},joy={x:0,y:0},tUp=false,tDn=false,tAct=false,yaw=0,pitch=-.12;const vel=new THREE.Vector3();
 function setLamp(v){lamp=v;sub.userData.spot.intensity=v?140:0;sub.userData.beam.visible=v;sub.userData.lamp.material.emissiveIntensity=v?2:0;$('bLamp').classList.toggle('act',v);tone(v?660:440,.12,'triangle')}
 addEventListener('keydown',e=>{if(/^(Space|Arrow)/.test(e.code))e.preventDefault();keys[e.code]=true;if(e.code==='KeyL'&&!e.repeat&&!paused)setLamp(!lamp)});
-addEventListener('keyup',e=>{keys[e.code]=false});addEventListener('blur',()=>{keys={}});
+addEventListener('keyup',e=>{keys[e.code]=false});
+function releaseInput(){keys={};joy.x=0;joy.y=0;tUp=false;tDn=false;tAct=false;jid=null;knob.style.transform=''}
+addEventListener('blur',releaseInput);document.addEventListener('visibilitychange',()=>{if(document.hidden)releaseInput()});
 const pad=$('joy'),knob=$('knob');let jid=null;
 function jset(e){const r=pad.getBoundingClientRect(),m=r.width*.4;let dx=e.clientX-(r.left+r.width/2),dy=e.clientY-(r.top+r.height/2);const l=Math.hypot(dx,dy);if(l>m){dx*=m/l;dy*=m/l}joy.x=dx/m;joy.y=dy/m;knob.style.transform=`translate(${dx}px,${dy}px)`}
 pad.addEventListener('pointerdown',e=>{jid=e.pointerId;pad.setPointerCapture(jid);jset(e)});
 pad.addEventListener('pointermove',e=>{if(e.pointerId===jid)jset(e)});
 const jend=e=>{if(e.pointerId===jid){jid=null;joy.x=joy.y=0;knob.style.transform=''}};pad.addEventListener('pointerup',jend);pad.addEventListener('pointercancel',jend);
-function hb(id,fn){const b=$(id);b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture(e.pointerId);fn(true)});const u=()=>fn(false);b.addEventListener('pointerup',u);b.addEventListener('pointercancel',u)}
+function hb(id,fn){const b=$(id);b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture(e.pointerId);fn(true)});const u=()=>fn(false);b.addEventListener('pointerup',u);b.addEventListener('pointercancel',u);b.addEventListener('lostpointercapture',u)}
 hb('bUp',v=>tUp=v);hb('bDn',v=>tDn=v);hb('bAct',v=>{tAct=v;$('bAct').classList.toggle('act',v)});
 $('bLamp').addEventListener('pointerdown',e=>{e.preventDefault();if(!paused)setLamp(!lamp)});
 let cid=null,lx=0,ly=0;const cv=$('c');
@@ -295,9 +298,9 @@ addEventListener('resize',()=>{cam.aspect=innerWidth/innerHeight;cam.updateProje
 function startWhale(){cineDone=true;whale.visible=true;whale.userData={t:0,z:sub.position.z-26,y:sub.position.y+3};
   cine={t:0,dur:7};document.getElementById('root').classList.add('cinema');
   subtitle('يظهر في الأعماق حوتٌ عظيم. وقد ورد في القرآن الكريم أن الحوت التقم يونس عليه السلام (الصافات: 142).',7000);tone(120,1.2,'sine',.08)}
-function nextPearl(){tone(520+pr*90,.3,'triangle');const f=FACTS[pr];pearls[pr].visible=false;pr++;save.yunus.pearls=pr;store();
+function nextPearl(){progressAt=performance.now()/1000;tone(520+pr*90,.3,'triangle');const f=FACTS[pr];pearls[pr].visible=false;pr++;save.yunus.pearls=pr;store();
   story(f[0],f[1],7000);if(pr>=5){setStep(2)}else{pearls[pr].visible=true}hud()}
-function lightBeacon(){lit=true;beacon.userData.light.intensity=60;beacon.userData.crystal.material.emissiveIntensity=2.5;tone(440,.5,'triangle');tone(660,.7,'sine');$('bar').style.display='none';
+function lightBeacon(){progressAt=performance.now()/1000;lit=true;beacon.userData.light.intensity=60;beacon.userData.crystal.material.emissiveIntensity=2.5;tone(440,.5,'triangle');tone(660,.7,'sine');$('bar').style.display='none';
   const dd=avail['dua-yunus'],T=dd?dd*1000:9000;if(dd)PJ.audio.play('audio/dua-yunus.mp3');
   story('لَا إِلَٰهَ إِلَّا أَنتَ سُبْحَانَكَ إِنِّي كُنتُ مِنَ الظَّالِمِينَ','دعاء يونس عليه السلام — سورة الأنبياء، الآية 87',T+1500,'dua');
   setTimeout(()=>story('ثم قال الله تعالى: ﴿فَاسْتَجَبْنَا لَهُ وَنَجَّيْنَاهُ مِنَ الْغَمِّ﴾','الأنبياء: 88',7500),T+3000);setStep(4)}
@@ -318,7 +321,7 @@ function update(dt,t){
   sub.rotation.set(vel.y*.02,yaw,-vel.x*.012*Math.cos(yaw)+Math.sin(t*2)*.03);sub.userData.prop.rotation.z+=dt*(8+vel.length());
   /* المهام */
   if(!paused&&!cine){
-    if(step===0){rings.forEach((m,i)=>{if(!ringHit[i]&&sp.distanceTo(ringPos[i])<3.4){ringHit[i]=true;m.material.emissiveIntensity=2;tone(480+i*120,.25,'triangle');hud();if(ringHit.every(Boolean)){story('أحسنت! تعلّمتَ قيادة الغواصة. هيا إلى شعاب المرجان.','',4500);setTimeout(()=>{if(step===0){setStep(1);narrate('story-yunus-1',PART1)}},1500)}}})}
+    if(step===0){rings.forEach((m,i)=>{if(!ringHit[i]&&sp.distanceTo(ringPos[i])<3.4){ringHit[i]=true;progressAt=t;m.material.emissiveIntensity=2;tone(480+i*120,.25,'triangle');hud();if(ringHit.every(Boolean)){story('أحسنت! تعلّمتَ قيادة الغواصة. هيا إلى شعاب المرجان.','',4500);setTimeout(()=>{if(step===0){setStep(1);narrate('story-yunus-1',PART1)}},1500)}}})}
     else if(step===1&&pearls[pr]&&sp.distanceTo(pearlPos[pr])<3.6)nextPearl();
     else if(step===2){const inCave=sp.z<-138&&sp.z>-168&&Math.abs(sp.x)<10;
       if(inCave){if(lamp){caveT+=dt;if(caveT>1.5){caveT=0;toast('أضاء المصباح الطريق. تابع إلى الأعماق.');tone(560,.3,'triangle');setStep(3)}}else{caveT=0;if(!tTimer||!$('toast').classList.contains('on'))toast('الظلام شديد. شغّل مصباح الغواصة.',3000)}}else caveT=0}
@@ -349,6 +352,7 @@ function update(dt,t){
   {const tg=target();if(tg&&!paused&&!cine&&!introOn){const dx=tg.x-sp.x,dz=tg.z-sp.z,fx=-Math.sin(yaw),fz=-Math.cos(yaw),ang=Math.atan2(dx*Math.cos(yaw)+dz*-Math.sin(yaw),dx*fx+dz*fz),d=Math.hypot(dx,dz,tg.y-sp.y);
     $('na').style.transform='rotate('+ang+'rad)';$('nd').textContent=Math.round(d)+' م'+(Math.abs(tg.y-sp.y)>4?(tg.y>sp.y?' ⬆':' ⬇'):'');$('nav').style.display='flex';guide.visible=true;guide.position.set(tg.x,tg.y+14,tg.z);guide.material.opacity=.16+Math.sin(t*3)*.05}
    else{$('nav').style.display='none';guide.visible=false}}
+  {const tg=target();if(tg&&!paused&&!cine&&!introOn&&t-progressAt>=14){progressAt=t;toast('لو احتجت مساعدة، اتبع السهم المضيء إلى الهدف التالي.',4500)}}
   /* الكاميرا */
   if(introOn){const a=t*.15;cam.position.set(sp.x+Math.sin(a)*15,sp.y+4.5,sp.z+Math.cos(a)*15);cam.lookAt(sp.x,sp.y,sp.z)}
   else if(cine){const k=cine.t/cine.dur;cam.position.lerp(new THREE.Vector3(sp.x-9,sp.y+3,sp.z+8),1-Math.exp(-3*dt));cam.lookAt(whale.position.x*(.4+k*.6)+sp.x*(1-.4-k*.6),whale.position.y,whale.position.z)}
@@ -357,7 +361,7 @@ function update(dt,t){
 }
 
 let last=performance.now();
-function loop(now){const dt=Math.min((now-last)/1000,.05);last=now;update(dt,now/1000);R.render(S,cam);requestAnimationFrame(loop)}
+function loop(now){const dt=Math.min((now-last)/1000,.05);last=now;if(!document.hidden){update(dt,now/1000);R.render(S,cam)}requestAnimationFrame(loop)}
 
 /* ---- البدء ---- */
 function begin(fresh){
