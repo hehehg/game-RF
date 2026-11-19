@@ -215,10 +215,22 @@ const pearls=pearlPos.map(p=>{const g=new THREE.Group(),m=new THREE.Mesh(new THR
 const BP=new THREE.Vector3(0,H(0,-232)+2,-232);
 const beacon=new THREE.Group();{const t=new THREE.Mesh(new THREE.CylinderGeometry(.9,1.4,4,12),new THREE.MeshStandardMaterial({color:0x5a7a8c,roughness:.7}));const cr=new THREE.Mesh(new THREE.OctahedronGeometry(1.2),new THREE.MeshStandardMaterial({color:0x7ad0ff,emissive:0x2a8fc8,emissiveIntensity:.5}));cr.position.y=3.2;beacon.add(t,cr);beacon.userData.crystal=cr;
   const pl=new THREE.PointLight(0x9fe8ff,0,70,1.2);pl.position.y=3.2;beacon.add(pl);beacon.userData.light=pl;beacon.position.copy(BP);beacon.position.y-=1;S.add(beacon)}
-const whale=new THREE.Group();{const m=new THREE.MeshStandardMaterial({color:0x4a6f86,emissive:0x0e2d40,emissiveIntensity:.9,roughness:.8,fog:false});
-  const b=new THREE.Mesh(new THREE.SphereGeometry(1,24,16),m);b.scale.set(9,3.2,3.4);const tl=new THREE.Mesh(new THREE.ConeGeometry(1.6,5,12),m);tl.rotation.z=-Math.PI/2;tl.position.x=10.5;
-  const fl=new THREE.Mesh(new THREE.BoxGeometry(1.6,.3,6),m);fl.position.x=12.6;whale.add(b,tl,fl);whale.visible=false;S.add(whale)}
-new THREE.TextureLoader().load('assets/whale.png',t=>{t.colorSpace=THREE.SRGBColorSpace;whale.children.forEach(c=>c.visible=false);const ws=new THREE.Sprite(new THREE.SpriteMaterial({map:t,fog:false}));ws.scale.set(34,14,1);whale.add(ws)},undefined,()=>{});
+const whale=new THREE.Group();{
+  const m=new THREE.MeshStandardMaterial({color:0x4a6f86,emissive:0x0e2d40,emissiveIntensity:.35,roughness:.8});
+  const belly=new THREE.MeshStandardMaterial({color:0xb8d4d7,roughness:.9});
+  const body=new THREE.Mesh(new THREE.SphereGeometry(1,24,16),m);body.scale.set(9,3.2,3.4);
+  const head=new THREE.Mesh(new THREE.SphereGeometry(1,16,12),m);head.scale.set(3.2,2.4,2.8);head.position.set(-5.3,-.15,0);
+  const tailStock=new THREE.Mesh(new THREE.CylinderGeometry(.7,.95,3.5,12),m);tailStock.rotation.z=-Math.PI/2;tailStock.position.x=9.4;
+  const tailFin=new THREE.Mesh(new THREE.ConeGeometry(2.1,5,12),m);tailFin.rotation.z=-Math.PI/2;tailFin.position.x=12;
+  const dorsal=new THREE.Mesh(new THREE.ConeGeometry(1.05,2.3,8),m);dorsal.rotation.z=Math.PI;dorsal.position.set(1,3.2,0);
+  const fins=[];
+  [-1,1].forEach(side=>{
+    const fin=new THREE.Mesh(new THREE.ConeGeometry(1.1,4.2,8),m);fin.rotation.z=Math.PI/2;fin.rotation.x=side*.18;fin.position.set(1,-1.7,side*3.1);fins.push(fin);
+    const eye=new THREE.Mesh(new THREE.SphereGeometry(.22,10,8),new THREE.MeshBasicMaterial({color:0x172b37}));eye.position.set(-6,.65,side*2.35);whale.add(eye);
+  });
+  const underside=new THREE.Mesh(new THREE.SphereGeometry(1,20,12),belly);underside.scale.set(6.7,1.3,2.7);underside.position.set(-.2,-1.7,0);
+  whale.add(body,head,tailStock,tailFin,dorsal,underside,...fins);whale.visible=false;S.add(whale);
+}
 
 /* ---- الحالة ---- */
 const STEPS=[
