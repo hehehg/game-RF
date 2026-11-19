@@ -315,7 +315,7 @@ function start(A) {
     sp.x = clamp(sp.x, -XM, XM); sp.z = clamp(sp.z, ZB, ZA); sp.y = clamp(sp.y, H(sp.x, sp.z), A.ceiling || 48);
     orb.rotation.y = yaw;
     ring.rotation.z += dt * 1.5; core.scale.setScalar(1 + Math.sin(t * 3) * .08);
-    playerCharacter.update(t, dt, { speed: new THREE.Vector2(vel.x, vel.z).length(), grounded: grounded, vertical: verticalVelocity, turn: turnInput });
+    playerCharacter.update(t, dt, { speed: new THREE.Vector2(vel.x, vel.z).length(), grounded: grounded, vertical: verticalVelocity, turn: turnInput, flying: u > 0 });
     /* المهام */
     if (!paused && M && !ending) {
       if (M.type === 'rings') { M.meshes.forEach(function (m, i) { if (!M.hit[i] && sp.distanceTo(M.pts[i]) < 6.2) { M.hit[i] = true; m.visible = false; PJ.audio.tone(480 + i * 120, .25, 'triangle', .05); hud(); if (M.hit.every(Boolean)) { story('أحسنت! ' + (STEPS[step].done || 'تعلّمتَ قيادة المركبة.'), '', 4500); setTimeout(nextStep, 900); M.type = 'wait'; } } }); }

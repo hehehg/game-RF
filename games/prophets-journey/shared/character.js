@@ -54,7 +54,7 @@
         rightFlame.scale.set(1, flame * (1 + Math.cos(t * 18) * .2), 1);
         leftFlame.visible = flame > .2; rightFlame.visible = flame > .2;
       }
-      g.scale.setScalar(.82); g.userData.playerVehicle = true; g.name = 'ExplorerVehicle';
+      g.scale.setScalar(1.05); g.userData.playerVehicle = true; g.name = 'ExplorerVehicle';
       return { group: g, body: body, ring: ring, core: core, glow: glow, setState: setState, update: update, getState: function () { return state; } };
     }
   };
