@@ -367,7 +367,10 @@ function start(A) {
     ORBS.forEach(function (o, i) { if (!o.got) { o.g.position.y += Math.sin(t * 2 + i) * .02; if (!paused && !introOn && o.g.position.distanceTo(sp) < 5) { o.got = true; o.g.visible = false; orbsGot++; PJ.audio.tone(900, .25, 'triangle', .05); toast('✨ نور مخفي ' + orbsGot + ' من 3', 3000); hud(); } } });
     if (M && M.items) M.items.forEach(function (it) { if (it.g.userData.spin) it.g.userData.spin.rotation.y = t; });
     /* الكاميرا */
-    if (introOn) { var a = t * .15; cam.position.set(sp.x + Math.sin(a) * 16, sp.y + 5, sp.z + Math.cos(a) * 16); cam.lookAt(sp.x, sp.y, sp.z); }
+    if (introOn) {
+      cam.position.set(sp.x + Math.sin(yaw) * 16, sp.y + 5, sp.z + Math.cos(yaw) * 16);
+      cam.lookAt(sp.x - Math.sin(yaw) * 8, sp.y + 1, sp.z - Math.cos(yaw) * 8);
+    }
     else { var off = new THREE.Vector3(0, 4.4 - pitch * 4, 12).applyAxisAngle(up, yaw), tgt = sp.clone().add(off); tgt.y = Math.max(tgt.y, H(tgt.x, tgt.z) + 1); cam.position.lerp(tgt, 1 - Math.exp(-7 * dt)); cam.lookAt(sp.x - Math.sin(yaw) * 12, sp.y + 1 + pitch * 6, sp.z - Math.cos(yaw) * 12); }
     if (FXS) { FXS.t += dt; var amp = FXS.k === 'calm' ? 0 : Math.min(1, FXS.t / 1.2) * (FXS.t < 4 ? 1 : Math.max(0, 5 - FXS.t)); cam.position.x += (Math.random() - .5) * .9 * amp; cam.position.y += (Math.random() - .5) * .9 * amp;
       if (FXS.k === 'dawn' || FXS.k === 'calm') { var kd = ss(FXS.t / 4); S.fog.color.lerp(DAWN, kd); S.background.copy(S.fog.color); hemi.intensity = HB + kd * 1.2; sun.intensity = SB + kd * 1.2; }
@@ -390,7 +393,10 @@ function start(A) {
     introOn = false; hints = 0; mistakes = 0; orbsGot = 0; ORBS.forEach(function (o) { o.got = false; o.g.visible = true; }); PJ.audio.init(A.ambient || 'wind'); try { window.focus(); } catch (e) { }
     if (fresh) { SV.step = 0; SV.done = false; }
     var s = SV.done && !fresh ? 0 : clamp(SV.step || 0, 0, STEPS.length - 1); ending = false; FXS = null; flood = null; water.position.y = -200; rain.visible = false;
-    setStep(s, true); if (STEPS[s].type === 'flood') startFlood(); $('intro').classList.add('hidden'); paused = false;
+    setStep(s, true);
+    cam.position.set(orb.position.x + Math.sin(yaw) * 16, orb.position.y + 5, orb.position.z + Math.cos(yaw) * 16);
+    cam.lookAt(orb.position.x - Math.sin(yaw) * 8, orb.position.y + 1, orb.position.z - Math.cos(yaw) * 8);
+    if (STEPS[s].type === 'flood') startFlood(); $('intro').classList.add('hidden'); paused = false;
     var iu = 'audio/' + id + '/intro.mp3'; if (s === 0 && avail[iu]) PJ.audio.play(iu); else if (s === 0 && avail.general) PJ.audio.play('audio/instructions-general.mp3');
   }
   if (SV.step > 0 && !SV.done) { $('go').textContent = 'متابعة المغامرة'; $('fresh').style.display = ''; } else if (SV.done) $('go').textContent = 'العب المغامرة مرة أخرى';
