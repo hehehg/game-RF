@@ -60,6 +60,7 @@ kbd{display:inline-block;min-width:22px;padding:0 6px;margin:0 2px;border:1px so
 #story.dua #sx{font-size:clamp(26px,5.5vw,44px);color:#f4e6b4;line-height:2.1}
 #sub{bottom:9%}
 .cinema #story{opacity:0}
+.hintb{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);padding:8px 16px;border-radius:999px;border:1px solid var(--line);background:var(--pn);color:#fff;font:700 14px Tajawal,sans-serif;cursor:pointer;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:4}
 </style>
 </head>
 <body>
@@ -70,6 +71,7 @@ kbd{display:inline-block;min-width:22px;padding:0 6px;margin:0 2px;border:1px so
   <a class="back" href="../prophets-journey.html">↩ مركز أسرار الزمان</a>
   <div class="audio"><button id="mute" aria-label="كتم">🔊</button><input id="vol" type="range" min="0" max="100" value="40" aria-label="مستوى الصوت"></div>
   <div class="help"><div><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> حركة</div><div><kbd>Space</kbd> صعود <kbd>C</kbd> هبوط</div><div>اقترب من العنصر ليلتقطه تلقائيًا</div><div><kbd>←</kbd><kbd>→</kbd> أو اسحب بالفأرة: الكاميرا</div></div>
+  <button class="hintb" id="hintBtn">💡 تلميح (H)</button>
   <div class="nav" id="nav"><span id="na">▲</span><span id="nd"></span></div>
   <div class="bar" id="bar"><b id="barf"></b></div>
   <div id="toast"></div><div id="story"><div id="sx"></div><div id="sr"></div></div><div id="sub"></div>

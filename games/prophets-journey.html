@@ -34,6 +34,7 @@ button{font-family:inherit}
 .card h2{margin:0 0 12px;font:700 28px Amiri,serif;color:var(--gold)}
 .ach{display:flex;gap:10px;align-items:center;padding:10px 12px;margin-bottom:8px;border-radius:12px;background:rgba(255,255,255,.06)}.ach.off{opacity:.45}.ach span{font-size:22px}
 #toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);padding:10px 18px;border-radius:14px;background:var(--pn);border:1px solid var(--line);opacity:0;transition:opacity .3s;pointer-events:none;font-size:14px}#toast.on{opacity:1}
+.st{margin-top:6px;color:#f4c95d;letter-spacing:2px;font-size:15px}
 .foot{margin-top:26px;font-size:12px;color:#8fb7c4;line-height:1.9}
 </style>
 </head>
@@ -70,32 +71,41 @@ function st(a){
   return{c:'open',t:'متاحة'};
 }
 var tt;function toast(m){var e=$('toast');e.textContent=m;e.className='on';clearTimeout(tt);tt=setTimeout(function(){e.className=''},2600)}
+function starsOf(a){var d=S[a.id];return d?(d.stars||(d.done?1:0)):0}
+function stars(a){var n=starsOf(a);return '★'.repeat(n)+'☆'.repeat(3-n)}
+function totalStars(){var n=0;A.forEach(function(a){n+=starsOf(a)});return n}
+function doneCount(){return A.filter(function(a){return S[a.id]&&S[a.id].done}).length}
 function render(){
   var done=A.filter(function(a){return S[a.id]&&S[a.id].done}).length;
-  $('pt').textContent='المغامرات المكتملة: '+done+' من '+A.length;
+  $('pt').textContent='المغامرات المكتملة: '+done+' من '+A.length+'  ·  النجوم: '+totalStars()+' من '+(A.length*3);
   $('pf').style.width=(done/A.length*100)+'%';
   $('nt').textContent=done?'أحسنت! أكملتَ '+done+' من المغامرات. اختر عالمًا جديدًا أو أعد زيارة عالم تحبه.':'مرحبًا! أنا نور، مرشدك في مركز أسرار الزمان. اختر مغامرة من المغامرات المتاحة لتبدأ رحلتك.';
   var g=$('g');g.innerHTML='';
   A.forEach(function(a,i){
     var s=st(a),b=document.createElement('button');
     b.className='w '+s.c;
-    b.innerHTML='<div class="n">'+(i+1)+'</div><h3></h3><span class="s">'+s.t+'</span>';
+    b.innerHTML='<div class="n">'+(i+1)+'</div><h3></h3><span class="s">'+s.t+'</span><div class="st">'+(a.file?stars(a):'')+'</div>';
     b.querySelector('h3').textContent=a.name;
     b.onclick=function(){if(a.file){location.href=a.file}else toast('هذه المغامرة قيد التطوير وستُفتح قريبًا')};
     g.appendChild(b);
   });
 }
 function achievements(){
-  var y=S.yunus||{};
+  var y=S.yunus||{},n=doneCount();
   return[
-    {i:'🧭',t:'أول غوص',d:'ابدأ مغامرة يونس وتجاوز مهمة التدريب',on:y.done||y.step>0},
-    {i:'🔮',t:'جامع اللآلئ',d:'اجمع لآلئ القصة الخمس',on:y.done||y.pearls>=5||y.step>=2},
-    {i:'🌟',t:'ختم أسرار الزمان: يونس',d:'أكمل مغامرة يونس عليه السلام',on:!!y.done}
+    {i:'🧭',t:'أول مغامرة',d:'أكمل أي مغامرة',on:n>=1},
+    {i:'🗺️',t:'مستكشف صغير',d:'أكمل 5 مغامرات',on:n>=5},
+    {i:'🐪',t:'رحّالة',d:'أكمل 10 مغامرات',on:n>=10},
+    {i:'🌙',t:'ختم الأنبياء',d:'أكمل المغامرات الخمس والعشرين',on:n>=25},
+    {i:'💡',t:'بلا تلميح',d:'احصل على نجمتين في أي مغامرة',on:A.some(function(a){return starsOf(a)>=2})},
+    {i:'✨',t:'جامع النور',d:'احصل على ثلاث نجوم في أي مغامرة',on:A.some(function(a){return starsOf(a)>=3})},
+    {i:'⭐',t:'عالم النجوم',d:'اجمع 30 نجمة',on:totalStars()>=30},
+    {i:'🔮',t:'جامع اللآلئ',d:'اجمع لآلئ قصة يونس الخمس',on:!!(y.done||y.pearls>=5||y.step>=2)}
   ];
 }
 $('ba').onclick=function(){
   var l=$('al');l.innerHTML='';
-  achievements().forEach(function(a){var d=document.createElement('div');d.className='ach'+(a.on?'':' off');d.innerHTML='<span>'+a.i+'</span><div><b></b><div style="font-size:12px;color:#bfe7f2"></div></div>';d.querySelector('b').textContent=a.t;d.querySelector('div div').textContent=a.d;l.appendChild(d)});
+  achievements().forEach(function(a){var d=document.createElement('div');d.className='ach'+(a.on?'':' off');d.innerHTML='<span>'+a.i+'</span><div><b></b><div style="font-size:12px;color:#bfe7f2"></div></div>';d.children[1].children[0].textContent=a.t;d.children[1].children[1].textContent=a.d;l.appendChild(d)});
   $('ov').className='ov on';
 };
 $('ac').onclick=function(){$('ov').className='ov'};

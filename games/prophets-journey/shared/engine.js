@@ -113,6 +113,7 @@ function start(A) {
 
   /* الحالة */
   var step = 0, paused = true, introOn = true, M = null, flood = null, ending = false, yaw = 0, pitch = -.12, vel = new THREE.Vector3(), keys = {}, joy = { x: 0, y: 0 }, tUp = false, tDn = false, objs = [];
+  var hints = 0, mistakes = 0, orbsGot = 0, hintUntil = 0, ORBS = [];
   var START = A.start || [0, 8, 30];
   orb.position.set(START[0], START[1], START[2]);
   function toast(t, ms) { var e = $('toast'); e.textContent = t; e.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(function () { e.classList.remove('on'); }, ms || 6500); }
@@ -122,9 +123,9 @@ function start(A) {
   function card(o) { $('ct').textContent = o.t; $('cb').textContent = o.b || ''; $('cd').textContent = o.d || ''; $('cr').textContent = o.r || ''; $('cs').style.display = 'none'; $('cok').textContent = o.btn || 'متابعة'; $('card').classList.remove('hidden'); paused = true; $('cok').onclick = function () { $('card').classList.add('hidden'); paused = false; if (o.done) o.done(); }; }
   var pips = $('pips'); STEPS.forEach(function () { pips.appendChild(document.createElement('i')); });
   function hud() {
-    var s = STEPS[Math.min(step, STEPS.length - 1)]; $('mt').textContent = s.t; $('mx').textContent = s.m;
+    var s = STEPS[Math.min(step, STEPS.length - 1)]; $('mt').textContent = s.t; $('mx').textContent = (M && M.type === 'discover' && M.items && M.items[M.delivered]) ? '🔎 ابحث عن المعلم الذي تتحدث عنه هذه الجملة: «' + M.items[M.delivered].fact[0] + '»' : s.m;
     Array.prototype.forEach.call(pips.children, function (p, i) { p.className = i < step ? 'on' : i === step ? 'cur' : ''; });
-    var c = ''; if (M) { if (M.type === 'rings') c = 'الحلقات: ' + M.hit.filter(Boolean).length + '/' + M.pts.length; else if (M.type === 'carry' || M.type === 'discover') c = (s.count || 'المنقول') + ': ' + M.delivered + '/' + M.items.length; } $('cnt').textContent = c;
+    var c = ''; if (M) { if (M.type === 'rings') c = 'الحلقات: ' + M.hit.filter(Boolean).length + '/' + M.pts.length; else if (M.type === 'carry' || M.type === 'discover') c = (s.count || 'المنقول') + ': ' + M.delivered + '/' + M.items.length; } c += (c ? '   ' : '') + '✨ ' + orbsGot + '/3'; $('cnt').textContent = c;
   }
   function clearObjs() { objs.forEach(function (o) { S.remove(o); if (o.parent && o.parent !== S) o.parent.remove(o); }); objs = []; }
   function makeAnimal(col) { var g = new THREE.Group(), mt = new THREE.MeshStandardMaterial({ color: col, roughness: .8 });
@@ -143,7 +144,7 @@ function start(A) {
   }
   function addGlow(g, r) { var h = new THREE.Mesh(new THREE.SphereGeometry(r, 12, 10), new THREE.MeshBasicMaterial({ color: 0xffe08a, transparent: true, opacity: .2, blending: THREE.AdditiveBlending, depthWrite: false })); g.add(h); }
   function label(text) { var c = document.createElement('canvas'); c.width = 320; c.height = 80; var x = c.getContext('2d'); x.font = '700 44px Tajawal, Tahoma, sans-serif'; x.textAlign = 'center'; x.fillStyle = 'rgba(6,22,31,.7)'; x.fillRect(0, 8, 320, 64); x.fillStyle = '#f4e6b4'; x.fillText(text, 160, 56);
-    var sp2 = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), depthTest: false, transparent: true })); sp2.scale.set(7, 1.75, 1); sp2.renderOrder = 9; return sp2; }
+    var sp2 = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), depthTest: false, transparent: true, fog: false })); sp2.scale.set(9, 2.25, 1); sp2.renderOrder = 9; return sp2; }
   function lm(kind) {
     var g = new THREE.Group(), mat = function (c, e) { return new THREE.MeshStandardMaterial({ color: c, emissive: e || 0, emissiveIntensity: e ? .6 : 0, roughness: .8 }); };
     if (kind === 'earth') g.add(new THREE.Mesh(new THREE.SphereGeometry(2.2, 14, 8, 0, 6.283, 0, 1.57), mat(0x8a5a2b, 0x3a2000)));
@@ -172,7 +173,7 @@ function start(A) {
       var pad = new THREE.Mesh(new THREE.TorusGeometry(6, .25, 8, 40), new THREE.MeshBasicMaterial({ color: 0xffe08a, transparent: true, opacity: .8 })); pad.rotation.x = Math.PI / 2; pad.position.set(s.to[0], M.to.y - 1, s.to[1]); S.add(pad); objs.push(pad); M.pad = pad;
     }
     if (s.type === 'discover') {
-      M.delivered = 0; M.items = s.items.map(function (it, ix) { var core = lm(it.kind), g = new THREE.Group(), y = it.y !== undefined ? it.y : H(it.x, it.z); g.add(core); g.userData.spin = core.userData.spin; loadTex('lm-' + it.kind, function (t) { if (t) { core.visible = false; var sp3 = new THREE.Sprite(new THREE.SpriteMaterial({ map: t })); sp3.center.set(.5, 0); sp3.scale.set(8, 8, 1); g.add(sp3); } }); g.position.set(it.x, y, it.z); addGlow(g, 3); var lb = label(it.name); lb.position.y = 7; g.add(lb); g.visible = ix === 0; S.add(g); objs.push(g); return { g: g, fact: it.fact }; });
+      M.delivered = 0; M.items = s.items.map(function (it, ix) { var core = lm(it.kind), g = new THREE.Group(), y = it.y !== undefined ? it.y : H(it.x, it.z); g.add(core); g.userData.spin = core.userData.spin; loadTex('lm-' + it.kind, function (t) { if (t) { core.visible = false; var sp3 = new THREE.Sprite(new THREE.SpriteMaterial({ map: t })); sp3.center.set(.5, 0); sp3.scale.set(8, 8, 1); g.add(sp3); } }); g.position.set(it.x, y, it.z); addGlow(g, 3); var lb = label(it.name); lb.position.y = 7; g.add(lb); var bm0 = new THREE.Mesh(new THREE.CylinderGeometry(.5, .5, 40, 8, 1, true), new THREE.MeshBasicMaterial({ color: 0xfff2b0, transparent: true, opacity: .16, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide })); bm0.position.y = 20; g.add(bm0); g.visible = ix < 3; S.add(g); objs.push(g); return { g: g, fact: it.fact, name: it.name }; });
     }
     if (s.type === 'reach') { M.pos = new THREE.Vector3(s.pos[0], H(s.pos[0], s.pos[1]) + 3, s.pos[1]);
       if (s.walls) { var w = s.walls, len = Math.abs(w.z1 - w.z0), zc = (w.z0 + w.z1) / 2; [-1, 1].forEach(function (sd) { var wm = new THREE.Mesh(new THREE.BoxGeometry(50, w.h, len), new THREE.MeshStandardMaterial({ color: 0x2a8fbf, transparent: true, opacity: .5, emissive: 0x0a4a6a, emissiveIntensity: .5, roughness: .1 })); wm.position.set(sd * (w.gap / 2 + 25), w.h / 2 - 6, zc); S.add(wm); objs.push(wm); }); }
@@ -185,18 +186,21 @@ function start(A) {
     step = n; SV.step = n; store();
     for (var i = 0; i < n; i++) if (STEPS[i].type === 'carry') STEPS[i].items.forEach(function (_, k) { if (STEPS[i].reveals === 'parts') reveal(k + (STEPS[i].offset || 0)); });
     if (n >= 0 && STEPS[n].type === 'flood') {}
-    buildStep(n); if (spawn) { var p = STEPS[n].spawn || START; orb.position.set(p[0], p[1], p[2]); yaw = STEPS[n].yaw || 0; vel.set(0, 0, 0); }
+    buildStep(n); if (M && M.type === 'discover') startClue(); if (spawn) { var p = STEPS[n].spawn || START; orb.position.set(p[0], p[1], p[2]); yaw = STEPS[n].yaw || 0; vel.set(0, 0, 0); }
   }
+  function startClue() { var it = M && M.items && M.items[M.delivered]; if (!it) return; M.warned = {}; hud(); say('s' + step + 'i' + M.delivered, it.fact[0], ''); }
+  function hint() { if (paused || ending || introOn || !M || M.type === 'flood' || M.type === 'storm' || M.type === 'reach' || M.type === 'wait') return; var now = performance.now() / 1000; if (now >= hintUntil) hints++; hintUntil = now + 14; toast('تلميح: اتبع السهم الذهبي', 2500); }
+  function starsInfo() { var s2 = hints === 0 && mistakes === 0, s3 = orbsGot >= 3, n = 1 + (s2 ? 1 : 0) + (s3 ? 1 : 0); return { n: n, big: '★'.repeat(n) + '☆'.repeat(3 - n), line: '★ أكملتَ المغامرة · ' + (s2 ? '★' : '☆') + ' بلا تلميح وبلا أخطاء · ' + (s3 ? '★' : '☆') + ' جمعتَ الأنوار الثلاثة' }; }
   function nextStep() { if (step + 1 >= STEPS.length) return finish(); var n = step + 1; setStep(n, false); var s = STEPS[n]; if (s.intro) say('s' + n + 'n', s.intro, ''); if (s.type === 'flood') startFlood(); }
   function startFlood() { flood = { t: 0, phase: 'rise', r: 0 }; rain.visible = true; PJ.audio.tone(140, 1, 'sine', .05); }
   var FXS = null;
   function finish() {
-    SV.done = true; SV.step = STEPS.length; store(); ending = true; flood = flood || null;
+    SV.done = true; SV.step = STEPS.length; SV.stars = Math.max(SV.stars || 0, starsInfo().n); store(); ending = true; flood = flood || null;
     if (A.ending.fx) { FXS = { t: 0, k: A.ending.fx, shown: false }; paused = true; } else showEnding();
   }
   function showEnding() {
     var eu = 'audio/' + id + '/end.mp3'; if (avail[eu]) PJ.audio.play(eu);
-    card({ t: A.ending.t, b: A.ending.b, r: A.ending.r, btn: 'العودة إلى المركز', done: function () { PJ.audio.stop(); location.href = '../prophets-journey.html'; } });
+    card({ t: A.ending.t, b: A.ending.b, d: starsInfo().big, r: starsInfo().line + ' — ' + A.ending.r, btn: 'العودة إلى المركز', done: function () { PJ.audio.stop(); location.href = '../prophets-journey.html'; } });
   }
   function target() {
     if (!M || ending) return null;
@@ -206,7 +210,8 @@ function start(A) {
     if (M.type === 'flood' || M.type === 'storm' || M.type === 'reach') return M.pos; return null;
   }
   /* الإدخال */
-  addEventListener('keydown', function (e) { if (/^(Space|Arrow)/.test(e.code)) e.preventDefault(); keys[e.code] = true; });
+  addEventListener('keydown', function (e) { if (/^(Space|Arrow)/.test(e.code)) e.preventDefault(); keys[e.code] = true; if (e.code === 'KeyH' && !e.repeat) hint(); });
+  $('hintBtn').onclick = function () { hint(); };
   addEventListener('keyup', function (e) { keys[e.code] = false; }); addEventListener('blur', function () { keys = {}; });
   var pad = $('joy'), knob = $('knob'), jid = null;
   function jset(e) { var r = pad.getBoundingClientRect(), m = r.width * .4, dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2), l = Math.hypot(dx, dy); if (l > m) { dx *= m / l; dy *= m / l; } joy.x = dx / m; joy.y = dy / m; knob.style.transform = 'translate(' + dx + 'px,' + dy + 'px)'; }
@@ -248,9 +253,15 @@ function start(A) {
       }
       else if (M.type === 'discover') {
         var cur = M.items[M.delivered];
-        if (cur && cur.g.position.distanceTo(sp) < 7) { M.delivered++; PJ.audio.tone(560 + M.delivered * 60, .3, 'triangle', .05); say('s' + step + 'i' + (M.delivered - 1), cur.fact[0], cur.fact[1]);
-          if (M.items[M.delivered]) M.items[M.delivered].g.visible = true; hud();
-          if (M.delivered >= M.items.length) { M = { type: 'wait' }; setTimeout(function () { if (!ending) nextStep(); }, 2600); } }
+        if (cur && cur.g.position.distanceTo(sp) < 7) {
+          M.delivered++; PJ.audio.tone(560 + M.delivered * 60, .3, 'triangle', .05); story('✔ ' + cur.name + ' — ' + cur.fact[0], cur.fact[1], 6500);
+          for (var vv = 0; vv < M.items.length; vv++) M.items[vv].g.visible = vv < M.delivered + 3;
+          hud(); var sref = M;
+          if (M.delivered >= M.items.length) { M = { type: 'wait' }; hud(); setTimeout(function () { if (!ending) nextStep(); }, 2800); }
+          else setTimeout(function () { if (M === sref && !ending) startClue(); }, 3800);
+        } else if (cur) {
+          for (var wj = M.delivered + 1; wj < Math.min(M.items.length, M.delivered + 3); wj++) { var dc = M.items[wj]; if (!M.warned[wj] && dc.g.position.distanceTo(sp) < 5.5) { M.warned[wj] = true; mistakes++; PJ.audio.tone(200, .3, 'sine', .04); toast('هذا معلم «' + dc.name + '». لا يناسب الجملة، جرّب معلمًا آخر.', 4200); } }
+        }
       }
       else if (M.type === 'reach' && sp.distanceTo(M.pos) < 8) { say('s' + step + 'z', STEPS[step].settle, ''); M = { type: 'wait' }; setTimeout(function () { if (!ending) nextStep(); }, 3500); }
       else if (M.type === 'storm' && sp.distanceTo(M.pos) < 8) { say('s' + step + 'z', STEPS[step].settle, ''); rain.visible = false; M = { type: 'wait' }; setTimeout(function () { if (!ending) nextStep(); }, 3800); }
@@ -271,10 +282,12 @@ function start(A) {
     /* الحلقات وهدف المهمة */
     if (M && M.type === 'rings') M.meshes.forEach(function (m, i) { m.rotation.z = t * .5 + i; if (!M.hit[i]) m.material.emissiveIntensity = .7 + Math.sin(t * 3) * .25; });
     var tg = target();
-    if (tg && !paused && !introOn) { var dx = tg.x - sp.x, dz = tg.z - sp.z, fx = -Math.sin(yaw), fz = -Math.cos(yaw), ang = Math.atan2(dx * Math.cos(yaw) - dz * Math.sin(yaw), dx * fx + dz * fz), d = Math.hypot(dx, dz, tg.y - sp.y);
+    var alwaysArr = M && (M.type === 'flood' || M.type === 'storm' || M.type === 'reach'), hintOn = t < hintUntil;
+    if (tg && !paused && !introOn && (alwaysArr || hintOn)) { var dx = tg.x - sp.x, dz = tg.z - sp.z, fx = -Math.sin(yaw), fz = -Math.cos(yaw), ang = Math.atan2(dx * Math.cos(yaw) - dz * Math.sin(yaw), dx * fx + dz * fz), d = Math.hypot(dx, dz, tg.y - sp.y);
       $('na').style.transform = 'rotate(' + ang + 'rad)'; $('nd').textContent = Math.round(d) + ' م' + (Math.abs(tg.y - sp.y) > 5 ? (tg.y > sp.y ? ' ⬆' : ' ⬇') : ''); $('nav').style.display = 'flex'; guide.visible = true; guide.position.set(tg.x, tg.y + 14, tg.z); guide.material.opacity = .16 + Math.sin(t * 3) * .05; }
-    else { $('nav').style.display = 'none'; guide.visible = false; }
+    else { $('nav').style.display = 'none'; guide.visible = !!(M && M.type === 'carry' && M.carry && !paused && !introOn); if (guide.visible) { guide.position.set(M.to.x, M.to.y + 14, M.to.z); guide.material.opacity = .16 + Math.sin(t * 3) * .05; } }
     if (M && M.pad) M.pad.rotation.z = t;
+    ORBS.forEach(function (o, i) { if (!o.got) { o.g.position.y += Math.sin(t * 2 + i) * .02; if (!paused && !introOn && o.g.position.distanceTo(sp) < 5) { o.got = true; o.g.visible = false; orbsGot++; PJ.audio.tone(900, .25, 'triangle', .05); toast('✨ نور مخفي ' + orbsGot + ' من 3', 3000); hud(); } } });
     if (M && M.items) M.items.forEach(function (it) { if (it.g.userData.spin) it.g.userData.spin.rotation.y = t; });
     /* الكاميرا */
     if (introOn) { var a = t * .15; cam.position.set(sp.x + Math.sin(a) * 16, sp.y + 5, sp.z + Math.cos(a) * 16); cam.lookAt(sp.x, sp.y, sp.z); }
@@ -283,6 +296,9 @@ function start(A) {
       if (FXS.k === 'dawn' || FXS.k === 'calm') { var kd = ss(FXS.t / 4); S.fog.color.lerp(DAWN, kd); S.background.copy(S.fog.color); hemi.intensity = HB + kd * 1.2; sun.intensity = SB + kd * 1.2; }
       if (FXS.t > 4.8 && !FXS.shown) { FXS.shown = true; showEnding(); } }
   }
+  for (var oq = 0; oq < 3; oq++) { var ox, oz, tries = 0; do { ox = (rnd() < .5 ? -1 : 1) * (28 + rnd() * 34); oz = ZA - 25 - rnd() * (ZA - ZB - 50); tries++; } while (nearFlat(ox, oz) && tries < 10);
+    var og = new THREE.Group(); og.add(new THREE.Mesh(new THREE.SphereGeometry(.9, 12, 10), new THREE.MeshBasicMaterial({ color: 0x9fe8ff })), new THREE.Mesh(new THREE.SphereGeometry(2.6, 12, 10), new THREE.MeshBasicMaterial({ color: 0x7fd7ff, transparent: true, opacity: .22, blending: THREE.AdditiveBlending, depthWrite: false })));
+    og.position.set(ox, H(ox, oz) + 3.5 + rnd() * 2, oz); S.add(og); ORBS.push({ g: og, got: false }); }
   var last = performance.now();
   function loop(now) { var dt = Math.min((now - last) / 1000, .05); last = now; update(dt, now / 1000); R.render(S, cam); requestAnimationFrame(loop); }
   /* البدء */
@@ -294,7 +310,7 @@ function start(A) {
   $('mute').onclick = null; PJ.audio.bindUI($('mute'), $('vol'));
   document.title = 'رحلة الأنبياء — ' + A.title;
   function begin(fresh) {
-    introOn = false; PJ.audio.init(A.ambient || 'wind'); try { window.focus(); } catch (e) { }
+    introOn = false; hints = 0; mistakes = 0; orbsGot = 0; ORBS.forEach(function (o) { o.got = false; o.g.visible = true; }); PJ.audio.init(A.ambient || 'wind'); try { window.focus(); } catch (e) { }
     if (fresh) { SV.step = 0; SV.done = false; }
     var s = SV.done && !fresh ? 0 : clamp(SV.step || 0, 0, STEPS.length - 1); ending = false; FXS = null; flood = null; water.position.y = -200; rain.visible = false;
     setStep(s, true); if (STEPS[s].type === 'flood') startFlood(); $('intro').classList.add('hidden'); paused = false;
