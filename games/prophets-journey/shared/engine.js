@@ -34,6 +34,30 @@ function start(A) {
     return y;
   }
   var W = TR.w || 160, L = TR.l || 220, CZ = TR.cz || -60, XM = W / 2 - 4, ZA = CZ + L / 2 - 4, ZB = CZ - L / 2 + 4;
+  var collisionObstacles = [];
+  function addCircularObstacle(x, z, radius) { collisionObstacles.push({ kind: 'circle', x: x, z: z, r: radius }); }
+  function resolvePlayerMovement(previousX, previousZ, sp) {
+    var vehicleRadius = 1.35;
+    for (var i = 0; i < collisionObstacles.length; i++) {
+      var o = collisionObstacles[i];
+      if (o.kind === 'circle') {
+        var dx = sp.x - o.x, dz = sp.z - o.z, distance = Math.hypot(dx, dz);
+        var min = o.r + vehicleRadius;
+        if (distance < min) {
+          if (distance < .001) { sp.x = previousX; sp.z = previousZ; }
+          else { sp.x = o.x + dx / distance * min; sp.z = o.z + dz / distance * min; }
+          vel.x *= -.12; vel.z *= -.12;
+        }
+      } else {
+        var ix = Math.max(o.x - o.hx, Math.min(sp.x, o.x + o.hx));
+        var iz = Math.max(o.z - o.hz, Math.min(sp.z, o.z + o.hz));
+        if ((sp.x - ix) * (sp.x - ix) + (sp.z - iz) * (sp.z - iz) < vehicleRadius * vehicleRadius) {
+          sp.x = previousX; sp.z = previousZ;
+          vel.x *= -.12; vel.z *= -.12;
+        }
+      }
+    }
+  }
   /* صور حقيقية اختيارية: ضع ملفات PNG في مجلد assets وتُستخدم تلقائيًا بدل المجسمات البسيطة */
   var texLoader = new THREE.TextureLoader();
   function loadTex(n, cb) { texLoader.load('assets/' + n + '.png', function (t) { t.colorSpace = THREE.SRGBColorSpace; cb(t); }, undefined, function () { cb(null); }); }
@@ -66,13 +90,13 @@ function start(A) {
   var rockM2 = [], rockPts = [];
   var dummy = new THREE.Object3D();
   (A.decor || []).forEach(function (d) {
-    if (d.type === 'rocks') { for (var i = 0; i < d.n; i++) { var x = (rnd() - .5) * W * .9, z = CZ + (rnd() - .5) * L * .9; if (!nearFlat(x, z)) rock(x, z, 1 + rnd() * 2.6); } }
+    if (d.type === 'rocks') { for (var i = 0; i < d.n; i++) { var x = (rnd() - .5) * W * .9, z = CZ + (rnd() - .5) * L * .9; if (!nearFlat(x, z)) { var size = 1 + rnd() * 2.6; rock(x, z, size); addCircularObstacle(x, z, size * .9); } } }
     if (d.type === 'trees') {
       var tr = new THREE.InstancedMesh(new THREE.CylinderGeometry(.25, .4, 3, 6).translate(0, 1.5, 0), new THREE.MeshStandardMaterial({ color: 0x6b4a2b }), d.n);
       var cn = new THREE.InstancedMesh(new THREE.ConeGeometry(1.8, 4.2, 7).translate(0, 5, 0), new THREE.MeshStandardMaterial({ roughness: .9 }), d.n), k = 0;
       var tp = [], cols = (d.colors || [0x3f7d3a, 0x56903f, 0x2f6b3a]).map(function (c) { return new THREE.Color(c); });
       for (var i = 0; i < d.n; i++) { var x = (rnd() - .5) * W * .92, z = CZ + (rnd() - .5) * L * .92, y = H(x, z); if (nearFlat(x, z) || y > (d.maxY || 6)) continue;
-        var s = .8 + rnd() * .8; tp.push({ x: x, y: y, z: z, s: s }); dummy.position.set(x, y, z); dummy.scale.set(s, s, s); dummy.rotation.set(0, rnd() * 6, 0); dummy.updateMatrix(); tr.setMatrixAt(k, dummy.matrix); cn.setMatrixAt(k, dummy.matrix); cn.setColorAt(k, cols[(rnd() * cols.length) | 0]); k++; }
+        var s = .8 + rnd() * .8; tp.push({ x: x, y: y, z: z, s: s }); addCircularObstacle(x, z, 1.25 * s); dummy.position.set(x, y, z); dummy.scale.set(s, s, s); dummy.rotation.set(0, rnd() * 6, 0); dummy.updateMatrix(); tr.setMatrixAt(k, dummy.matrix); cn.setMatrixAt(k, dummy.matrix); cn.setColorAt(k, cols[(rnd() * cols.length) | 0]); k++; }
       tr.count = cn.count = k; S.add(tr, cn); spriteSwap(d.sprites || ['tree-1', 'tree-2', 'tree-3'], tp, d.sw || 7, d.sh || 9, [tr, cn]);
     }
   });
@@ -96,6 +120,7 @@ function start(A) {
   if (STR) {
     strG = new THREE.Group(); var sy = H(STR.x, STR.z); strG.position.set(STR.x, sy, STR.z);
     if (STR.type === 'ark') {
+      collisionObstacles.push({ kind: 'box', x: STR.x, z: STR.z, hx: 5.5, hz: 10 });
       var m1 = new THREE.MeshStandardMaterial({ color: 0x8a5a2b, roughness: .9 }), m2 = new THREE.MeshStandardMaterial({ color: 0xa9733a, roughness: .9 });
       for (var i = 0; i < 5; i++) { var sgm = new THREE.Mesh(new THREE.BoxGeometry(8, 2.8, 4), m1); sgm.position.set(0, 1.4, -8 + i * 4); sgm.visible = false; strG.add(sgm); strParts.push(sgm); }
       var cab = new THREE.Mesh(new THREE.BoxGeometry(5.5, 2.6, 8), m2); cab.position.set(0, 4.1, 1); cab.visible = false; strG.add(cab); strExtra = cab;
@@ -104,9 +129,11 @@ function start(A) {
     } else if (STR.type === 'blocks') {
       var bk = function (q) { var b = new THREE.Mesh(new THREE.BoxGeometry(q[3], q[4], q[5]), new THREE.MeshStandardMaterial({ color: q[6] || STR.color || 0x9a8a72, roughness: .9, flatShading: true })); b.position.set(q[0], q[1], q[2]); return b; };
       (STR.base || []).forEach(function (q) { strG.add(bk(q)); }); (STR.parts || []).forEach(function (q) { var b = bk(q); b.visible = false; strG.add(b); strParts.push(b); });
+      (STR.base || []).forEach(function (q) { collisionObstacles.push({ kind: 'box', x: STR.x + q[0], z: STR.z + q[2], hx: q[3] / 2, hz: q[5] / 2 }); });
     } else if (STR.type === 'house') {
       var sm = new THREE.MeshStandardMaterial({ color: 0x9a8a72, roughness: .95, flatShading: true });
       [[-3.4, -3], [0, -3], [3.4, -3], [-3.4, 3], [0, 3], [3.4, 3]].forEach(function (q) { var bl = new THREE.Mesh(new THREE.BoxGeometry(3.2, 1.8, 3.2), sm); bl.position.set(q[0], .9, q[1]); bl.visible = false; strG.add(bl); strParts.push(bl); });
+      [[-3.4, -3], [0, -3], [3.4, -3], [-3.4, 3], [0, 3], [3.4, 3]].forEach(function (q) { collisionObstacles.push({ kind: 'box', x: STR.x + q[0], z: STR.z + q[1], hx: 1.6, hz: 1.6 }); });
     }
     S.add(strG);
   }
@@ -178,7 +205,7 @@ function start(A) {
       M.delivered = 0; M.items = s.items.map(function (it, ix) { var core = lm(it.kind), g = new THREE.Group(), y = it.y !== undefined ? it.y : H(it.x, it.z); g.add(core); g.userData.spin = core.userData.spin; loadTex('lm-' + it.kind, function (t) { if (t) { core.visible = false; var sp3 = new THREE.Sprite(new THREE.SpriteMaterial({ map: t })); sp3.center.set(.5, 0); sp3.scale.set(8, 8, 1); g.add(sp3); } }); g.position.set(it.x, y, it.z); addGlow(g, 3); var lb = label(it.name); lb.position.y = 7; g.add(lb); var bm0 = new THREE.Mesh(new THREE.CylinderGeometry(.5, .5, 40, 8, 1, true), new THREE.MeshBasicMaterial({ color: 0xfff2b0, transparent: true, opacity: .16, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide })); bm0.position.y = 20; g.add(bm0); g.visible = ix < 3; S.add(g); objs.push(g); return { g: g, fact: it.fact, name: it.name }; });
     }
     if (s.type === 'reach') { M.pos = new THREE.Vector3(s.pos[0], H(s.pos[0], s.pos[1]) + 3, s.pos[1]);
-      if (s.walls) { var w = s.walls, len = Math.abs(w.z1 - w.z0), zc = (w.z0 + w.z1) / 2; [-1, 1].forEach(function (sd) { var wm = new THREE.Mesh(new THREE.BoxGeometry(50, w.h, len), new THREE.MeshStandardMaterial({ color: 0x2a8fbf, transparent: true, opacity: .5, emissive: 0x0a4a6a, emissiveIntensity: .5, roughness: .1 })); wm.position.set(sd * (w.gap / 2 + 25), w.h / 2 - 6, zc); S.add(wm); objs.push(wm); }); }
+      if (s.walls) { var w = s.walls, len = Math.abs(w.z1 - w.z0), zc = (w.z0 + w.z1) / 2; [-1, 1].forEach(function (sd) { var wx = sd * (w.gap / 2 + 25); var wm = new THREE.Mesh(new THREE.BoxGeometry(50, w.h, len), new THREE.MeshStandardMaterial({ color: 0x2a8fbf, transparent: true, opacity: .5, emissive: 0x0a4a6a, emissiveIntensity: .5, roughness: .1 })); wm.position.set(wx, w.h / 2 - 6, zc); S.add(wm); objs.push(wm); collisionObstacles.push({ kind: 'box', x: wx, z: zc, hx: 25, hz: len / 2 }); }); }
       var rm = new THREE.Mesh(new THREE.OctahedronGeometry(2), new THREE.MeshBasicMaterial({ color: 0xfff2b0 })); rm.position.copy(M.pos); S.add(rm); objs.push(rm); }
     if (s.type === 'storm') { M.pos = new THREE.Vector3(s.pos[0], H(s.pos[0], s.pos[1]) + 3, s.pos[1]); M.t = 0; M.wind = s.wind || [1, 0]; M.force = s.force || 7; var bm = new THREE.Mesh(new THREE.OctahedronGeometry(2), new THREE.MeshBasicMaterial({ color: 0xfff2b0 })); bm.position.copy(M.pos); S.add(bm); objs.push(bm); }
     if (s.type === 'flood') { M.pos = new THREE.Vector3(s.pos[0], H(s.pos[0], s.pos[1]) + 3, s.pos[1]); }
@@ -248,7 +275,9 @@ function start(A) {
       if (targetSpeed < .05) accel = grounded ? cfg.groundDeceleration : cfg.airAcceleration;
       vel.x += (hx - vel.x) * Math.min(1, accel * dt);
       vel.z += (hz - vel.z) * Math.min(1, accel * dt);
+      var previousX = sp.x, previousZ = sp.z;
       sp.x += vel.x * dt; sp.z += vel.z * dt;
+      resolvePlayerMovement(previousX, previousZ, sp);
 
       var jumpPressed = !!(keys.Space || tUp);
       if (jumpPressed && !prevJump) jumpBufferLeft = cfg.jumpBuffer;

@@ -1,144 +1,61 @@
 (function () {
   'use strict';
   var T = window.THREE;
-
-  function mat(color, roughness) {
-    return new T.MeshStandardMaterial({ color: color, roughness: roughness === undefined ? .8 : roughness });
+  function mat(color, emissive, roughness) {
+    return new T.MeshStandardMaterial({ color: color, emissive: emissive || 0x000000, emissiveIntensity: emissive ? .45 : 0, roughness: roughness === undefined ? .55 : roughness, metalness: .18 });
   }
-
   window.PJCharacter = {
-    create: function (options) {
-      options = options || {};
+    create: function () {
       var g = new T.Group();
-      var clothes = mat(options.clothes || 0x287fb5);
-      var accent = mat(options.accent || 0xf4c95d);
-      var skin = mat(options.skin || 0xd69b6a);
-      var dark = mat(options.dark || 0x263746);
-      var hair = mat(options.hair || 0x4a3026);
-
-      var shadow = new T.Mesh(new T.CircleGeometry(1.15, 24), new T.MeshBasicMaterial({
-        color: 0x07131a, transparent: true, opacity: .28, depthWrite: false
-      }));
-      shadow.rotation.x = -Math.PI / 2;
-      shadow.position.y = -.05;
-      g.add(shadow);
-
-      var body = new T.Mesh(new T.CylinderGeometry(.72, .58, 1.45, 12), clothes);
-      body.position.y = 1.65;
-      g.add(body);
-
-      var head = new T.Mesh(new T.SphereGeometry(.72, 18, 12), skin);
-      head.position.y = 3.15;
-      g.add(head);
-
-      var hairMesh = new T.Mesh(new T.SphereGeometry(.74, 16, 8, 0, Math.PI * 2, 0, Math.PI * .48), hair);
-      hairMesh.position.y = 3.25;
-      g.add(hairMesh);
-
-      var eyeGeo = new T.SphereGeometry(.09, 8, 6);
-      [-.25, .25].forEach(function (x) {
-        var eye = new T.Mesh(eyeGeo, dark);
-        eye.position.set(x, 3.18, -.67);
-        g.add(eye);
+      var bodyMat = mat(0x38b6c8, 0x123f55), goldMat = mat(0xf4c95d, 0x705214);
+      var wingMat = mat(0x85dddf, 0x1b6168), darkMat = mat(0x183849, 0x091821);
+      var body = new T.Mesh(new T.CylinderGeometry(.75, .75, 3.3, 16), bodyMat);
+      body.rotation.x = Math.PI / 2; body.position.y = .5; g.add(body);
+      var nose = new T.Mesh(new T.ConeGeometry(.72, 1.25, 16), goldMat);
+      nose.rotation.x = -Math.PI / 2; nose.position.set(0, .5, -2.1); g.add(nose);
+      var cockpit = new T.Mesh(new T.SphereGeometry(.62, 16, 10), mat(0xbff4ff, 0x4b91aa));
+      cockpit.scale.set(1.15, .55, .75);       cockpit.position.set(0, 1.15, -.45); g.add(cockpit);
+      var leftWing = new T.Mesh(new T.ConeGeometry(1.25, 3.2, 3), wingMat);
+      leftWing.rotation.set(0, 0, Math.PI / 2); leftWing.position.set(1.75, .25, .15); g.add(leftWing);
+      var rightWing = leftWing.clone(); rightWing.position.x = -1.75; g.add(rightWing);
+      [-.7, .7].forEach(function (z) {
+        var tail = new T.Mesh(new T.ConeGeometry(.48, 1.5, 3), goldMat);
+        tail.rotation.z = Math.PI / 2; tail.position.set(1.45, .85, z); g.add(tail);
       });
-
-      var nose = new T.Mesh(new T.SphereGeometry(.08, 8, 6), skin);
-      nose.position.set(0, 3.04, -.72);
-      g.add(nose);
-
-      var hat = new T.Mesh(new T.CylinderGeometry(.78, .78, .13, 18), accent);
-      hat.position.y = 3.78;
-      g.add(hat);
-      var hatTop = new T.Mesh(new T.ConeGeometry(.55, .38, 18), accent);
-      hatTop.position.y = 4.02;
-      g.add(hatTop);
-
-      var backpack = new T.Mesh(new T.BoxGeometry(1.05, 1.25, .38), mat(options.backpack || 0xe8a44a));
-      backpack.position.set(0, 1.7, .58);
-      g.add(backpack);
-
-      var legs = [], arms = [];
-      [-.38, .38].forEach(function (x) {
-        var leg = new T.Mesh(new T.CylinderGeometry(.16, .14, .82, 8), dark);
-        leg.position.set(x, .82, 0);
-        g.add(leg); legs.push(leg);
-        var arm = new T.Mesh(new T.CylinderGeometry(.14, .12, .88, 8), clothes);
-        arm.position.set(x * 1.9, 1.75, 0);
-        g.add(arm); arms.push(arm);
-      });
-
-      var ring = new T.Mesh(new T.TorusGeometry(1.28, .055, 8, 28), new T.MeshBasicMaterial({
-        color: 0xffdf73, transparent: true, opacity: .45
-      }));
-      ring.rotation.x = Math.PI / 2;
-      ring.position.y = -.5;
-      g.add(ring);
-      var core = new T.Mesh(new T.SphereGeometry(.16, 12, 8), new T.MeshBasicMaterial({ color: 0xfff2b0 }));
-      core.position.y = 4.18;
-      g.add(core);
-      var glow = new T.Mesh(new T.SphereGeometry(1.7, 12, 8), new T.MeshBasicMaterial({
-        color: 0xffdf73, transparent: true, opacity: .08, depthWrite: false, blending: T.AdditiveBlending
-      }));
-      glow.position.y = 2;
+      var thrusterL = new T.Mesh(new T.CylinderGeometry(.34, .48, .55, 12), darkMat);
+      thrusterL.rotation.z = Math.PI / 2; thrusterL.position.set(1.7, .18, .72); g.add(thrusterL);
+      var thrusterR = thrusterL.clone(); thrusterR.position.z = -.72; g.add(thrusterR);
+      var flameMat = new T.MeshBasicMaterial({ color: 0xffd56a, transparent: true, opacity: .85, blending: T.AdditiveBlending, depthWrite: false });
+      var leftFlame = new T.Mesh(new T.ConeGeometry(.22, 1.15, 12), flameMat);
+      leftFlame.rotation.z = Math.PI / 2; leftFlame.position.set(2.28, .18, .72); g.add(leftFlame);
+      var rightFlame = leftFlame.clone(); rightFlame.position.z = -.72; g.add(rightFlame);
+      var ring = new T.Mesh(new T.TorusGeometry(1.15, .045, 8, 28), new T.MeshBasicMaterial({ color: 0xffdf73, transparent: true, opacity: .35 }));
+      ring.rotation.x = Math.PI / 2; ring.position.y = -.7; g.add(ring);
+      var glow = new T.Mesh(new T.SphereGeometry(1.45, 12, 8), new T.MeshBasicMaterial({ color: 0x71efff, transparent: true, opacity: .07, blending: T.AdditiveBlending, depthWrite: false }));
       g.add(glow);
-
+      var core = new T.Mesh(new T.SphereGeometry(.12, 10, 8), new T.MeshBasicMaterial({ color: 0xfff1a8 }));
+      core.position.set(2.1, .5, 0); g.add(core);
       var state = 'idle';
       function setState(next) { state = next; }
       function update(t, dt, motion) {
         motion = motion || {};
-        var speed = motion.speed || 0;
-        var grounded = motion.grounded !== false;
-        var vertical = motion.vertical || 0;
-        if (!grounded) setState(vertical > 1 ? 'rise' : 'fall');
-        else if (speed > 10) setState('run');
+        var speed = motion.speed || 0, vertical = motion.vertical || 0, flying = motion.flying;
+        if (!motion.grounded && vertical > 1) setState('rise');
+        else if (!motion.grounded) setState('fall');
+        else if (speed > 8) setState('run');
         else if (speed > .5) setState('walk');
-        else setState('idle');
-
-        var breathe = Math.sin(t * 2.2) * .025;
-        body.scale.y = 1 + breathe;
-        head.position.y = 3.15 + breathe;
-        ring.rotation.z += dt * .7;
-        ring.material.opacity = .32 + Math.sin(t * 2) * .08;
-        glow.scale.setScalar(1 + Math.sin(t * 1.8) * .04);
-
-        var phase = t * (state === 'run' ? 10 : 6);
-        legs[0].rotation.x = grounded ? Math.sin(phase) * Math.min(.55, speed * .04) : -.3;
-        legs[1].rotation.x = grounded ? -legs[0].rotation.x : .25;
-        arms[0].rotation.x = grounded ? -legs[0].rotation.x * .65 : -.7;
-        arms[1].rotation.x = grounded ? -legs[1].rotation.x * .65 : -.45;
-        g.rotation.z += (-(motion.turn || 0) * .08 - g.rotation.z) * Math.min(1, dt * 8);
-        g.position.y += Math.max(0, vertical > 0 ? .002 : 0);
+        else setState(flying ? 'fly' : 'idle');
+        g.rotation.z += ((motion.turn || 0) * -.12 - g.rotation.z) * Math.min(1, dt * 7);
+        g.rotation.x += ((vertical > 1 ? -.12 : vertical < -1 ? .12 : 0) - g.rotation.x) * Math.min(1, dt * 6);
+        ring.rotation.z += dt * .8;
+        ring.material.opacity = .25 + Math.sin(t * 2) * .08;
+        var flame = flying || !motion.grounded ? 1 : .35;
+        leftFlame.scale.set(1, flame * (1 + Math.sin(t * 18) * .2), 1);
+        rightFlame.scale.set(1, flame * (1 + Math.cos(t * 18) * .2), 1);
+        leftFlame.visible = flame > .2; rightFlame.visible = flame > .2;
       }
-
-      g.scale.setScalar(.9);
-      g.userData.playerCharacter = true;
-
-      var characterSprite = null;
-      var texLoader = new T.TextureLoader();
-      texLoader.load('assets/maincharcter.png', function (texture) {
-        texture.colorSpace = T.SRGBColorSpace;
-        characterSprite = new T.Sprite(new T.SpriteMaterial({ map: texture, transparent: true, alphaTest: .05 }));
-        characterSprite.center.set(.5, 0);
-        characterSprite.scale.set(4.8, 5.2, 1);
-        characterSprite.position.y = 0;
-        characterSprite.renderOrder = 2;
-        g.add(characterSprite);
-        g.children.forEach(function (child) {
-          if (child !== characterSprite && child !== shadow && child !== ring && child !== glow) child.visible = false;
-        });
-      });
-
-      var originalUpdate = update;
-      update = function (t, dt, motion) {
-        originalUpdate(t, dt, motion);
-        if (characterSprite) {
-          characterSprite.position.y = Math.sin(t * 2.2) * (motion.speed > .5 ? .035 : .018);
-          var breathe = 1 + Math.sin(t * 2.2) * .012;
-          characterSprite.scale.set(4.8 * (1 + Math.abs(motion.turn || 0) * .018), 5.2 * breathe, 1);
-        }
-      };
-
-      return { group: g, body: body, head: head, legs: legs, arms: arms, ring: ring, core: core, glow: glow, shadow: shadow, setState: setState, update: update, getState: function () { return state; }, sprite: function () { return characterSprite; } };
+      g.scale.setScalar(.82); g.userData.playerVehicle = true; g.name = 'ExplorerVehicle';
+      return { group: g, body: body, ring: ring, core: core, glow: glow, setState: setState, update: update, getState: function () { return state; } };
     }
   };
 })();
