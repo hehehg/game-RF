@@ -63,8 +63,19 @@ function start(A) {
   function loadTex(n, cb) { texLoader.load('assets/' + n + '.png', function (t) { t.colorSpace = THREE.SRGBColorSpace; cb(t); }, undefined, function () { cb(null); }); }
   function spriteSwap(names, pts, w, h, hide) {
     var texs = [], left = names.length; if (!pts.length) return;
+    function bottomPadding(tex) {
+      var image = tex.image, canvas = document.createElement('canvas');
+      canvas.width = image.naturalWidth || image.width; canvas.height = image.naturalHeight || image.height;
+      var ctx = canvas.getContext('2d', { willReadFrequently: true });
+      ctx.drawImage(image, 0, 0);
+      var pixels = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+      for (var y = canvas.height - 1; y >= 0; y--) {
+        for (var x = 0; x < canvas.width; x++) if (pixels[(y * canvas.width + x) * 4 + 3] > 8) return (canvas.height - 1 - y) / canvas.height;
+      }
+      return 0;
+    }
     names.forEach(function (n) { loadTex(n, function (t) { if (t) texs.push(t); if (--left === 0 && texs.length) { hide.forEach(function (m) { m.visible = false; });
-      pts.forEach(function (q, i) { var sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: texs[i % texs.length] })); sp.center.set(.5, 0); sp.position.set(q.x, q.y - .2, q.z); sp.scale.set(w * q.s, h * q.s, 1); S.add(sp); }); } }); });
+      pts.forEach(function (q, i) { var tex = texs[i % texs.length], sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex })); sp.center.set(.5, 0); sp.scale.set(w * q.s, h * q.s, 1); sp.position.set(q.x, q.y - bottomPadding(tex) * h * q.s, q.z); S.add(sp); }); } }); });
   }
   /* التضاريس */
   (function () {
