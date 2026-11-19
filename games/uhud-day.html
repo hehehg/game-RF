@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>أيام المدينة — مغامرة تاريخية</title>
+<link rel="stylesheet" href="uhud-day/style.css">
+</head>
+<body>
+<div id="game"></div>
+
+<div id="hud" class="hide">
+  <div id="bars">
+    <div class="b"><span>❤</span><i id="hp"></i></div>
+    <div class="b"><span>⚡</span><i id="en"></i></div>
+    <div class="b"><span>🏃</span><i id="sta"></i></div>
+  </div>
+  <div id="obj"></div>
+  <canvas id="mini" width="140" height="140"></canvas>
+  <div id="btns"><button id="bInv" aria-label="المخزون">🎒</button><button id="bSave" aria-label="حفظ">💾</button></div>
+  <div id="prompt" class="hide">اضغط E للتفاعل</div>
+  <div id="toast" class="hide"></div>
+  <div id="joy"><i></i></div>
+  <button id="bAct">تفاعل</button>
+  <button id="bRun">ركض</button>
+</div>
+
+<div id="dlg" class="hide"><b id="who"></b><p id="txt"></p><div id="opts"></div></div>
+<div id="inv" class="hide"></div>
+<div id="title" class="hide"><h1 id="tt"></h1><p id="ts"></p></div>
+
+<div id="menu">
+  <h1>أيام المدينة</h1>
+  <p class="lead">أنت رجل من أهل المدينة المنورة، عمرك مثل أعمار جيرانك، وحياتك بسيطة. وتأتيك أخبار لم تكن تنتظرها.</p>
+  <label for="nm">اسم بطلك</label>
+  <input id="nm" maxlength="14" placeholder="مثال: هاني" autocomplete="off">
+  <label>لون عباءتك</label>
+  <div id="cols"><button class="c on" data-i="0" style="background:#3b6e8f"></button><button class="c" data-i="1" style="background:#7a3b3b"></button><button class="c" data-i="2" style="background:#4f6b3f"></button></div>
+  <div class="row"><button id="go">ابدأ المغامرة</button><button id="cont" class="hide">تابع من آخر حفظ</button></div>
+  <small>الحركة: W A S D — الركض: Shift — التفاعل: E — المخزون: I — تدوير الكاميرا: ← → أو السحب بالفأرة/اللمس.<br>جميع شخصيات اللعبة خيالية، وأما الأحداث التاريخية فمبنية على مراجع مذكورة في نهايتها.</small>
+</div>
+
+<div id="end" class="hide"></div>
+<div id="fade"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="uhud-day/game.js"></script>
+</body>
+</html>
